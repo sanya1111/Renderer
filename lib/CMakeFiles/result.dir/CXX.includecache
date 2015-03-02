@@ -1,0 +1,18 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/sanya1/Temp/Renderer/src/LogUtils/Utils.cpp
+LogUtils/Utils.h
+/home/sanya1/Temp/Renderer/src/LogUtils/LogUtils/Utils.h
+
+include/LogUtils/Utils.h
+iostream
+-
+string
+-
+

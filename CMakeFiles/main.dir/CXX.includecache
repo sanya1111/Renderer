@@ -1,0 +1,14 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/sanya1/Temp/Renderer/test/test.cpp
+Renderer.h
+/home/sanya1/Temp/Renderer/test/Renderer.h
+
+src/Renderer.h
+

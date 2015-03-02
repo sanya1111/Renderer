@@ -1,0 +1,2 @@
+/home/sanya1/Temp/Renderer/test/CMakeFiles/main_test.dir
+/home/sanya1/Temp/Renderer/lib/CMakeFiles/result.dir

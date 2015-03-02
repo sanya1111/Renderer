@@ -1,0 +1,2 @@
+1. apt-get install libgtkmm-3.0-dev
+2. cmake . -G"Eclipse CDT4 - Unix Makefiles"
