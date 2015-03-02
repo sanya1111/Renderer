@@ -1,2 +1,9 @@
-1. apt-get install libgtkmm-3.0-dev
-2. cmake . -G"Eclipse CDT4 - Unix Makefiles"
+libdrm installing 
+from archive 
+1. cd /tmp && wget http://dri.freedesktop.org/libdrm/libdrm-[verison].tar.bz2
+3. tar -xvjf libdrm-[verison].tar.bz2
+2. cd libdrm-[version] &&  sed -e "/pthread-stubs/d" -i configure.ac && autoreconf -fiv && ./configure --prefix=/usr --enable-udev && make
+3. make install (as root)
+
+include directories :
+/usr/include/libkms  and /usr/include/libdrm

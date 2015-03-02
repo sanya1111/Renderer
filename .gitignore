@@ -1,5 +1,9 @@
 .cproject
 .project
 .settings/
+.csettings/
 *~
+bin/*
+obj/*
+lib/*
 
