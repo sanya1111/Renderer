@@ -187,7 +187,7 @@ static int modeset_prepare(int fd)
 {
 	drmModeRes *res;
 	drmModeConnector *conn;
-	unsigned int i;
+	int i;
 	struct modeset_dev *dev;
 	int ret;
 
@@ -246,7 +246,7 @@ static int modeset_prepare(int fd)
  *   * We have to find a suitable resolution and refresh-rate. All this is
  *     available in drmModeModeInfo structures saved for each crtc. We simply
  *     use the first mode that is available. This is always the mode with the
- *     highest resolution.
+ *     hiÿghest resolution.
  *     A more sophisticated mode-selection should be done in real applications,
  *     though.
  *   * Then we need to find an CRTC that can drive this connector. A CRTC is an
