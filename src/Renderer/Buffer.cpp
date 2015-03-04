@@ -1,5 +1,6 @@
 #include "Renderer/Buffer.h"
 
+/*
 void Renderer::Buffer::create_mapping(Loader &from)
 {
 	struct drm_mode_create_dumb dumber;
@@ -20,3 +21,5 @@ Renderer::BufferInfo::BufferInfo() : mapping_info(GPU_MAPPING)
 {
 
 }
+
+*/
