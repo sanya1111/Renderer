@@ -339,8 +339,8 @@ static int modeset_find_crtc(int fd, drmModeRes *res, drmModeConnector *conn,
 static int modeset_create_fb(int fd, struct modeset_buf *buf)
 {
 	struct drm_mode_create_dumb creq;
-	struct drm_mode_destroy_dumb dreq;
 	struct drm_mode_map_dumb mreq;
+	struct drm_mode_destroy_dumb dreq;
 	int ret;
 
 	/* create dumb buffer */

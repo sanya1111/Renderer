@@ -2,9 +2,10 @@
 
 
 
-Renderer::Loader::Loader(const LoaderInfo& _l_info) : l_info(_l_info),
+Renderer::Loader::Loader(const LoaderInfo * _l_info) : l_info(*_l_info),
 next_connector_pair_ptr(0), loader_log("loader: ", std::cerr)
 {
+	loader_log() << "Loading...";
 	openDevice(getDevice());
 	initModeRes();
 }
@@ -35,17 +36,23 @@ void Renderer::Loader::initModeRes() {
 	}
 }
 
-std::pair<drmModeConnector *, int32_t> Renderer::Loader::getNextConnectorPair() {
+std::pair<int32_t, int32_t> Renderer::Loader::getNextConnectorPair() {
 	drmModeConnector * conn = NULL;
+	int32_t conn_id;
 	int32_t crtc;
 	while(next_connector_pair_ptr != drm_mode_res->count_connectors){
-		drmModeConnector * conn = drmModeGetConnector(fd, drm_mode_res->connectors[next_connector_pair_ptr++]);
-		if(!conn){
-			loader_log() << "cannot retrieve DRM connector " << next_connector_pair_ptr ;
+		conn = drmModeGetConnector(fd, drm_mode_res->connectors[next_connector_pair_ptr++]);
+		if(!conn || conn->connection != DRM_MODE_CONNECTED || !conn->modes){
+			loader_log() << "connector passed " << conn->connector_id ;
+		}else{
+			conn_id = conn->connector_id;
 		}
 	}
+
 	if(!conn && next_connector_pair_ptr == drm_mode_res->count_connectors)
 			throw LoaderException("all connectors done");
+	if(!conn)
+			throw LoaderException("FUCKING");
 
 	drmModeEncoder * enc = NULL;
 	if(conn->encoder_id){
@@ -57,11 +64,10 @@ std::pair<drmModeConnector *, int32_t> Renderer::Loader::getNextConnectorPair() 
 			if(!used_crtc.count(crtc)){
 				drmModeFreeEncoder(enc);
 				used_crtc.insert(crtc);
-				return std::make_pair(conn, crtc);
+				return std::make_pair(conn_id, crtc);
 			}
 		}
 	}
-
 
 	for(int32_t i = 0; i < conn->count_encoders; i++){
 		enc = drmModeGetEncoder(fd, conn->encoders[i]);
@@ -75,10 +81,16 @@ std::pair<drmModeConnector *, int32_t> Renderer::Loader::getNextConnectorPair() 
 			if(!used_crtc.count(crtc)){
 				drmModeFreeEncoder(enc);
 				used_crtc.insert(crtc);
-				return std::make_pair(conn, crtc);
+				return std::make_pair(conn_id, crtc);
 			}
 		}
 	}
 	throw LoaderException("cant create new connector pair");
 }
 
+Renderer::Loader& Renderer::Loader::getInstance(const LoaderInfo* params, bool force_restart) {
+	static Loader sing(params);
+	if(force_restart)
+		sing = Loader(params);
+	return sing;
+}

@@ -6,7 +6,10 @@
 
 
 namespace DrmWrapper{
-	class
+	class Drm{
+	public:
+
+	};
 }
 
 #endif /* DRMWRAPPER_H_ */

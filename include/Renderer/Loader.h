@@ -1,3 +1,5 @@
+#ifndef LOADER_H_
+#define LOADER_H_
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -13,6 +15,7 @@
 #include <unistd.h>
 #include <xf86drm.h>
 #include <xf86drmMode.h>
+#include <libkms/libkms.h>
 #include "Renderer/Exception.h"
 #include "Renderer/Log.h"
 
@@ -24,14 +27,18 @@ namespace Renderer{
 
 	class Loader{
 	private:
-
 		int32_t next_connector_pair_ptr;
-		std::string getDevice();
 		std::unordered_set<int32_t> used_crtc;
 
+		std::string getDevice();
 		void openDevice(const std::string &path);
 		void initModeRes();
-		std::pair<drmModeConnector *, int32_t> getNextConnectorPair();
+		std::pair<int32_t, int32_t> getNextConnectorPair();
+		//for singleton
+		Loader(const LoaderInfo *);
+		Loader () {}
+		Loader (const Loader &);
+		Loader & operator=(const Loader &) {}
 	protected:
 		LoaderInfo l_info;
 		Log loader_log;
@@ -45,6 +52,9 @@ namespace Renderer{
 		public:
 			using Exception::Exception;
 		};
-		Loader(const LoaderInfo &);
+		//if not start yet - init new Loader;
+		static Loader & getInstance(const LoaderInfo * params = NULL, bool force_restart = false);
 	};
 }
+
+#endif
