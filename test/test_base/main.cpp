@@ -6,4 +6,5 @@ int main(){
 	Loader &loader = Loader::getInstance();
 	Device dev;
 	usleep(1000000);
+	return 0;
 }

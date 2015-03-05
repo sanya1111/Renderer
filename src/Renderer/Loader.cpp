@@ -94,3 +94,6 @@ Renderer::Loader& Renderer::Loader::getInstance(const LoaderInfo* params, bool f
 		sing = Loader(params);
 	return sing;
 }
+
+Renderer::Loader::~Loader() {
+}

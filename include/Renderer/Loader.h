@@ -54,6 +54,7 @@ namespace Renderer{
 		};
 		//if not start yet - init new Loader;
 		static Loader & getInstance(const LoaderInfo * params = NULL, bool force_restart = false);
+		~Loader();
 	};
 }
 

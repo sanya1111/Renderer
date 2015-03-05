@@ -30,16 +30,22 @@ Renderer::Device::Device() : buffer_vec(), device_log("device : ", std::cerr){
 	}
 
 
-	/*test
-
-
-	*/
 }
 
 Renderer::Device::~Device() {
 	for(size_t i = 0; i < buffer_vec.size(); i++){
 		delete buffer_vec[i];
 	}
+	drmModeSetCrtc(Loader().getInstance().fd,
+				       crtc->crtc_id,
+				       crtc->buffer_id,
+				       crtc->x,
+				       crtc->y,
+				       &conn_id,
+				       1,
+				       &crtc->mode);
+	drmModeFreeCrtc(crtc);
+//	drmModeFreeConnector(conn);
 }
 
 void Renderer::Device::addBuffer() {
