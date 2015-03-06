@@ -13,3 +13,8 @@ std::ostream& Renderer::Log::operator ()() {
 	log_stream << std::endl << special_prefix;
 	return log_stream;
 }
+
+Renderer::Log& Renderer::Log::operator =(const Renderer::Log&other) {
+	special_prefix = other.special_prefix;
+	return *this;
+}

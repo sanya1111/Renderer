@@ -12,6 +12,7 @@ namespace Renderer{
 		Log(const std::string _special_prefix = "",
 				std::ostream & from = std::cerr);
 		std::ostream & operator()();
+		Log & operator=(const Log &);
 	};
 }
 

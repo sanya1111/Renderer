@@ -2,14 +2,13 @@
 
 
 
-Renderer::Loader::Loader(const LoaderInfo * _l_info) :
-next_connector_pair_ptr(0), loader_log("loader: ", std::cerr)
+Renderer::Loader::Loader(const LoaderInfo &_l_info) :
+next_connector_pair_ptr(0), loader_log("loader: ", std::cerr), l_info(_l_info)
 {
-	l_info = !_l_info ? LoaderInfo() : *_l_info;
 	loader_log() << "Loading...";
 	openDevice(getDevice());
-	initModeRes();
 	checkDriver();
+	initModeRes();
 }
 
 std::string Renderer::Loader::getDevice(){
@@ -92,7 +91,7 @@ return_result:
 	return std::make_pair(conn, crtc);
 }
 
-Renderer::Loader& Renderer::Loader::getInstance(const LoaderInfo* params, bool force_restart) {
+Renderer::Loader& Renderer::Loader::getInstance(bool force_restart , const LoaderInfo params) {
 	static Loader sing(params);
 	if(force_restart)
 		sing = Loader(params);
@@ -100,25 +99,21 @@ Renderer::Loader& Renderer::Loader::getInstance(const LoaderInfo* params, bool f
 }
 
 void Renderer::Loader::checkDriver() {
-	/*drm_i915_gem_create cr1;
-	if(!drmIoctl(fd, DRM_IOCTL_I915_GEM_CREATE, &cr1) ){
-		loader_log() << "intel" << cr1.handle << " " << cr1.pad << cr1.size;
-		return;
+	drmVersionPtr version = drmGetVersion(fd);
+	if(!strcmp(version->name, "i915")){
+		l_info.driver_version = LoaderInfo::DriverVersion::i915;
+	}else if(!strcmp(version->name, "nouveau")){
+		l_info.driver_version = LoaderInfo::DriverVersion::nouveau;
+	}else if(!strcmp(version->name, "radeon")){
+		l_info.driver_version = LoaderInfo::DriverVersion::radeon;
 	}
-	drm_nouveau_gem_new cr2;
-	if(!drmIoctl(fd, DRM_NOUVEAU_GEM_NEW, &cr2) ){
-			loader_log() << "nvidia";
-			return;
-	}
-	drm_radeon_gem_create cr3;
-	if(!drmIoctl(fd, DRM_IOCTL_RADEON_GEM_CREATE, &cr3) ){
-				loader_log() << "adeion";
-	}
-	*/
+	drmFreeVersion(version);
+}
+
+Renderer::LoaderInfo::LoaderInfo(Renderer::LoaderInfo::DriverVersion _driver_version ,
+		Renderer::LoaderInfo::BufInfo _buf_info ): driver_version(_driver_version),
+				buf_info(_buf_info){
 }
 
 Renderer::Loader::~Loader() {
-}
-
-Renderer::LoaderInfo::LoaderInfo() : buf_info(BOTH_BUFFERS){
 }

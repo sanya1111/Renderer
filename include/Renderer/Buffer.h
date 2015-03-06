@@ -4,6 +4,7 @@
 #include "Renderer/Exception.h"
 #include "Renderer/Loader.h"
 #include "Renderer/Log.h"
+#include <drm_fourcc.h>
 
 namespace Renderer{
 
@@ -15,6 +16,8 @@ namespace Renderer{
 		}mapping_info;
 		static const int DEFAULT_DEPTH = 24;
 		static const int DEFAULT_BPP = 32;
+		static const int DEFAULT_PIX_FORMAT = DRM_FORMAT_RGB565;
+//		BufferInfo(MappingInfo = GEM_INTEL_MAPPING);
 		BufferInfo(MappingInfo = DUMB_MAPPING);
 	};
 
@@ -22,8 +25,9 @@ namespace Renderer{
 	private:
 		//return false, if cant create_dumb, throw at older states
 		bool dumbMapping();
-		void dumbDestroy();
 		bool intelGemMapping();
+		//
+		void dumbDestroy();
 		void intelGemDestroy();
 	protected:
 		Log buffer_log;

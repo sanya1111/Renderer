@@ -1,4 +1,5 @@
 #include "Renderer/Device.h"
+
 Renderer::Device::Device() : buffer_vec(), device_log("device : ", std::cerr){
 	device_log() << "Device init...";
 	Loader & loader = Loader::getInstance();
@@ -7,9 +8,9 @@ Renderer::Device::Device() : buffer_vec(), device_log("device : ", std::cerr){
 	crtc = init_pair.second;
 	addBuffer();
 	//===test==
-	unsigned int r = rand() % 0xff,
+	unsigned int b = 0x01,
 	g = rand() % 0xff,
-	b = rand() % 0xff;
+	r = rand() % 0x01;
 	Buffer * buf = buffer_vec.back();
 	for (int32_t j = 0; j < buf->height; ++j) {
 	for (int32_t k = 0; k < buf->width; ++k) {
@@ -31,7 +32,7 @@ Renderer::Device::~Device() {
 	for(size_t i = 0; i < buffer_vec.size(); i++){
 		delete buffer_vec[i];
 	}
-	drmModeSetCrtc(Loader().getInstance().fd,
+	drmModeSetCrtc(Loader::getInstance().fd,
 				       crtc->crtc_id,
 				       crtc->buffer_id,
 				       crtc->x,
