@@ -12,8 +12,6 @@ namespace Renderer{
 		Log device_log;
 		drmModeModeInfo mode;
 		drmModeConnector * conn;
-		uint32_t crtc_id;
-		uint32_t conn_id;
 		drmModeCrtc * crtc;
 		std::vector<Buffer * > buffer_vec;
 	public:

@@ -11,9 +11,10 @@ namespace Renderer{
 	public:
 		enum MappingInfo{
 			DUMB_MAPPING = 0x1,
-			GEM_MAPPING = 0x2,
+			GEM_INTEL_MAPPING = 0x2,
 		}mapping_info;
-
+		static const int DEFAULT_DEPTH = 24;
+		static const int DEFAULT_BPP = 32;
 		BufferInfo(MappingInfo = DUMB_MAPPING);
 	};
 
@@ -22,6 +23,8 @@ namespace Renderer{
 		//return false, if cant create_dumb, throw at older states
 		bool dumbMapping();
 		void dumbDestroy();
+		bool intelGemMapping();
+		void intelGemDestroy();
 	protected:
 		Log buffer_log;
 		uint32_t width;
@@ -29,6 +32,8 @@ namespace Renderer{
 		uint32_t stride;
 		uint32_t size;
 		uint32_t handle;
+		uint32_t bpp;
+		uint32_t depth;
 		uint8_t *map;
 		uint32_t fb;
 		BufferInfo buf_info;
@@ -39,7 +44,7 @@ namespace Renderer{
 		public:
 			using Exception::Exception;
 		};
-		Buffer(const BufferInfo &, drmModeConnector *);
+		Buffer(const BufferInfo &, uint32_t width, uint32_t height);
 		~Buffer();
 	};
 }
