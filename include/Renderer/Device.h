@@ -12,8 +12,9 @@ namespace Renderer{
 		Log device_log;
 		drmModeModeInfo mode;
 		drmModeConnector * conn;
-		drmModeCrtc * crtc;
+		drmModeCrtc * old_crtc;
 		std::vector<Buffer * > buffer_vec;
+		size_t current_buffer;
 	public:
 		class DeviceException:public Exception{
 		public:
@@ -22,6 +23,9 @@ namespace Renderer{
 		Device();
 		~Device();
 		void addBuffer();
+		Buffer::DrawBuffer getDrawBuffer();
+		void applyDrawBuffer(Buffer::DrawBuffer&);
+		void switchBuffer();
 	};
 }
 #endif /* DEVICE_H_ */

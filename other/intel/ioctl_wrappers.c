@@ -146,7 +146,6 @@ int __gem_set_tiling(int fd, uint32_t handle, uint32_t tiling, uint32_t stride)
 
 		ret = ioctl(fd, DRM_IOCTL_I915_GEM_SET_TILING, &st);
 	} while (ret == -1 && (errno == EINTR || errno == EAGAIN));
-	if (ret != 0)
 		return -errno;
 
 	errno = 0;

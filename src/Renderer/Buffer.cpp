@@ -8,18 +8,18 @@ bool Renderer::Buffer::dumbMapping() {
 	drm_mode_create_dumb cr_dumb;
 	drm_mode_map_dumb mp_dumb;
 	memset(&cr_dumb, 0, sizeof(cr_dumb));
-	cr_dumb.width = width;
-	cr_dumb.height = height;
-	cr_dumb.bpp = bpp;
+	cr_dumb.width = buf_info.width;
+	cr_dumb.height = buf_info.height;
+	cr_dumb.bpp = buf_info.bpp;
 	int ret = drmIoctl(loader.fd, DRM_IOCTL_MODE_CREATE_DUMB, &cr_dumb);
 	if(ret < 0){
 		buffer_log() << "cant create dumb buffer";
 		return false;
 	}
-	stride = cr_dumb.pitch;
-	size = cr_dumb.size;
+	buf_info.stride = cr_dumb.pitch;
+	buf_info.size = cr_dumb.size;
 	handle = cr_dumb.handle;
-	ret = drmModeAddFB(loader.fd, width, height, depth, bpp , stride,
+	ret = drmModeAddFB(loader.fd, buf_info.width, buf_info.height, buf_info.depth, buf_info.bpp , buf_info.stride,
 			handle, &fb);
 	if(ret){
 		throw BufferException("cannot create framebuffer from dumb buffer");
@@ -30,13 +30,13 @@ bool Renderer::Buffer::dumbMapping() {
 	if (ret) {
 		throw BufferException("cannot map dumb buffer (IOCTL) ");
 	}
-	map = (uint8_t*)mmap(0, size, PROT_READ | PROT_WRITE, MAP_SHARED,
+	map = (uint8_t*)mmap(0, buf_info.size, PROT_READ | PROT_WRITE, MAP_SHARED,
 				loader.fd, mp_dumb.offset);
 	if (map == MAP_FAILED) {
 		throw BufferException("cannot mmap dumb buffer (MMAP)");
 	}
 
-	memset(map, 0, size);
+	memset(map, 0, buf_info.size);
 	return true;
 }
 
@@ -74,9 +74,8 @@ void Renderer::Buffer::createMapping() {
 
 }
 
-Renderer::Buffer::Buffer(const BufferInfo& _buf_info, uint32_t _width, uint32_t _height) : buf_info(_buf_info),
-		buffer_log("buffer : ", std::cerr), width(_width), height(_height), bpp(buf_info.DEFAULT_BPP),
-		depth(buf_info.DEFAULT_DEPTH){
+Renderer::Buffer::Buffer(const BufferInfo& _buf_info) : buf_info(_buf_info),
+		buffer_log("buffer : ", std::cerr){
 	buffer_log() << "creating buffer...";
 	createMapping();
 }
@@ -106,13 +105,11 @@ bool Renderer::Buffer::intelGemMapping() {
 	Loader & loader = Loader::getInstance();
 	struct drm_i915_gem_create create;
 	struct drm_i915_gem_mmap mmapi;
-	bpp = BufferInfo::DEFAULT_BPP;
-	depth = BufferInfo::DEFAULT_DEPTH;
 
-	std::pair<int32_t, uint32_t> params = getParamsForIntelGem(width, height, bpp, 0);
+	std::pair<int32_t, uint32_t> params = getParamsForIntelGem(buf_info.width, buf_info.height, buf_info.bpp, 0);
 	memset(&create, 0, sizeof(create));
-	create.size = size = params.first;
-	stride = params.second;
+	create.size = buf_info.size = params.first;
+	buf_info.stride = params.second;
 
 	int ret = ioctl(loader.fd, DRM_IOCTL_I915_GEM_CREATE, &create);
 	if(ret){
@@ -123,18 +120,14 @@ bool Renderer::Buffer::intelGemMapping() {
 	uint32_t handles[4];
 	uint32_t pitches[4];
 	uint32_t offsets[4];
-	uint32_t ff[4];
 
 	memset(handles, 0, sizeof(handles));
 	memset(pitches, 0, sizeof(pitches));
 	memset(offsets, 0, sizeof(offsets));
-	memset(ff, 0, sizeof ff);
-	ff[0] = width;
 	handles[0] = create.handle;
-	pitches[0] = stride;
+	pitches[0] = buf_info.stride;
 	offsets[0] = 0;
-	uint32_t format = DRM_FORMAT_RGB565;
-	ret = drmModeAddFB2(loader.fd, width, height,  format,
+	ret = drmModeAddFB2(loader.fd, buf_info.width, buf_info.height, buf_info.pixel_format,
 					handles, pitches, offsets,
 					&fb, 0);
 	if(ret){
@@ -163,10 +156,19 @@ void Renderer::Buffer::intelGemDestroy() {
 //	drmIoctl(loader.fd, DRM_I915_GEM_SW_FINISH, &ds);
 }
 
+Renderer::Buffer::DrawBuffer Renderer::Buffer::getDrawBuffer() {
+	int32_t * result;
+	if(buf_info.pixel_format == DRM_FORMAT_XRGB8888 ||
+	   buf_info.pixel_format == DRM_FORMAT_RGB888){
+		result = (int32_t * )map;
+	}
+	return DrawBuffer(result, buf_info.width, buf_info.height, buf_info.pixel_format);
+}
+
 Renderer::Buffer::~Buffer() {
 	Loader & loader = Loader::getInstance();
 	if(buf_info.mapping_info == BufferInfo::MappingInfo::DUMB_MAPPING){
-		munmap(map, size);
+		munmap(map, buf_info.size);
 		drmModeRmFB(loader.fd, fb);
 		dumbDestroy();
 	}else{
@@ -175,5 +177,80 @@ Renderer::Buffer::~Buffer() {
 	}
 }
 
-Renderer::BufferInfo::BufferInfo(MappingInfo _mapping_info) : mapping_info(_mapping_info) {
+Renderer::BufferInfo::BufferInfo(uint32_t _width ,
+		uint32_t _height , MappingInfo _mapping_info ,  uint32_t _stride , uint32_t _size ,
+		 uint32_t _bpp,  uint32_t _depth) :
+			width(_width), height(_height), mapping_info(_mapping_info),
+			stride(_stride), size(_size), bpp(_bpp),
+			depth(_depth){
+
+	if(mapping_info == MappingInfo::DUMB_MAPPING){
+		pixel_format = BufferInfo::Defaults::DUMB_PIXEL_FORMAT;
+	}else if(mapping_info == MappingInfo::GEM_INTEL_MAPPING){
+		pixel_format = BufferInfo::Defaults::INTEL_GEM_PIXEL_FORMAT;
+	}
+}
+
+int32_t Renderer::Buffer::DrawBuffer::RgbItem::r(){
+	return getChannel(off_r, len_r);
+}
+
+int32_t Renderer::Buffer::DrawBuffer::RgbItem::g() {
+	return getChannel(off_g, len_g);
+}
+
+int32_t Renderer::Buffer::DrawBuffer::RgbItem::b() {
+	return getChannel(off_b, len_b);
+}
+
+int32_t Renderer::Buffer::DrawBuffer::RgbItem::a() {
+	return getChannel(off_a, len_a);
+}
+
+Renderer::Buffer::DrawBuffer::RgbItem::RgbItem(int32_t* _item, uint32_t format):item(_item) {
+	if(format == DRM_FORMAT_XRGB8888 || format == DRM_FORMAT_RGB888){
+		len_a = len_g = len_b = len_r = 8;
+		off_a = 24;
+		off_r = 16;
+		off_g = 8;
+		off_b = 0;
+	}
+}
+
+
+
+int32_t Renderer::Buffer::DrawBuffer::RgbItem::getChannel(uint8_t off, uint8_t len) {
+	return ((*item) << off) & ((1<<len) - 1);
+}
+
+Renderer::Buffer::DrawBuffer::RgbItem Renderer::Buffer::DrawBuffer::at(uint32_t x, uint32_t y) {
+	return RgbItem(inner + x * width + y, mode);
+}
+
+
+void Renderer::Buffer::DrawBuffer::RgbItem::setChannel(uint8_t off, uint8_t len,
+		int32_t value) {
+	int32_t temp = ((*item) & ((~0) - ((1<<(off+len)) - 1) + ((1<<(off)) - 1)));
+	*item = (temp | (value << off));
+}
+
+void Renderer::Buffer::DrawBuffer::RgbItem::set(int32_t r, int32_t g, int32_t b,
+		int32_t a) {
+	setChannel(off_r, len_r, r);
+	setChannel(off_g, len_g, g);
+	setChannel(off_b, len_b, b);
+	setChannel(off_a, len_a, a);
+}
+
+
+
+Renderer::Buffer::DrawBuffer::DrawBuffer(int32_t* _inner, int32_t _width,
+		int32_t _height, uint32_t _mode) : inner(_inner), width(_width), height(_height),
+				mode(_mode) {
+}
+
+void Renderer::Buffer::applyDrawBuffer(DrawBuffer& ok) {
+	if(ok.mode == DRM_FORMAT_XRGB8888 || ok.mode == DRM_FORMAT_RGB888){
+		map = (uint8_t *) ok.inner;
+	}
 }

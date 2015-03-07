@@ -638,16 +638,16 @@ static void modeset_draw(void)
 	struct modeset_dev *iter;
 
 	srand(time(NULL));
-	r = rand() % 0xff;
-	g = rand() % 0xff;
-	b = rand() % 0xff;
+
 	r_up = g_up = b_up = true;
 
 	for (i = 0; i < 50; ++i) {
-		r = next_color(&r_up, r, 20);
-		g = next_color(&g_up, g, 10);
-		b = next_color(&b_up, b, 5);
-
+//		r = next_color(&r_up, r, 20);
+//		g = next_color(&g_up, g, 10);
+//		b = next_color(&b_up, b, 5);
+		r = rand() % 0xff;
+			g = rand() % 0xff;
+			b = rand() % 0xff;
 		for (iter = modeset_list; iter; iter = iter->next) {
 			for (j = 0; j < iter->height; ++j) {
 				for (k = 0; k < iter->width; ++k) {
