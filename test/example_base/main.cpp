@@ -658,8 +658,8 @@ static void modeset_draw(void)
 			}
 		}
 
-		usleep(100000);
 	}
+//		usleep(100000);
 }
 
 /*

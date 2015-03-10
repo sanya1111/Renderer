@@ -8,6 +8,6 @@ Renderer::Exception::Exception(const std::string& str) {
 	msg = str;
 }
 
-const char* Renderer::Exception::what() const noexcept{
+const char* Renderer::Exception::what() const noexcept {
 	return msg.c_str();
 }
