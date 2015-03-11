@@ -23,13 +23,15 @@ private:
 	std::vector<Buffer::DrawBuffer *> draw_buffer_vec;
 	//Drawable
 	std::vector<std::pair<Drawable *, DrawableInfo*> > drawable_vec;
-	//flags
+	//flags && counters
 	bool page_flip_pending;
 	bool loop_finit;
+	int64_t frames_count;
 	//methods
 	static void pageFlipped(int fd, uint32_t frame, uint32_t sec, uint32_t usec,
 			void *data);
 	void switchBuffer();
+	void print_statistics();
 public:
 	class DeviceException: public Exception {
 	public:
@@ -40,7 +42,7 @@ public:
 	void addBuffer();
 	Buffer::DrawBuffer * getDrawBuffer();
 	void applyDrawBuffer(Buffer::DrawBuffer*);
-	void startLoop(int32_t loop_timeout = 1000, int32_t loop_end = 3);
+	void startLoop(int32_t loop_timeout = 1000, int32_t loop_end = 5);
 	void addDrawable(Drawable *);
 };
 

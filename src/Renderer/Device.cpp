@@ -2,7 +2,8 @@
 
 Renderer::Device::Device() :
 		loop_finit(false), page_flip_pending(false), buffer_vec(), device_log(
-				"device : ", std::cerr), current_buffer(0) {
+				"device : ", std::cerr), current_buffer(0),
+				frames_count(0){
 	device_log() << "Device init...";
 	Loader * loader = Loader::getInstance();
 	std::pair<drmModeConnector *, drmModeCrtc *> init_pair =
@@ -20,6 +21,7 @@ Renderer::Device::Device() :
 
 Renderer::Device::~Device() {
 	device_log() << "device removed ...";
+	print_statistics();
 	for (size_t i = 0; i < buffer_vec.size(); i++) {
 		delete buffer_vec[i];
 		delete draw_buffer_vec[i];
@@ -76,6 +78,7 @@ void Renderer::Device::pageFlipped(int fd, uint32_t frame, uint32_t sec,
 	}
 
 	cur_buffer->applyDrawBuffer(cur_draw_buffer);
+	dev->frames_count++;
 	int ret = drmModePageFlip(fd, dev->old_crtc->crtc_id, cur_buffer->fb,
 	DRM_MODE_PAGE_FLIP_EVENT, dev);
 	if (ret) {
@@ -131,7 +134,9 @@ void Renderer::Device::startLoop(int32_t loop_timeout, int32_t loop_end) {
 	}
 }
 
-
+void Renderer::Device::print_statistics() {
+	device_log() << "total frames count " << frames_count;
+}
 
 void Renderer::Device::addDrawable(Drawable* what) {
 	drawable_vec.push_back(std::make_pair(what, (new DrawableInfo)));

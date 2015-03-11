@@ -136,6 +136,7 @@ bool Renderer::Buffer::intelGemMapping() {
 	if (map == MAP_FAILED) {
 		throw "cannot create GTT(MMAP)";
 	}
+	memset(map, 0, sizeof map);
 	return true;
 }
 
@@ -199,3 +200,21 @@ void Renderer::Buffer::applyDrawBuffer(DrawBuffer* ok) {
 
 	}
 }
+
+Renderer::Buffer::DrawBuffer::Rgb::Rgb() {
+	ptr = new int8_t[4];
+	memset(ptr, 0, sizeof ptr);
+}
+
+Renderer::Buffer::DrawBuffer::Rgb::Rgb(int8_t r, int8_t b, int8_t g, int8_t a) {
+	ptr = new int8_t[4];
+	ptr[2] = r;
+	ptr[1] = g;
+	ptr[0] = b;
+	ptr[3] = a;
+}
+
+Renderer::Buffer::DrawBuffer::Rgb::~Rgb() {
+	delete [] ptr;
+}
+

@@ -61,6 +61,7 @@ public:
 
 	public:
 		class RgbPixel {
+		protected:
 			int8_t * ptr;
 		public:
 			RgbPixel() = default;
@@ -79,6 +80,17 @@ public:
 			int8_t &a() {
 				return ptr[3];
 			}
+			void set(const RgbPixel &with){
+				for(int32_t i = 0; i < 4; i++){
+					ptr[i] = with.ptr[i];
+				}
+			}
+		};
+		class Rgb : public RgbPixel{
+		public:
+			Rgb();
+			Rgb(int8_t r, int8_t b, int8_t g, int8_t a);
+			~Rgb();
 		};
 		int32_t width;
 		int32_t height;
