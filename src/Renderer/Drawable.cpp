@@ -1,4 +1,5 @@
 #include "Renderer/Drawable.h"
 
-Renderer::DrawableInfo::DrawableInfo() : flag_finit(false) {
+
+Renderer::Drawable::Drawable() : flag_finit(false) {
 }

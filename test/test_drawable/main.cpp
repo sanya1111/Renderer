@@ -1,40 +1,23 @@
-#include "Renderer/Loader.h"
 #include "Renderer/Device.h"
 #include "Renderer/Drawable.h"
 #include "Renderer/Buffer.h"
+#include "Renderer/Context.h"
 #include "Renderer/Graphics.h"
 
 using namespace Renderer;
-
+using namespace std;
 class MyDraw : public Drawable{
 	public:
 	int count  = 0;
-		virtual void onDraw(Buffer::DrawBuffer * get, DrawableInfo *dev){
-			count ++;
-//			if(count == 1)
-//				return;
-			if(count == 59900){
-				dev->flag_finit = true;
-			}
-
-			int r = rand() % 0xff,
-				g = rand() % 0xff,
-				b = rand() % 0xff;
-			Graphics::fill(get, Buffer::DrawBuffer::Rgb(r, g, b, 0));
+		virtual void onDraw(uint32_t frame, uint32_t sec,
+				uint32_t usec, Buffer &){
 		}
 };
 
 int main(){
-	Loader * loader = Loader::getInstance();
-	Device dev;
-	for(int i = 0; i < 5; i++){
-	dev.addBuffer();
-	dev.addBuffer();
-	}
-	MyDraw * dr= new MyDraw();
-	dev.addDrawable(dr);
-	dev.startLoop();
-	std::cerr << dr->count;
-	delete dr;
+	Device dev("/dev/dri/card0");
+	pair<Connector, Crtc> pa = dev.getPossiblePair();
+	MyDraw draw;
+	Context context(2, pa.first, pa.second,draw, dev);
 	return 0;
 }

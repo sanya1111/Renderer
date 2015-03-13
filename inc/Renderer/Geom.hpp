@@ -42,7 +42,7 @@ public:
 	Line() {}
 };
 
-template<class T>
+/*template<class T>
 class Triangle{
 public:
 	Line<T> lines[3];
@@ -63,17 +63,17 @@ public:
 	}
 	Triangle(std::initializer_list<Point<T>> from){
 		int i = 0;
-		for(typename std::initializer_list<Point<T>>::const_iterator it = from.begin(); i < 3; it++){
+		for(typename std::initializer_list<Point<T>>::const_iterator it = from.begin(); i < 3; ++it){
 			typename std::initializer_list<Point<T>>::const_iterator nex = it;
-			nex++;
-//			if(i == 2)
-//				nex = from.begin();
+			++nex;
+			if(nex == from.end())
+				nex = from.begin();
 			lines[i] = Line<T>(*it, *nex);
 			i++;
 		}
 	}
 };
-
+*/
 }
 }
 

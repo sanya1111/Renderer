@@ -1,6 +1,6 @@
 #include "Renderer/Graphics.h"
 
-void Renderer::Graphics::fill(Buffer::DrawBuffer* buf,
+/*void Renderer::Graphics::fill(Buffer::DrawBuffer* buf,
 		const Buffer::DrawBuffer::Rgb& color) {
 	for (int32_t i = 0; i < buf->height; i++) {
 		for (int32_t j = 0; j < buf->width; j++) {
@@ -45,3 +45,4 @@ void Renderer::Graphics::draw_triangle(Buffer::DrawBuffer* buf,
 		draw_line(buf, what.lines[i], color);
 	}
 }
+*/

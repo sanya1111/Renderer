@@ -1,10 +1,10 @@
 #VARS
-CC=g++
+CC=g++-4.9
 CC_FLAGS=--std=c++0x -Wall -Wextra -Wno-reorder -O3
 LIB_DIR=lib
 SRC_DIR=src
 TEST_DIR=test
-INCLUDE_DIR=include
+INCLUDE_DIR=inc
 OBJ_DIR=obj
 BIN_DIR=bin
 MAKE_CLEAN=make clean

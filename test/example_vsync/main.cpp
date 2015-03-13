@@ -561,7 +561,6 @@ static void modeset_draw(int fd)
 	memset(&ev, 0, sizeof(ev));
 	ev.version = DRM_EVENT_CONTEXT_VERSION;
 	ev.page_flip_handler = modeset_page_flip_event;
-
 	/* redraw all outputs */
 	for (iter = modeset_list; iter; iter = iter->next) {
 		iter->r = rand() % 0xff;

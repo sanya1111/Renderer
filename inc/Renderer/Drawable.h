@@ -1,0 +1,19 @@
+#ifndef PAINTER_H_
+#define PAINTER_H_
+#include "Renderer/Buffer.h"
+
+namespace Renderer {
+
+
+class Drawable {
+public:
+	bool flag_finit;
+	Drawable();
+	virtual void onDraw(uint32_t frame, uint32_t sec,
+			uint32_t usec, Buffer &) = 0;
+	virtual ~Drawable() = default;
+};
+
+}
+
+#endif /* PAINTER_H_ */
