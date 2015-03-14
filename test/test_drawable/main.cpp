@@ -24,6 +24,7 @@ class MyDraw : public Drawable{
 			count++;
 			Rgba color_a(255, 255, 255, 0);
 			Rgba color_b(0, 0, 0, 0);
+			drawer.setBuffer(&buf);
 			if(count & 1)
 				drawer.fill(color_a);
 			else
@@ -38,5 +39,6 @@ int main(){
 	Context context(2, pa.first, pa.second,draw, dev);
 	context.startListenning();
 	dev.startLoop();
+	DEB("%d\n", draw.count);
 	return 0;
 }

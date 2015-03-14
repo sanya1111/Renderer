@@ -7,35 +7,25 @@ void Renderer::Drawer::setBuffer(Buffer* buf) {
 	this->buf = buf;
 }
 
-inline void at_func(uint8_t * ptr, const int8_t &bit, const int32_t &mask, int8_t & color){
-	if(mask & (1<<bit)){
-		*(ptr) = (color & 1);
-		color >>= 1;
-	}
-}
-
-inline void Renderer::Drawer::at(uint8_t* ptr, Rgba& color) {
-	for(size_t k = 0; k < buf->bpp; k++, ptr++){
-		int a = 0;
-
-//		at_func(ptr, k, buf->format_desc[buf->format_desc_entry].rmask, color.r);
-		int8_t col = color.r;
-		at_func(ptr, k, a, col);
+inline void Renderer::Drawer::at(uint8_t* ptr, const Rgba& color) {
+	if(buf->format_desc[buf->format_desc_entry].bpp == 32){
+		*((uint32_t *) ptr) = ((color.a) << 24) | ((color.r) << 16) |
+							   ((color.g) << 8) | (color.b);
 	}
 }
 
 
-void Renderer::Drawer::fill(Rgba& color) {
-	uint8_t * ptr = buf->map;
-	for (size_t i = 0; i < buf->height; i++) {
-		for (size_t j = 0; j < buf->width; j++,  ptr = ptr + buf->bpp / sizeof(char)) {
+void Renderer::Drawer::fill(const Rgba& color) {
+	uint8_t * ptr  = buf->map;
+	for (uint32_t i = 0; i < buf->height; i++) {
+		for (uint32_t j = 0; j < buf->width; j++, ptr = ptr + buf->bpp / 8) {
 			at(ptr, color);
 		}
 	}
 }
 
-void Renderer::Drawer::drawPixel(const uint32_t& screen_x,const uint32_t& screen_y, Rgba & color) {
-	uint8_t * ptr = buf->map + screen_x * buf->stride + screen_y * buf->bpp / sizeof(char);
+void Renderer::Drawer::drawPixel(const uint32_t& screen_x,const uint32_t& screen_y, const Rgba & color) {
+	uint8_t * ptr = buf->map + screen_x * buf->stride + screen_y * buf->bpp / 8;
 	at(ptr, color);
 }
 /*void Renderer::Graphics::fill(Buffer::DrawBuffer* buf,

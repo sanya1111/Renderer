@@ -16,11 +16,11 @@ namespace Renderer {
 	class Drawer{
 	protected:
 		Buffer * buf;
-		void at(uint8_t * ptr, Rgba & color);
+		void at(uint8_t * ptr,const Rgba & color);
 	public:
 		void setBuffer(Buffer * buf	);
-		void fill(Rgba &color);
-		void drawPixel(const uint32_t &screen_x,const uint32_t &screen_y, Rgba & color);
+		void fill(const Rgba &color);
+		void drawPixel(const uint32_t &screen_x,const uint32_t &screen_y, const Rgba & color);
 //		void draw_line(Buffer::DrawBuffer * buf, const Geom::Line<int32_t> &what,
 //		const Buffer::DrawBuffer::Rgb& color);
 //		void draw_triangle(Buffer::DrawBuffer * buf, const Geom::Triangle<int32_t> &what,
