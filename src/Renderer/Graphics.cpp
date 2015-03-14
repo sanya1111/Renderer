@@ -1,5 +1,43 @@
 #include "Renderer/Graphics.h"
 
+Renderer::Rgba::Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {
+}
+
+void Renderer::Drawer::setBuffer(Buffer* buf) {
+	this->buf = buf;
+}
+
+inline void at_func(uint8_t * ptr, const int8_t &bit, const int32_t &mask, int8_t & color){
+	if(mask & (1<<bit)){
+		*(ptr) = (color & 1);
+		color >>= 1;
+	}
+}
+
+inline void Renderer::Drawer::at(uint8_t* ptr, Rgba& color) {
+	for(size_t k = 0; k < buf->bpp; k++, ptr++){
+		int a = 0;
+
+//		at_func(ptr, k, buf->format_desc[buf->format_desc_entry].rmask, color.r);
+		int8_t col = color.r;
+		at_func(ptr, k, a, col);
+	}
+}
+
+
+void Renderer::Drawer::fill(Rgba& color) {
+	uint8_t * ptr = buf->map;
+	for (size_t i = 0; i < buf->height; i++) {
+		for (size_t j = 0; j < buf->width; j++,  ptr = ptr + buf->bpp / sizeof(char)) {
+			at(ptr, color);
+		}
+	}
+}
+
+void Renderer::Drawer::drawPixel(const uint32_t& screen_x,const uint32_t& screen_y, Rgba & color) {
+	uint8_t * ptr = buf->map + screen_x * buf->stride + screen_y * buf->bpp / sizeof(char);
+	at(ptr, color);
+}
 /*void Renderer::Graphics::fill(Buffer::DrawBuffer* buf,
 		const Buffer::DrawBuffer::Rgb& color) {
 	for (int32_t i = 0; i < buf->height; i++) {

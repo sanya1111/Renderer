@@ -23,6 +23,10 @@ namespace Renderer{
 
 class Device{
 protected:
+	//flags
+	bool loop_finit;
+	int8_t page_flip_pending;
+	//
 	drmModeRes * drm_mode_res;
 	int32_t fd;
 	std::unordered_set<uint32_t> used_connectors;
@@ -53,7 +57,8 @@ public:
 	void startLoop(int32_t loop_timeout = 1000, int32_t loop_end = 5);
 	void setCrtcBuffer(Connector &conn, Crtc &crtc, Buffer &buf);
 	void setCrtc(Connector &conn, Crtc &crtc);
-	void pageFlip(Crtc &crtc, Buffer &buf, void * params);
+	void pageFlip(Crtc &crtc, Buffer &buf, void * params, bool is_init = false);
+	void finishLoop();
 	std::pair<Connector, Crtc> getPossiblePair();
 };
 

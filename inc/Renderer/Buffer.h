@@ -17,7 +17,7 @@
 #include <exception>
 #include <libdrm/i915_drm.h>
 #include <drm_fourcc.h>
-#define DEB(...) fprintf(stderr, __VA_ARGS__)
+#include "Renderer/Log.h"
 
 namespace Renderer {
 
@@ -39,14 +39,33 @@ protected:
 		uint32_t drm_id;
 		int32_t bpp;
 		int32_t depth;
+
+		uint32_t bmask;
+		uint32_t gmask;
+		uint32_t rmask;
+		uint32_t amask;
 	}format_desc[] = {
-			{DRM_FORMAT_RGB565,	16, 16} ,
-			{DRM_FORMAT_RGB888,	24, 24},
-			{DRM_FORMAT_XRGB8888, 32, 24},
-			{DRM_FORMAT_XRGB2101010, 32, 30},
-			{DRM_FORMAT_ARGB8888, 32, 32}
+			{DRM_FORMAT_RGB565,	16, 16, (1<<5) - 1,
+										(1<<11) - (1<<5),
+										(1<<16) - (1<<11),
+										 0} ,
+			{DRM_FORMAT_RGB888,	24, 24, (1<<8) - 1,
+										(1<<16) - (1<<8),
+										(1<<24) - (1<<16),
+										(1ULL<<32) - (1U<<24)},
+			{DRM_FORMAT_XRGB8888, 32, 24, (1<<8) - 1,
+										  (1<<16) - (1<<8),
+									      (1<<24) - (1<<16),
+									      (1ULL<<32) - (1U<<24)},
+			{DRM_FORMAT_XRGB2101010, 32, 30, 0, 0, 0, 0}, //TODO
+			{DRM_FORMAT_ARGB8888, 32, 32, (1<<8) - 1,
+										  (1<<16) - (1<<8),
+										  (1<<24) - (1<<16),
+										  (1ULL<<32) - (1U<<24)}
 	};
+	uint8_t format_desc_entry;
 	//var
+	friend class Drawer;
 	uint32_t handle;
 	uint8_t *map;
 	uint32_t fb;

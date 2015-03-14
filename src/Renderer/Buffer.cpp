@@ -78,10 +78,11 @@ Renderer::Buffer::Buffer(int32_t fd, uint32_t width, uint32_t height, uint32_t f
 	width(width), height(height), pixel_format(format), mapping_info(mapping_info){
 	for(uint32_t i  = 0; i < (sizeof(format_desc) / sizeof(format_desc_struct)); i++){
 		if(format == format_desc[i].drm_id){
-			bpp = format_desc[i].bpp;
-			depth = format_desc[i].depth;
+			format_desc_entry = i;
 		}
 	}
+	bpp = format_desc[format_desc_entry].bpp;
+	depth = format_desc[format_desc_entry].depth;
 	createMapping(fd);
 }
 
@@ -139,7 +140,7 @@ bool Renderer::Buffer::intelGemMapping(int32_t fd) {
 	if (map == MAP_FAILED) {
 		throw "cannot create GTT(MMAP)";
 	}
-	memset(map, 0, sizeof(map));
+	memset(map, 0, size);
 	return true;
 }
 

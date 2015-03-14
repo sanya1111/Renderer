@@ -35,7 +35,7 @@ void Renderer::Context::addConnector(Connector & conn) {
 }
 
 void Renderer::Context::startListenning() {
-	dev.pageFlip(saved_crtc, buffers[current_buffer], (void *)this);
+	dev.pageFlip(saved_crtc, buffers[current_buffer], (void *)this, true);
 }
 
 void Renderer::Context::changeBuffer() {

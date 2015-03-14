@@ -2,7 +2,7 @@
 #include "Renderer/Context.h"
 #include <unistd.h>
 
-Renderer::Device::Device(const std::string & file_path) {
+Renderer::Device::Device(const std::string & file_path) : loop_finit(false), page_flip_pending(0) {
 	openDevice(file_path.c_str());
 	initModeRes();
 }
@@ -63,42 +63,37 @@ void Renderer::Device::useConnector(Renderer::Connector & item) {
 }
 
 void Renderer::Device::startLoop(int32_t loop_timeout, int32_t loop_end) {
-	/*int32_t ret;
+	int32_t ret;
 	fd_set fds;
 	time_t start, cur;
 	struct timeval v;
 	drmEventContext ev;
 
-	Loader * loader = Loader::getInstance();
 	FD_ZERO(&fds);
 	time(&start);
 	memset(&v, 0, sizeof(v));
 	memset(&ev, 0, sizeof(ev));
 	ev.version = DRM_EVENT_CONTEXT_VERSION;
-	ev.page_flip_handler = pageFlipped;
+	ev.page_flip_handler = onPageFlipped;
 	loop_finit = false;
-	drmModePageFlip(loader->fd, old_crtc->crtc_id, buffer_vec[0]->fb,
-	DRM_MODE_PAGE_FLIP_EVENT, (void *) this);
 	while (!loop_finit &&( loop_end == -1 || time(&cur) < start + loop_end)) {
 		FD_SET(0, &fds);
-		FD_SET(loader->fd, &fds);
+		FD_SET(fd, &fds);
 		v.tv_usec = loop_timeout;
-		ret = select(loader->fd + 1, &fds, NULL, NULL, NULL);
+		ret = select(fd + 1, &fds, NULL, NULL, &v);
 		if (ret < 0) {
-			device_log() << "select failed";
+//			device_log() << "select failed";
 			break;
 		} else if (FD_ISSET(0, &fds)) {
-			device_log() << "user_interrupted";
 			break;
-		} else if (FD_ISSET(loader->fd, &fds)) {
-			drmHandleEvent(loader->fd, &ev);
+		} else if (FD_ISSET(fd, &fds)) {
+			drmHandleEvent(fd, &ev);
 		}
 	}
 	loop_finit = true;
 	while (page_flip_pending) {
-		ret = drmHandleEvent(loader->fd, &ev);
+		ret = drmHandleEvent(fd, &ev);
 	}
-	*/
 }
 
 void Renderer::Device::openDevice(const std::string &dev_path) {
@@ -186,6 +181,10 @@ void Renderer::Device::setCrtcBuffer(Connector &conn_o, Crtc &crtc_o, Buffer & b
 	}
 }
 
+void Renderer::Device::finishLoop() {
+	loop_finit = true;
+}
+
 std::pair<Renderer::Connector, Renderer::Crtc> Renderer::Device::getPossiblePair() {
 	std::vector<Connector> conn= getConnectorVec();
 	std::vector<Crtc> crtc= getCrtcVec();
@@ -210,12 +209,19 @@ void Renderer::Device::setCrtc(Connector& conn_o, Crtc& crtc_o) {
 	}
 }
 
-void Renderer::Device::pageFlip(Crtc& crtc, Buffer& buf, void * params) {
+void Renderer::Device::pageFlip(Crtc& crtc, Buffer& buf, void * params, bool is_start) {
+	if(!is_start){
+		page_flip_pending--;
+	}
+	if(loop_finit){
+		return;
+	}
 	int ret = drmModePageFlip(fd, crtc.getDrmInstance()->crtc_id, buf.fb,
 			DRM_MODE_PAGE_FLIP_EVENT, params);
 	if(ret){
 		throw DeviceException("failed to page flip");
 	}
+	page_flip_pending++;
 }
 
 void Renderer::Device::onPageFlipped(int32_t, uint32_t frame, uint32_t sec,
