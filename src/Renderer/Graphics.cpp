@@ -1,5 +1,6 @@
 #include "Renderer/Graphics.h"
 
+
 Renderer::Rgba::Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {
 }
 
@@ -28,49 +29,41 @@ void Renderer::Drawer::drawPixel(const uint32_t& screen_x,const uint32_t& screen
 	uint8_t * ptr = buf->map + screen_x * buf->stride + screen_y * buf->bpp / 8;
 	at(ptr, color);
 }
-/*void Renderer::Graphics::fill(Buffer::DrawBuffer* buf,
-		const Buffer::DrawBuffer::Rgb& color) {
-	for (int32_t i = 0; i < buf->height; i++) {
-		for (int32_t j = 0; j < buf->width; j++) {
-			buf->at(i, j).set(color);
-		}
-	}
-}
 
-void Renderer::Graphics::draw_line(Buffer::DrawBuffer* buf,
-		const Geom::Line<int32_t>& arg, const Buffer::DrawBuffer::Rgb& color) {
-	Geom::Line<int32_t>  what = arg;
+
+void Renderer::Drawer::drawLine(Geom::Point2D<int32_t> begin, Geom::Point2D<int32_t> end, const Rgba & color) {
 	bool swapped = false;
-	if(std::abs(what.begin.x - what.end.x) < std::abs(what.begin.y - what.end.y)){
+	if (std::abs(begin.x - end.x) < std::abs(begin.y - end.y)) {
+		std::swap(begin.x, begin.y);
+		std::swap(end.x, end.y);
 		swapped = true;
-		std::swap(what.begin.x, what.begin.y);
-		std::swap(what.end.x, what.end.y);
 	}
-	int32_t dx = -what.begin.x +  what.end.x;
-	int32_t dy = -what.begin.y + what.end.y;
-	int32_t delta_x = Geom::sign(dx);
-	int32_t delta_y = Geom::sign(dy);
-	int32_t every = 0;
-	if(delta_y)
-		every = std::max(1, abs(dx/ dy));
-	int32_t cury = what.begin.y;
-	for(int32_t i = what.begin.x, j = 0; i != what.end.x; i += delta_x, j++){
-		if(every && j % every == 0){
-			cury += delta_y;
-		}
-		if(!swapped){
-			buf->at(i, cury).set(color);
+	if (begin.x > end.x) {
+		std::swap(begin, end);
+	}
+	int dx = end.x - begin.x;
+	int dy = end.y - begin.y;
+	int derror2 = std::abs(dy)*2;
+	int error2 = 0;
+	int y = begin.y;
+	for (int x=begin.x; x<=end.x; x++) {
+		if (swapped) {
+			drawPixel(y, x, color);
 		} else {
-			buf->at(cury, i).set(color);
+			drawPixel(x, y, color);
+		}
+		error2 += derror2;
+
+		if (error2 > dx) {
+			y += (end.y > begin.y ? 1 : -1);
+			error2 -= dx * 2;
 		}
 	}
 }
 
-void Renderer::Graphics::draw_triangle(Buffer::DrawBuffer* buf,
-		const Geom::Triangle<int32_t>& what,
-		const Buffer::DrawBuffer::Rgb& color) {
+void Renderer::Drawer::drawTriangle(Geom::Triangle2D<int32_t> triangle,
+		const Rgba& color) {
 	for(int8_t i = 0; i < 3; i++){
-		draw_line(buf, what.lines[i], color);
+			drawLine(triangle.points[i], triangle.points[(i + 1) % 3], color);
 	}
 }
-*/

@@ -9,18 +9,9 @@ using namespace std;
 class MyDraw : public Drawable{
 	public:
 	int count  = 0;
+	Drawer drawer;
 		virtual void onDraw(uint32_t frame, uint32_t sec,
 				uint32_t usec, Buffer & buf){
-			/*count++;
-			uint32_t * temp = (uint32_t *)buf.map;
-			for(size_t i = 0; i < buf.height; i++)
-				for(size_t j = 0; j < buf.width; j++){
-					if(count & 1)
-						*(temp + i * buf.width + j) = ~0;
-					else
-						*(temp + i * buf.width + j) = 0;
-				}
-			*/
 			count++;
 			Rgba color_a(255, 255, 255, 0);
 			Rgba color_b(0, 0, 0, 0);

@@ -14,7 +14,7 @@ bool Renderer::Buffer::dumbMapping(int32_t fd) {
 	cr_dumb.bpp = bpp;
 	int ret = drmIoctl(fd, DRM_IOCTL_MODE_CREATE_DUMB, &cr_dumb);
 	if (ret < 0) {
-//		buffer_log() << "cant create dumb buffer";
+		DEB("cannot create dumb buffer\n");
 		return false;
 	}
 	stride = cr_dumb.pitch;
@@ -81,6 +81,7 @@ Renderer::Buffer::Buffer(int32_t fd, uint32_t width, uint32_t height, uint32_t f
 			format_desc_entry = i;
 		}
 	}
+	DEB("creating buffer\n");
 	bpp = format_desc[format_desc_entry].bpp;
 	depth = format_desc[format_desc_entry].depth;
 	createMapping(fd);
@@ -118,7 +119,7 @@ bool Renderer::Buffer::intelGemMapping(int32_t fd) {
 
 	int ret = ioctl(fd, DRM_IOCTL_I915_GEM_CREATE, &create);
 	if (ret) {
-//		buffer_log() << "cant create  buffer";
+		DEB("cannot create gem buffer\n");
 		return false;
 	}
 	handle = create.handle;
@@ -153,6 +154,7 @@ void Renderer::Buffer::intelGemDestroy(int32_t fd) {
 
 
 void Renderer::Buffer::destroy(int32_t fd) {
+	DEB("destroying buffer\n");
 	munmap(map, size);
 	drmModeRmFB(fd, fb);
 	if (mapping_info == MappingInfo::DUMB_MAPPING) {

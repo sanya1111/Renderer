@@ -3,12 +3,14 @@
 #include <unistd.h>
 
 Renderer::Device::Device(const std::string & file_path) : loop_finit(false), page_flip_pending(0) {
+	DEB("creating device\n");
 	openDevice(file_path.c_str());
 	initModeRes();
 }
 
 
 Renderer::Device::~Device() {
+	DEB("destroying device\n");
 	drmModeFreeResources(drm_mode_res);
 	close(fd);
 }
@@ -82,7 +84,7 @@ void Renderer::Device::startLoop(int32_t loop_timeout, int32_t loop_end) {
 		v.tv_usec = loop_timeout;
 		ret = select(fd + 1, &fds, NULL, NULL, &v);
 		if (ret < 0) {
-//			device_log() << "select failed";
+			DEB("select failed\n");
 			break;
 		} else if (FD_ISSET(0, &fds)) {
 			break;
@@ -137,7 +139,7 @@ bool Renderer::Device::isPossiblePair(Connector &conn, Crtc &crtc_o) {
 		enc = drmModeGetEncoder(fd, conn_obj->encoder_id);
 		bool result = false;
 		if (!enc) {
-//			loader_log() << "cannot drmModeGetEncoder";
+			DEB("cannot get encoder\n");
 		} else {
 			result = (enc->crtc_id == crtc);
 		}
@@ -157,7 +159,7 @@ bool Renderer::Device::isPossiblePair(Connector &conn, Crtc &crtc_o) {
 		bool result = false;
 		enc = drmModeGetEncoder(fd, conn_obj->encoders[i]);
 		if (!enc) {
-//			loader_log() << "cannot retrieve encoder " << i;
+			DEB("cannot retrieve encoder %d\n", i);
 		} else {
 			result = (enc->possible_crtcs & (1 << dev_id_crtc));
 		}

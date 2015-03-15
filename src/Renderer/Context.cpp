@@ -46,4 +46,5 @@ void Renderer::Context::onPageFlipped(uint32_t frame, uint32_t sec,
 		uint32_t usec) {
 	drawable.onDraw(frame, sec, usec, buffers[current_buffer]);
 	dev.pageFlip(saved_crtc, buffers[current_buffer], (void *)this);
-}
+	changeBuffer();
+};

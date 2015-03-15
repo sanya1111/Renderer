@@ -1,4 +1,4 @@
-#ifndef GEOM_H_
+	#ifndef GEOM_H_
 #define GEOM_H_
 
 namespace Renderer {
@@ -17,63 +17,38 @@ int8_t sign(T a) {
 
 //classes
 template<class T>
-class Point {
+class Point2D {
 public:
 	T x, y;
-	Point(T _x, T _y) :
+	Point2D(T _x, T _y) :
 			x(_x), y(_y) {
 	}
-	Point() {}
-	Point operator+(const Point &with) {
+	Point2D() {}
+	Point2D operator+(const Point2D &with) {
 		return Point(x + with.x, y + with.y);
 	}
-	Point operator-(const Point &with) {
+	Point2D operator-(const Point2D &with) {
 		return Point(x - with.x, y - with.y);
 	}
 };
 
+
 template<class T>
-class Line {
+class Triangle2D{
 public:
-	Point<T> begin, end;
-	Line(Point<T> _begin, Point<T> _end) :
-			begin(_begin), end(_end) {
+	Point2D<T> points[3];
+	Triangle2D(Point2D<T> from[]){
+		for(int8_t i = 0; i < 3; i++){
+			points[i] = from[i];
+		}
 	}
-	Line() {}
+	Triangle2D(const Point2D<T> &A, const Point2D<T> &B, const Point2D<T> &C){
+		points[0] = A;
+		points[1] = B;
+		points[2] = C;
+	}
 };
 
-/*template<class T>
-class Triangle{
-public:
-	Line<T> lines[3];
-	Triangle(Line<T> from[]){
-		for(int32_t i = 0; i < 3; i++){
-			lines[i] = from[i];
-		}
-	}
-	Triangle(std::initializer_list<Line<T>> from){
-//		for(int32_t i = 0; i < 3; i++){
-//			lines[i] = from[i];
-//		}
-	}
-	Triangle(Point<T> from[]){
-		for(int32_t i = 0; i < 3; i++){
-			lines[i] = Line<T>(from[i], from[(i + 1) % 3]);
-		}
-	}
-	Triangle(std::initializer_list<Point<T>> from){
-		int i = 0;
-		for(typename std::initializer_list<Point<T>>::const_iterator it = from.begin(); i < 3; ++it){
-			typename std::initializer_list<Point<T>>::const_iterator nex = it;
-			++nex;
-			if(nex == from.end())
-				nex = from.begin();
-			lines[i] = Line<T>(*it, *nex);
-			i++;
-		}
-	}
-};
-*/
 }
 }
 

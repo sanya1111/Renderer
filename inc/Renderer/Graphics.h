@@ -11,6 +11,7 @@ namespace Renderer {
 	public:
 		uint8_t a, r, g, b;
 		Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+		Rgba() = default;
 	};
 
 	class Drawer{
@@ -21,10 +22,8 @@ namespace Renderer {
 		void setBuffer(Buffer * buf	);
 		void fill(const Rgba &color);
 		void drawPixel(const uint32_t &screen_x,const uint32_t &screen_y, const Rgba & color);
-//		void draw_line(Buffer::DrawBuffer * buf, const Geom::Line<int32_t> &what,
-//		const Buffer::DrawBuffer::Rgb& color);
-//		void draw_triangle(Buffer::DrawBuffer * buf, const Geom::Triangle<int32_t> &what,
-//		const Buffer::DrawBuffer::Rgb & color);
+		void drawLine(Geom::Point2D<int32_t> beg, Geom::Point2D<int32_t> en, const Rgba & color);
+		void drawTriangle(Geom::Triangle2D<int32_t> triangle, const Rgba & color);
 	};
 
 }
