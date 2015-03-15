@@ -24,6 +24,7 @@ namespace Renderer {
 		void drawPixel(const uint32_t &screen_x,const uint32_t &screen_y, const Rgba & color);
 		void drawLine(Geom::Point2D<int32_t> beg, Geom::Point2D<int32_t> en, const Rgba & color);
 		void drawTriangle(Geom::Triangle2D<int32_t> triangle, const Rgba & color);
+		void drawMash(const char *filename, const Rgba & color);
 	};
 
 }

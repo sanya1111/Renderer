@@ -9,7 +9,7 @@ using namespace std;
 class MyDraw : public Drawable{
 	public:
 	Rgba white, black;
-	int count ;
+	int count = 0;
 	Drawer drawer;
 	MyDraw(){
 		count = 0;
@@ -19,7 +19,7 @@ class MyDraw : public Drawable{
 	virtual void onDraw(uint32_t frame, uint32_t sec,
 			uint32_t usec, Buffer & buf){
 		count++;
-		if(count == 1)
+		if(count > 2)
 			return;
 		drawer.setBuffer(&buf);
 		drawer.fill(white);

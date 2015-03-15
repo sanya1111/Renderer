@@ -20,8 +20,8 @@ template<class T>
 class Point2D {
 public:
 	T x, y;
-	Point2D(T _x, T _y) :
-			x(_x), y(_y) {
+	Point2D(T x, T y) :
+			x(x), y(y) {
 	}
 	Point2D() {}
 	Point2D operator+(const Point2D &with) {
@@ -46,6 +46,25 @@ public:
 		points[0] = A;
 		points[1] = B;
 		points[2] = C;
+	}
+};
+
+template<class T>
+class Point3D : public Point2D<T>{
+public:
+	T z;
+	Point3D() = default;
+	Point3D(T x, T y, T z) : Point2D<T>(x, y), z(z) {}
+
+	T & operator[](size_t id){
+		switch(id){
+		case 0 :
+			return this->x;
+		case 1:
+			return this->y;
+		default:
+			return z;
+		}
 	}
 };
 

@@ -1,5 +1,7 @@
 #include "Renderer/Graphics.h"
-
+#include <vector>
+#include <fstream>
+#include <sstream>
 
 Renderer::Rgba::Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {
 }
@@ -67,3 +69,58 @@ void Renderer::Drawer::drawTriangle(Geom::Triangle2D<int32_t> triangle,
 			drawLine(triangle.points[i], triangle.points[(i + 1) % 3], color);
 	}
 }
+
+void Renderer::Drawer::drawMash(const char* filename, const Rgba& color){
+	using namespace Geom;
+	std::ifstream in;
+    in.open (filename, std::ifstream::in);
+    if(in.fail()){
+    	DEB("%s\n", filename);
+    	return;
+    }
+    std::string line;
+    std::vector<Point3D<float>> verts;
+    std::vector<std::vector<int>> faces;
+    float mini[3] = {1e9, 1e9, 1e9};
+    while (!in.eof()) {
+        std::getline(in, line);
+        std::stringstream iss(line.c_str());
+        char trash;
+        if (!line.compare(0, 2, "v ")) {
+            iss >> trash;
+            Point3D<float> v;
+            for (int i=0;i<3;i++) iss >> v[i], mini[i] = std::min(mini[i], v[i]);
+            	verts.push_back(v);
+        }  else if (!line.compare(0, 2, "f ")) {
+        	 std::vector<int> f;
+        	int itrash, idx;
+        	iss >> trash;
+        	while (iss >> idx >> trash >> itrash >> trash >> itrash) {
+        	idx--; // in wavefront obj all indices start at 1, not zero
+        	f.push_back(idx);
+        	}
+        	faces.push_back(f);
+        }
+    }
+    float maxi[3] = {0, 0, 0};
+    for(int i = 0; i < 3; i++){
+    	mini[i]--;
+    }
+    for(auto &v : verts){
+    	for(int i = 0; i < 3; i++){
+    		v[i] += abs(mini[i]);
+    		maxi[i] = std::max(maxi[i], v[i]);
+    	}
+    }
+    for (size_t i=0; i < faces.size(); i++) {
+		std::vector<int> face = faces[i];
+		Point2D<int32_t> mas[3];
+		for (int j=0; j<3; j++) {
+			int x1 = (verts[face[j]].x/(maxi[0] + .1) ) * buf->height ;
+			int y1 = (verts[face[j]].y/(maxi[1] + .1) ) * buf->width ;
+			mas[j] = Point2D<int32_t>(x1, y1);
+		}
+		drawTriangle(Triangle2D<int32_t>(mas), color);
+    }
+}
+
