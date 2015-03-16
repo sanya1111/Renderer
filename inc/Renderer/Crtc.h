@@ -10,6 +10,7 @@ class Crtc{
 protected:
 	std::shared_ptr<drmModeCrtc> crtc;
 public:
+	Crtc() = default;
 	Crtc(int32_t fd, int32_t id);
 	drmModeCrtcPtr getDrmInstance();
 };
