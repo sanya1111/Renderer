@@ -22,7 +22,7 @@
 namespace Renderer{
 
 class Device{
-protected:
+private:
 	//flags
 	bool loop_finit;
 	int8_t page_flip_pending;
@@ -53,7 +53,7 @@ public:
 	void useConnector(Connector &item);
 	Renderer::Buffer createBuffer(Crtc &crtc);
 	void destroyBuffer(Renderer::Buffer &);
-	bool isPossiblePair(Connector& conn, Crtc &crtc);
+	bool isCompatible(Connector& conn, Crtc &crtc);
 	void startLoop(int32_t loop_timeout = 1000, int32_t loop_end = 5);
 	void setCrtcBuffer(Connector &conn, Crtc &crtc, Buffer &buf);
 	void setCrtc(Connector &conn, Crtc &crtc);

@@ -24,6 +24,7 @@ class MyDraw : public Drawable{
 };
 
 int main(){
+	/*
 	Device dev("/dev/dri/card0");
 	pair<Connector, Crtc> pa = dev.getPossiblePair();
 	MyDraw draw;
@@ -32,4 +33,5 @@ int main(){
 	dev.startLoop();
 	DEB("%d\n", draw.count);
 	return 0;
+*/
 }

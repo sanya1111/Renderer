@@ -80,9 +80,9 @@ void Renderer::Device::startLoop(int32_t loop_timeout, int32_t loop_end) {
 	loop_finit = false;
 	while (!loop_finit &&( loop_end == -1 || time(&cur) < start + loop_end)) {
 		FD_SET(0, &fds);
-		FD_SET(fd, &fds);
-		v.tv_usec = loop_timeout;
-		ret = select(fd + 1, &fds, NULL, NULL, &v);
+			FD_SET(fd, &fds);
+		v.tv_sec = loop_timeout;
+		ret = select(fd + 1, &fds, NULL, NULL, NULL);
 		if (ret < 0) {
 			DEB("select failed\n");
 			break;
@@ -128,7 +128,7 @@ void Renderer::Device::destroyBuffer(Renderer::Buffer & buf) {
 	buf.destroy(fd);
 }
 
-bool Renderer::Device::isPossiblePair(Connector &conn, Crtc &crtc_o) {
+bool Renderer::Device::isCompatible(Connector &conn, Crtc &crtc_o) {
 	drmModeEncoderPtr enc = NULL;
 	drmModeConnectorPtr conn_obj = conn.getDrmInstance();
 	uint32_t crtc = crtc_o.getDrmInstance()->crtc_id;
@@ -192,7 +192,7 @@ std::pair<Renderer::Connector, Renderer::Crtc> Renderer::Device::getPossiblePair
 	std::vector<Crtc> crtc= getCrtcVec();
 	for(auto &co : conn){
 		for(auto &cr : crtc){
-			if(isPossiblePair(co, cr))
+			if(isCompatible(co, cr))
 				return std::make_pair(co, cr);
 		}
 	}

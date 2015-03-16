@@ -27,6 +27,15 @@ namespace Renderer {
 		void drawMash(const char *filename, const Rgba & color);
 	};
 
+	/*
+	class Model{
+		std::vector<Geom::Point3D<float>> verts;
+		std::vector<std::vector<int>> triange_pts;
+	public:
+		void load(const std::string &s);
+
+	};
+	*/
 }
 
 #endif /* GRAPHICS_H_ */

@@ -40,7 +40,7 @@ public:
 
 
 int main(){
-	Device dev("/dev/dri/card0");
+	/*Device dev("/dev/dri/card0");
 	pair<Connector, Crtc> pa = dev.getPossiblePair();
 	MyDraw draw;
 	Context context(2, pa.first, pa.second,draw, dev);
@@ -48,4 +48,5 @@ int main(){
 	dev.startLoop();
 	DEB("%d\n", draw.count);
 	return 0;
+	*/
 }

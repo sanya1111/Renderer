@@ -4,12 +4,14 @@
 #include "Renderer/Context.h"
 #include "Renderer/Graphics.h"
 
+#include <iostream>
+
 using namespace Renderer;
 using namespace std;
+int count = 0;
 class MyDraw : public Drawable{
 	public:
 	Rgba white, black;
-	int count = 0;
 	Drawer drawer;
 	MyDraw(){
 		count = 0;
@@ -19,26 +21,27 @@ class MyDraw : public Drawable{
 	virtual void onDraw(uint32_t frame, uint32_t sec,
 			uint32_t usec, Buffer & buf){
 		count++;
-		if(count > 2)
-			return;
-		drawer.setBuffer(&buf);
-		drawer.fill(white);
-		using namespace Geom;
-		drawer.drawTriangle(Triangle2D<int32_t>(
-		Point2D<int32_t>(78, 120),
-		Point2D<int32_t>(771, 310),
-		Point2D<int32_t>(800, 60)), black);
+//		if(count > 2)
+//			return;
+//		drawer.setBuffer(&buf);
+//		drawer.fill(white);
+//		using namespace Geom;
+//		drawer.drawTriangle(Triangle2D<int32_t>(
+//		Point2D<int32_t>(78, 120),
+//		Point2D<int32_t>(771, 310),
+//		Point2D<int32_t>(800, 60)), black);
 
 	}
 };
 
 int main(){
 	Device dev("/dev/dri/card0");
-	pair<Connector, Crtc> pa = dev.getPossiblePair();
-	MyDraw draw;
-	Context context(2, pa.first, pa.second,draw, dev);
+	Connector connector;
+	Crtc crtc;
+	std::tie(connector, crtc) = dev.getPossiblePair();
+	Context context(2, connector, crtc, unique_ptr<Drawable>(new MyDraw()), dev);
 	context.startListenning();
 	dev.startLoop();
-	DEB("%d\n", draw.count);
+	DEB("%d\n", count);
 	return 0;
 }
