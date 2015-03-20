@@ -13,6 +13,7 @@ public:
 	Crtc() = default;
 	Crtc(int32_t fd, int32_t id);
 	drmModeCrtcPtr getDrmInstance();
+	size_t getUsed();
 };
 
 }

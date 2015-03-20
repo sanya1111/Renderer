@@ -10,3 +10,7 @@ Renderer::Connector::Connector(int32_t fd, int32_t id) : conn(drmModeGetConnecto
 drmModeConnectorPtr Renderer::Connector::getDrmInstance() {
 	return conn.get();
 }
+
+size_t Renderer::Connector::getUsed() {
+	return conn.use_count();
+}

@@ -2,7 +2,30 @@
 #include <vector>
 #include <fstream>
 #include <sstream>
+#include <algorithm>
+#include "Renderer/Log.h"
 
+//Helpers
+static const int INF = 1e9;
+struct LineStepper____{
+	int dx, error2, derror2, y, delta;
+	LineStepper____(const Renderer::Geom::Point2D<int32_t> &begin, const Renderer::Geom::Point2D<int32_t> & end){
+		dx = end.x - begin.x;
+		derror2 = std::abs(end.y - begin.y) * 2;
+		error2 = 0;
+		y = begin.y;
+		delta = (end.y > begin.y ? 1 : -1);
+	}
+	int next(){
+		error2 += derror2;
+		while (dx && error2 > dx) {
+			y += delta;
+			error2 -= dx * 2;
+		}
+		return y;
+	}
+};
+//
 Renderer::Rgba::Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {
 }
 
@@ -27,11 +50,11 @@ void Renderer::Drawer::fill(const Rgba& color) {
 	}
 }
 
-void Renderer::Drawer::drawPixel(const uint32_t& screen_x,const uint32_t& screen_y, const Rgba & color) {
+void Renderer::Drawer::drawPixel(const uint32_t& screen_x,const uint32_t& screen_y, const uint32_t &screen_h, const Rgba & color) {
+	if()
 	uint8_t * ptr = buf->map + screen_x * buf->stride + screen_y * buf->bpp / 8;
 	at(ptr, color);
 }
-
 
 void Renderer::Drawer::drawLine(Geom::Point2D<int32_t> begin, Geom::Point2D<int32_t> end, const Rgba & color) {
 	bool swapped = false;
@@ -43,23 +66,14 @@ void Renderer::Drawer::drawLine(Geom::Point2D<int32_t> begin, Geom::Point2D<int3
 	if (begin.x > end.x) {
 		std::swap(begin, end);
 	}
-	int dx = end.x - begin.x;
-	int dy = end.y - begin.y;
-	int derror2 = std::abs(dy)*2;
-	int error2 = 0;
-	int y = begin.y;
+	LineStepper____ step(begin, end);
 	for (int x=begin.x; x<=end.x; x++) {
 		if (swapped) {
-			drawPixel(y, x, color);
+			drawPixel(step.y, x, color);
 		} else {
-			drawPixel(x, y, color);
+			drawPixel(x, step.y, color);
 		}
-		error2 += derror2;
-
-		if (error2 > dx) {
-			y += (end.y > begin.y ? 1 : -1);
-			error2 -= dx * 2;
-		}
+		step.next();
 	}
 }
 
@@ -67,6 +81,39 @@ void Renderer::Drawer::drawTriangle(Geom::Triangle2D<int32_t> triangle,
 		const Rgba& color) {
 	for(int8_t i = 0; i < 3; i++){
 			drawLine(triangle.points[i], triangle.points[(i + 1) % 3], color);
+	}
+}
+
+void Renderer::Drawer::drawFilledTriangle(Geom::Triangle2D<int32_t> triangle,
+		const Rgba& color) {
+	drawTriangle(triangle, color);
+	int mi_x = INF, ma_x=-INF, mi_y = INF, ma_y = -INF;
+	for(size_t i = 0; i < 3; i++) {
+		mi_x = std::min(mi_x, triangle.points[i].x);
+		ma_x = std::max(ma_x, triangle.points[i].x);
+		mi_y = std::min(mi_y, triangle.points[i].y);
+		ma_y = std::max(ma_y, triangle.points[i].y);
+	}
+	bool swapped = false;
+	if(ma_y - mi_y > ma_x - mi_x){
+		swapped = true;
+		for(size_t i = 0; i < 3; i++) {
+			std::swap(triangle.points[i].x, triangle.points[i].y);
+		}
+	}
+	std::sort(triangle.points, triangle.points + 3);
+	LineStepper____ f(triangle.points[0], triangle.points[1]);
+	LineStepper____ s(triangle.points[0], triangle.points[2]);
+	for(int x = triangle.points[0].x; x <= triangle.points[2].x ; x++){
+		if(!swapped)
+			drawLine(Geom::Point2D<int32_t>(x, f.y), Geom::Point2D<int32_t>(x, s.y), color);
+		else
+			drawLine(Geom::Point2D<int32_t>(f.y, x), Geom::Point2D<int32_t>(s.y, x), color);
+		if(x == triangle.points[1].x){
+			f = LineStepper____(triangle.points[1], triangle.points[2]);
+		}
+		f.next();
+		s.next();
 	}
 }
 
@@ -79,9 +126,9 @@ void Renderer::Drawer::drawMash(const char* filename, const Rgba& color){
     	return;
     }
     std::string line;
-    std::vector<Point3D<float>> verts;
+    std::vector<Point3D<double>> verts;
     std::vector<std::vector<int>> faces;
-    float mini[3] = {1e9, 1e9, 1e9};
+    float mini[3] = {INF, INF, INF};
     while (!in.eof()) {
         std::getline(in, line);
         std::stringstream iss(line.c_str());
@@ -120,7 +167,20 @@ void Renderer::Drawer::drawMash(const char* filename, const Rgba& color){
 			int y1 = (verts[face[j]].y/(maxi[1] + .1) ) * buf->width ;
 			mas[j] = Point2D<int32_t>(x1, y1);
 		}
-		drawTriangle(Triangle2D<int32_t>(mas), color);
+
+		drawFilledTriangle(Triangle2D<int32_t>(mas), color);
     }
 }
 
+void Renderer::Drawer::fill2(const Rgba& color) {
+
+}
+
+void Renderer::Drawer::drawBegin() {
+	current_draw++;
+	zbuffer.resize(buf->size);
+	check.resize(buf->size);
+}
+
+void Renderer::Drawer::drawEnd() {
+}

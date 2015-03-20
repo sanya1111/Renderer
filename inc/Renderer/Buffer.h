@@ -23,7 +23,6 @@ namespace Renderer {
 
 
 class Buffer {
-protected:
 	//methods
 	bool dumbMapping(int32_t fd);
 	bool intelGemMapping(int32_t fd);

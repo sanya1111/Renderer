@@ -1,4 +1,4 @@
-	#ifndef GEOM_H_
+#ifndef GEOM_H_
 #define GEOM_H_
 
 namespace Renderer {
@@ -29,6 +29,9 @@ public:
 	}
 	Point2D operator-(const Point2D &with) {
 		return Point(x - with.x, y - with.y);
+	}
+	bool operator<(const Point2D &other){
+		return (x < other.x) || (x == other.x && y < other.y);
 	}
 };
 

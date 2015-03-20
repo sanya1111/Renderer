@@ -4,6 +4,7 @@
 #include "Renderer/Buffer.h"
 #include "Renderer/Geom.hpp"
 
+#include <vector>
 namespace Renderer {
 
 //functions
@@ -17,14 +18,23 @@ namespace Renderer {
 	class Drawer{
 	protected:
 		Buffer * buf;
+		std::vector<int32_t> zbuffer,
+							 check;
+		int32_t current_draw;
 		void at(uint8_t * ptr,const Rgba & color);
 	public:
 		void setBuffer(Buffer * buf	);
 		void fill(const Rgba &color);
-		void drawPixel(const uint32_t &screen_x,const uint32_t &screen_y, const Rgba & color);
-		void drawLine(Geom::Point2D<int32_t> beg, Geom::Point2D<int32_t> en, const Rgba & color);
+		void fill2(const Rgba & color);
+		void drawPixel(const uint32_t &screen_x,const uint32_t &screen_y, const uint32_t &h, const Rgba & color);
+
+		void drawLine(Geom::Point2D<int32_t> , Geom::Point2D<int32_t> , const Rgba & color);
 		void drawTriangle(Geom::Triangle2D<int32_t> triangle, const Rgba & color);
+		void drawFilledTriangle(Geom::Triangle2D<int32_t> triangle, const Rgba &color);
 		void drawMash(const char *filename, const Rgba & color);
+		void drawBegin();
+		void drawEnd();
+		Drawer() : current_draw() {}
 	};
 
 	/*

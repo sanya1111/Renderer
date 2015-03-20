@@ -11,6 +11,7 @@ using namespace Renderer::Geom;
 #include <iostream>
 #include <istream>
 #include <fstream>
+#include <memory>
 
 
 class MyDraw : public Drawable{
@@ -31,8 +32,8 @@ public:
 		drawer.setBuffer(&buf);
 		drawer.fill(white);
 		using namespace Geom;
-		drawer.drawMash("../test/test_obj_load/obj/Wraith Raider Starship.obj", black);
-//		drawer.drawMash("../test/test_obj_load/obj/african_head.obj", black);
+//		drawer.drawMash("../test/test_obj_load/obj/Wraith Raider Starship.obj", black);
+		drawer.drawMash("../test/test_obj_load/obj/african_head.obj", black);
 
 	}
 };
@@ -40,13 +41,14 @@ public:
 
 
 int main(){
-	/*Device dev("/dev/dri/card0");
-	pair<Connector, Crtc> pa = dev.getPossiblePair();
-	MyDraw draw;
-	Context context(2, pa.first, pa.second,draw, dev);
+//	/*Device dev("/dev/dri/card0");
+	Device dev("/dev/dri/card0");
+	Connector connector;
+	Crtc crtc;
+	std::tie(connector, crtc) = dev.getPossiblePair();
+	Context context(2, connector, crtc, unique_ptr<Drawable>(new MyDraw()), dev);
 	context.startListenning();
 	dev.startLoop();
-	DEB("%d\n", draw.count);
+//	DEB("%d\n", count);
 	return 0;
-	*/
 }

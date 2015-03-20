@@ -7,12 +7,12 @@
 namespace Renderer{
 
 class Connector{
-protected:
 	std::shared_ptr<drmModeConnector> conn;
 public:
 	Connector() = default;
 	Connector(int32_t fd, int32_t id) ;
 	drmModeConnectorPtr getDrmInstance();
+	size_t getUsed();
 };
 
 }
