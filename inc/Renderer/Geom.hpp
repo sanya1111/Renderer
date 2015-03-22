@@ -5,6 +5,7 @@
 #include <vector>
 #include <cmath>
 #include <bits/stdc++.h>
+#include "Renderer/Log.h"
 namespace Renderer {
 
 namespace Geom {
@@ -38,12 +39,13 @@ public:
 		}
 	}
 	void print(){
-//		FOR(i, N){
-//			FOR(j, M){
-//				DEB("%lf ", ma[i][j]);
-//			}
-//			DEB("\n");
-//		}
+#define FOR(i, n) for(int i = 0; i < (n); i++)
+		FOR(i, N){
+			FOR(j, M){
+				DEB("%lf ", ma[i][j]);
+			}
+			DEB("\n");
+		}
 	}
 	std::vector<T> &operator [](size_t i){
 		return ma[i];
@@ -171,6 +173,7 @@ public:
 	}
 
 	V3& scale(V3 v){
+		norm();
 		vSc(v);
 		return *this;
 	}

@@ -33,10 +33,10 @@ public:
 		if(count > 1)
 			return;
 		CameraView cam(V3f(0, 0, 0), V3f(0, 1, 0), V3f(0, 0, 1),
-						60.0/180 * 3.14, buf.width, buf.height, 1, 100);
+						60.0/180 * 3.14, buf.width, buf.height, 3, 100);
 		drawer.drawBegin(&buf, cam);
 		drawer.fill(white);
-		drawer.drawModel(model, V3f(0, 0, 10), V3f(500, 500, 500), V3f(0, 0, 0));
+		drawer.drawModel(model, V3f(0, 0, 10), V3f(1, 1, 1), V3f(0, 0, 0));
 		using namespace Geom;
 		drawer.drawEnd();
 	}

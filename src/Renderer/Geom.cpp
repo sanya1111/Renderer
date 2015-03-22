@@ -42,7 +42,7 @@ Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::projection(float left, 
 		2.0 / (right - left), 0, 0, 0,
 		0, 2.0 / (top - bottom), 0, 0,
 		(left + right) / (left - right), (bottom + top) / (bottom - top), (far + near) / (far - near), 1,
-		0, 0, -2*near*far/(far - near), 0
+		0, 0, -2.0 * near * far / ( far - near ), 0
 
 	};
 }

@@ -243,6 +243,7 @@ Geom::V3f Renderer::CameraView::translate(Geom::V3f v) {
 	float bottom = -top;
 	v4 = (v4.rowMatrix() * MatrixFactory::projection(left, right, top, bottom, near, far))[0];
 	V3f t = v4.norm();
-	DEB("%f  %f %f %f\n", t.x, t.y, t.z);
+	if(t.y != 1.027659)
+	DEB("%f %f %f\n", t.x, t.y, t.z);
 	return t;
 }
