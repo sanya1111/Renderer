@@ -15,37 +15,55 @@ namespace Renderer {
 		Rgba() = default;
 	};
 
+	class MeshModel{
+			std::vector<Geom::V3f> verts;
+			std::vector<std::vector<int> > faces;
+		public:
+			void loadObj(const char *filename);
+		friend class Drawer;
+	};
+
+	class CameraView{
+		Geom::V3f cen,
+			up,
+			r,
+			f;
+		float aw, ah;
+		float near, far;
+	public:
+		CameraView() {}
+		CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, float angle, int32_t width, int32_t height, float near, float far);
+		Geom::V3f translate(Geom::V3f v);
+	};
+
 	class Drawer{
 	protected:
+		//screen : buf, zbuf
 		Buffer * buf;
 		std::vector<int32_t> zbuffer,
 							 check;
 		int32_t current_draw;
+		bool zbufferAt(const int32_t &x, const int32_t &y, const int32_t &h);
 		void at(uint8_t * ptr,const Rgba & color);
+		bool inScreen(int32_t x, int32_t y);
+		//views
+		CameraView mainView;
+		Geom::V3f toScreen(Geom::V3f pt);
+		Geom::V3f translate(Geom::V3f cen, Geom::V3f pt, Geom::V3f scale, Geom::V3f rot);
 	public:
-		void setBuffer(Buffer * buf	);
 		void fill(const Rgba &color);
 		void fill2(const Rgba & color);
-		void drawPixel(const uint32_t &screen_x,const uint32_t &screen_y, const uint32_t &h, const Rgba & color);
+		void drawPixel(const int32_t &screen_x,const int32_t &screen_y, const uint32_t &h, const Rgba & color);
+		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
+		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
+		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
+		void drawBegin(Buffer * buf, const CameraView &mainView_);
 
-		void drawLine(Geom::Point2D<int32_t> , Geom::Point2D<int32_t> , const Rgba & color);
-		void drawTriangle(Geom::Triangle2D<int32_t> triangle, const Rgba & color);
-		void drawFilledTriangle(Geom::Triangle2D<int32_t> triangle, const Rgba &color);
-		void drawMash(const char *filename, const Rgba & color);
-		void drawBegin();
 		void drawEnd();
-		Drawer() : current_draw() {}
+		void drawModel(const MeshModel & model, Geom::V3f position, Geom::V3f scale, Geom::V3f rot);
+		Drawer() : current_draw(0) {}
 	};
 
-	/*
-	class Model{
-		std::vector<Geom::Point3D<float>> verts;
-		std::vector<std::vector<int>> triange_pts;
-	public:
-		void load(const std::string &s);
-
-	};
-	*/
 }
 
 #endif /* GRAPHICS_H_ */

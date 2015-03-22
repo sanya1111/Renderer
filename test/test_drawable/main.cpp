@@ -15,11 +15,12 @@ class MyDraw : public Drawable{
 			count++;
 			Rgba color_a(255, 255, 255, 0);
 			Rgba color_b(0, 0, 0, 0);
-			drawer.setBuffer(&buf);
+			drawer.drawBegin(&buf);
 			if(count & 1)
 				drawer.fill(color_a);
 			else
 				drawer.fill(color_b);
+			drawer.drawEnd();
 		}
 };
 

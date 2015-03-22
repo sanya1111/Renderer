@@ -19,7 +19,10 @@ public:
 	Rgba white, black;
 	int count ;
 	Drawer drawer;
-	MyDraw(){
+	MeshModel model;
+	MyDraw() {
+
+		model.loadObj("../test/test_obj_load/obj/african_head.obj");
 		count = 0;
 		white = Rgba(255, 255, 255, 0);
 		black = Rgba(0, 0, 0, 0);
@@ -27,14 +30,15 @@ public:
 	virtual void onDraw(uint32_t frame, uint32_t sec,
 			uint32_t usec, Buffer & buf){
 		count++;
-		if(count > 2)
+		if(count > 1)
 			return;
-		drawer.setBuffer(&buf);
+		CameraView cam(V3f(0, 0, 0), V3f(0, 1, 0), V3f(0, 0, 1),
+						60.0/180 * 3.14, buf.width, buf.height, 1, 100);
+		drawer.drawBegin(&buf, cam);
 		drawer.fill(white);
+		drawer.drawModel(model, V3f(0, 0, 10), V3f(500, 500, 500), V3f(0, 0, 0));
 		using namespace Geom;
-//		drawer.drawMash("../test/test_obj_load/obj/Wraith Raider Starship.obj", black);
-		drawer.drawMash("../test/test_obj_load/obj/african_head.obj", black);
-
+		drawer.drawEnd();
 	}
 };
 
@@ -46,7 +50,7 @@ int main(){
 	Connector connector;
 	Crtc crtc;
 	std::tie(connector, crtc) = dev.getPossiblePair();
-	Context context(2, connector, crtc, unique_ptr<Drawable>(new MyDraw()), dev);
+	Context context(1, connector, crtc, unique_ptr<Drawable>(new MyDraw()), dev);
 	context.startListenning();
 	dev.startLoop();
 //	DEB("%d\n", count);

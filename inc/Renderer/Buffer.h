@@ -69,8 +69,6 @@ class Buffer {
 	uint8_t *map;
 	uint32_t fb;
 	uint32_t pixel_format;
-	uint32_t width;
-	uint32_t height;
 	uint32_t stride;
 	uint32_t size;
 	uint32_t bpp;
@@ -79,6 +77,8 @@ class Buffer {
 	//constructor
 	Buffer(int32_t fd, uint32_t width, uint32_t height, uint32_t format,  MappingInfo mapping_info);
 public:
+	uint32_t width;
+	uint32_t height;
 	class BufferException: public std::runtime_error {
 	public:
 		using std::runtime_error::runtime_error;

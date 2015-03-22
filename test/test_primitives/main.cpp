@@ -13,31 +13,31 @@ class MyDraw : public Drawable{
 	public:
 	Rgba white, black;
 	Drawer drawer;
-	Geom::Triangle2D<int32_t> dr;
+	Geom::Triangle dr;
 	MyDraw() : dr(
-			Geom::Point2D<int32_t>(700, 1024),
-			Geom::Point2D<int32_t>(727 , 1431),
-			Geom::Point2D<int32_t>(727, 432)){
+			Geom::V3i(700, 1024, 0),
+			Geom::V3i(727 , 1431, 0),
+			Geom::V3i(727, 432, 0)){
 		count = 0;
 		white = Rgba(255, 255, 255, 0);
 		black = Rgba(0, 0, 0, 0);
 	}
 	virtual void onDraw(uint32_t frame, uint32_t sec,
 			uint32_t usec, Buffer & buf){
+		using namespace Geom;
 		count++;
 		if(count > 2)
 			return;
-		drawer.setBuffer(&buf);
+		drawer.drawBegin(&buf);
 		drawer.fill(white);
-		using namespace Geom;
 		drawer.drawTriangle(dr, black);
 		if(count == 1){
 			for(int i = 0; i < 3; i++){
-				dr.points[i].y += 300;
+				dr.vs[i].y += 300;
 			}
 		}
 		drawer.drawFilledTriangle(dr, black);
-
+		drawer.drawEnd();
 	}
 };
 
