@@ -31,6 +31,7 @@ namespace Renderer {
 		float aw, ah;
 		float near, far;
 	public:
+		CameraView & operator=(const CameraView & other) = default;
 		CameraView() {}
 		CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, float angle, int32_t width, int32_t height, float near, float far);
 		Geom::V3f translate(Geom::V3f v);
@@ -49,16 +50,18 @@ namespace Renderer {
 		//views
 		CameraView mainView;
 		Geom::V3f toScreen(Geom::V3f pt);
-		Geom::V3f translate(Geom::V3f cen, Geom::V3f pt, Geom::V3f scale, Geom::V3f rot);
+		Geom::V3f translate(Geom::V3f cen, Geom::V3f pt, Geom::V3f scale, Geom::V3f rot, bool &);
+		void translateLineToScreenBounds(Geom::V3i & begin, Geom::V3i & end, bool swapped);
 	public:
 		void fill(const Rgba &color);
 		void fill2(const Rgba & color);
 		void drawPixel(const int32_t &screen_x,const int32_t &screen_y, const uint32_t &h, const Rgba & color);
 		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
-		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
-		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
+		void drawTriangle(Geom::TriangleF triangle, const Rgba & color);
+		void drawFilledTriangle(Geom::TriangleF triangle, const Rgba &color);
 		void drawBegin(Buffer * buf, const CameraView &mainView_);
-
+		void drawTranslateTriangle(Geom::TriangleF triangle, const Rgba &color);
+		void drawTranslateFilledTriangle(Geom::TriangleF triangle, const Rgba &color);
 		void drawEnd();
 		void drawModel(const MeshModel & model, Geom::V3f position, Geom::V3f scale, Geom::V3f rot);
 		Drawer() : current_draw(0) {}

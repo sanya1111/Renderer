@@ -90,14 +90,18 @@ using Matrix44 = Matrix<T, 4, 4>;
 using Matrix44f = Matrix44<float>;
 using Matrix33f = Matrix33<float>;
 
+template<class T>
+class V3;
 namespace MatrixFactory{
 	Matrix33f e3();
 	Matrix33f rotX(float angle);
 	Matrix33f rotY(float angle);
 	Matrix33f rotZ(float angle);
-	Matrix33f scale(float x);
+	Matrix33f scale(const V3<float> &with);
 	Matrix44f projection(float left, float right, float top, float bottom,
 			             float near, float far);
+	Matrix44f translation(const V3<float> &with);
+	Matrix44f withRotation(const V3<float> & r, const V3<float> &up, const V3<float> &f);
 };
 
 
@@ -173,11 +177,12 @@ public:
 	}
 
 	V3& scale(V3 v){
-		norm();
-		vSc(v);
-		return *this;
+		return *this = (rowMatrix() * MatrixFactory::scale(v))[0];
 	}
 
+	operator V3<int> (){
+		return V3<int>(x, y, z);
+	}
 	V3& rotate(V3 v){
 		using namespace MatrixFactory;
 		return *this = (rowMatrix() * rotX(v.x) * rotY(v.y) * rotZ(v.z))[0];

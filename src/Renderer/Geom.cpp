@@ -31,8 +31,12 @@ Renderer::Geom::Matrix33f Renderer::Geom::MatrixFactory::rotZ(float angle) {
 	};
 }
 
-Renderer::Geom::Matrix33f Renderer::Geom::MatrixFactory::scale(float x) {
-	return e3() * x;
+Renderer::Geom::Matrix33f Renderer::Geom::MatrixFactory::scale(const V3<float> &with) {
+	return Matrix33f{
+		with.x, 0, 0,
+		0, with.y, 0,
+		0, 0, with.z
+	};
 }
 
 
@@ -45,4 +49,23 @@ Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::projection(float left, 
 		0, 0, -2.0 * near * far / ( far - near ), 0
 
 	};
+}
+
+Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::translation(const V3<float> &with) {
+	return Matrix44f{
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+			-with.x, -with.y, -with.z, 1.0f
+	};
+}
+
+Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::withRotation(const V3<float> & r, const V3<float> & up, const V3<float> & f) {
+	return Matrix44f {
+			r.x, up.x, f.x, 0.0f,
+			r.y, up.y, f.y, 0.0f,
+			r.z, up.z, f.z, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	};
+
 }

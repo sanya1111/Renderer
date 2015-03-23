@@ -9,6 +9,8 @@ using namespace Renderer;
 using namespace Geom;
 //Helpers
 static const int INF = 1e9;
+static const float eps = 1e-9;
+
 struct LineStepper____{
 	int dx, error2, derror2, y, delta, z;
 	LineStepper____(const V3i &begin, const V3i & end){
@@ -21,13 +23,26 @@ struct LineStepper____{
 	}
 	int next(){
 		error2 += derror2;
-		while (dx && error2 > dx) {
-			y += delta;
-			error2 -= dx * 2;
+		if(error2 > dx){
+			int tim = ((error2  - dx)/ (dx * 2)) + (error2 % (dx * 2 ) > 0);
+			y += delta * tim;
+			error2 -= dx * 2 * tim;
 		}
 		return y;
 	}
 };
+
+static int32_t getLineY(V3i beg, V3i end, int32_t x){
+	if(end.x == beg.x){
+		return end.y;
+	}
+	return (float)beg.y + (float)(x - beg.x) * (float)(end.y - beg.y)/(float)
+			(end.x - beg.x);
+}
+
+static bool inBounds(float w, float b, float e){
+	return w  + eps >= b && w - eps <= e;
+}
 
 Geom::V3f Renderer::Drawer::toScreen(Geom::V3f pt){
 	Matrix44f transf{
@@ -38,15 +53,32 @@ Geom::V3f Renderer::Drawer::toScreen(Geom::V3f pt){
 	return (V4f(pt).rowMatrix() * transf)[0];
 }
 
-V3f Renderer::Drawer::translate(V3f cen, V3f pt, V3f scale, V3f rot){
+
+V3f Renderer::Drawer::translate(V3f cen, V3f pt, V3f scale, V3f rot, bool &success){
 	V3f res = cen + (pt).rotate(rot).scale(scale);
 	res = mainView.translate(res);
+	if(!inBounds(res.x, -1, 1) ||
+	   !inBounds(res.y, -1, 1) ||
+	   !inBounds(res.z, -1, 1)){
+		success = false;
+		return res;
+	}
 	res = toScreen(res);
+
 	return res;
 }
-
 bool Renderer::Drawer::inScreen(int32_t x, int32_t y){
-	return x >= 0 && x < buf->height && y >= 0 && y < buf->width;
+	return inBounds(x, 0, buf->height) &&
+		   inBounds(y, 0, buf->width);
+}
+void Renderer::Drawer::translateLineToScreenBounds(Geom::V3i & begin, Geom::V3i & end, bool swapped){
+	V3i nbegin, nend;
+	nbegin.x = std::max(begin.x, 0);
+	nbegin.y = getLineY(begin, end, nbegin.x);
+	nend.x = std::min(end.x, swapped ? (int)buf->width : (int)buf->height);
+	nend.y = getLineY(begin, end, nend.x);
+	begin = nbegin;
+	end = nend;
 }
 //
 Renderer::Rgba::Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {
@@ -88,6 +120,14 @@ void Renderer::Drawer::drawLine(V3i begin, V3i end, const Rgba & color) {
 	if (begin.x > end.x) {
 		std::swap(begin, end);
 	}
+//	V3i nbegin, nend;
+//	nbegin.x = std::max(begin.x, 0);
+//	nbegin.y = getLineY(begin, end, nbegin.x);
+//	nend.x = std::min(end.x, swapped ? (int)buf->width : (int)buf->height);
+//	nend.y = getLineY(begin, end, nend.x);
+//	begin = nbegin;
+//	end = nend;
+	translateLineToScreenBounds(begin, end, swapped);
 	LineStepper____ step(begin, end);
 	for (int x=begin.x; x<=end.x; x++) {
 		if (swapped) {
@@ -99,17 +139,17 @@ void Renderer::Drawer::drawLine(V3i begin, V3i end, const Rgba & color) {
 	}
 }
 
-void Renderer::Drawer::drawTriangle(Triangle triangle,
+void Renderer::Drawer::drawTriangle(TriangleF triangle,
 		const Rgba& color) {
 	for(int8_t i = 0; i < 3; i++){
 			drawLine(triangle.vs[i], triangle.vs[(i + 1) % 3], color);
 	}
 }
 
-void Renderer::Drawer::drawFilledTriangle(Triangle triangle,
+void Renderer::Drawer::drawFilledTriangle(TriangleF triangle,
 		const Rgba& color) {
 	drawTriangle(triangle, color);
-	int mi_x = INF, ma_x=-INF, mi_y = INF, ma_y = -INF;
+	float mi_x = INF, ma_x=-INF, mi_y = INF, ma_y = -INF;
 	for(size_t i = 0; i < 3; i++) {
 		mi_x = std::min(mi_x, triangle.vs[i].x);
 		ma_x = std::max(ma_x, triangle.vs[i].x);
@@ -126,7 +166,9 @@ void Renderer::Drawer::drawFilledTriangle(Triangle triangle,
 	std::sort(triangle.vs, triangle.vs + 3);
 	LineStepper____ f(triangle.vs[0], triangle.vs[1]);
 	LineStepper____ s(triangle.vs[0], triangle.vs[2]);
-	for(int x = triangle.vs[0].x; x <= triangle.vs[2].x ; x++){
+	V3i temp[3] = {triangle.vs[0], triangle.vs[1], triangle.vs[2]};
+	translateLineToScreenBounds(temp[0], temp[2], swapped);
+	for(int x = temp[0].x; x <= temp[2].x ; x++){
 		if(!swapped)
 			drawLine(V3i(x, f.y, f.z), V3i(x, s.y, s.z), color);
 		else
@@ -213,37 +255,50 @@ Renderer::CameraView::CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, floa
 	ah = atan(tan(aw) * height / width);
 }
 
+void Renderer::Drawer::drawTranslateTriangle(Geom::TriangleF triangle,
+		const Rgba& color) {
+	bool suc = true;
+	for(int8_t i = 0; i < 3; i++){
+		triangle.vs[i] = translate(V3f(0, 0, 0), triangle.vs[i],
+				V3f(1, 1, 1), V3f(0, 0, 0), suc);
+	}
+	drawTriangle(triangle, color);
+}
 
+void Renderer::Drawer::drawTranslateFilledTriangle(Geom::TriangleF triangle,
+		const Rgba& color) {
+	bool suc = true;
+	for(int8_t i = 0; i < 3; i++){
+		triangle.vs[i] = translate(V3f(0, 0, 0), triangle.vs[i],
+				V3f(1, 1, 1), V3f(0, 0, 0), suc);
+	}
+	drawFilledTriangle(triangle, color);
+}
 
 void Renderer::Drawer::drawModel(const MeshModel& model, Geom::V3f position,
 		Geom::V3f scale, Geom::V3f rot) {
 	for (size_t i=0; i < model.faces.size(); i++) {
 		std::vector<int> face = model.faces[i];
-		V3i mas[3];
+		V3f mas[3];
+		bool suc = true;
 		for (int j=0; j<3; j++) {
-			V3f res = translate(position, model.verts[face[j]], scale, rot);
-			mas[j] = V3i(res.x, res.y, res.z * 10000);
+			V3f res = translate(position, model.verts[face[j]], scale, rot, suc);
+			mas[j] = V3f(res.x, res.y, res.z * 10000);
  		}
-		Rgba color(0, 0, 0, 0);
-		drawTriangle(Triangle(mas), color);
+		Rgba color(rand(), rand(), rand(), 0);
+		if(suc) {
+			drawTriangle(TriangleF(mas), color);
+		}
 	}
 }
 
 
 Geom::V3f Renderer::CameraView::translate(Geom::V3f v) {
-	v = v - cen;
-	v.x = v.scMul(r);
-	v.y = v.scMul(up);
-	v.z = v.scMul(f);
-	V4f v4(v, 1);
 	float projection_plane_z = 1.0;
 	float right = std::tan(aw) * projection_plane_z;
 	float left = -right;
 	float top = std::tan(ah) * projection_plane_z;
 	float bottom = -top;
-	v4 = (v4.rowMatrix() * MatrixFactory::projection(left, right, top, bottom, near, far))[0];
-	V3f t = v4.norm();
-	if(t.y != 1.027659)
-	DEB("%f %f %f\n", t.x, t.y, t.z);
-	return t;
+	Matrix44f summary { MatrixFactory::translation(cen) * MatrixFactory::withRotation(r, up, f)* MatrixFactory::projection(left, right, top, bottom, near, far)};
+	return V4f((V4f(v, 1).rowMatrix() * summary)[0]).norm();
 }
