@@ -39,9 +39,8 @@ public:
 		}
 	}
 	void print(){
-#define FOR(i, n) for(int i = 0; i < (n); i++)
-		FOR(i, N){
-			FOR(j, M){
+		for(int i = 0; i < N;i++){
+			for(int j = 0; j < M; j++){
 				DEB("%lf ", ma[i][j]);
 			}
 			DEB("\n");
@@ -273,6 +272,7 @@ template<class T >
 class Triangle_{
 public:
 	V3<T> vs[3];
+	Triangle_() {}
 	Triangle_(V3<T> from[]){
 		for(int8_t i = 0; i < 3; i++){
 			vs[i] = from[i];
@@ -282,6 +282,13 @@ public:
 		vs[0] = A;
 		vs[1] = B;
 		vs[2] = C;
+	}
+	operator Triangle_<int>(){
+		Triangle_<int> outp;
+		for(int8_t i = 0; i < 3; i++){
+			outp.vs[i] = vs[i];
+		}
+		return outp;
 	}
 };
 

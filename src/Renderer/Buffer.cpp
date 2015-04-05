@@ -17,6 +17,7 @@ bool Renderer::Buffer::dumbMapping(int32_t fd) {
 		DEB("cannot create dumb buffer\n");
 		return false;
 	}
+
 	stride = cr_dumb.pitch;
 	size = cr_dumb.size;
 	handle = cr_dumb.handle;

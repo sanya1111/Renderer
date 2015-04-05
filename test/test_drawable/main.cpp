@@ -4,35 +4,49 @@
 #include "Renderer/Context.h"
 #include "Renderer/Graphics.h"
 
-//using namespace Renderer;
-//using namespace std;
-//class MyDraw : public Drawable{
-//	public:
-//	int count  = 0;
-//	Drawer drawer;
-//		virtual void onDraw(uint32_t frame, uint32_t sec,
-//				uint32_t usec, Buffer & buf){
-//			count++;
-//			Rgba color_a(255, 255, 255, 0);
-//			Rgba color_b(0, 0, 0, 0);
-//			drawer.drawBegin(&buf);
-//			if(count & 1)
-//				drawer.fill(color_a);
-//			else
-//				drawer.fill(color_b);
-//			drawer.drawEnd();
-//		}
-//};
+using namespace Renderer;
+using namespace std;
+using namespace Renderer::Geom;
+#include <sstream>
+#include <iostream>
+#include <istream>
+#include <fstream>
+#include <memory>
+
+
+int counter = 0;
+class MyDraw : public Drawable{
+public:
+	Rgba white, black;
+	Drawer drawer;
+	float count = 0;
+	MyDraw() {
+		white = Rgba(255, 255, 255, 0);
+		black = Rgba(0, 0, 0, 0);
+		count = 0;
+	}
+	virtual void onDraw(uint32_t frame, uint32_t sec,
+			uint32_t usec, Buffer & buf){
+		counter++;
+		count += 0.025;
+		CameraView cam(V3f(0, 0, count * 20), V3f(0, 1, 0), V3f(0, 0, 1),
+						(60.0)/180.0 * 3.14, buf.width, buf.height, 1, 100);
+		drawer.drawBegin(&buf, cam);
+		drawer.fill2(white);
+		drawer.drawEnd();
+	}
+};
+
+
 
 int main(){
-	/*
 	Device dev("/dev/dri/card0");
-	pair<Connector, Crtc> pa = dev.getPossiblePair();
-	MyDraw draw;
-	Context context(2, pa.first, pa.second,draw, dev);
+	Connector connector;
+	Crtc crtc;
+	std::tie(connector, crtc) = dev.getPossiblePair();
+	Context context(2, connector, crtc, unique_ptr<Drawable>(new MyDraw()), dev);
 	context.startListenning();
 	dev.startLoop();
-	DEB("%d\n", draw.count);
+	DEB("%d\n", counter);
 	return 0;
-*/
 }

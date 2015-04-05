@@ -1,6 +1,6 @@
 #VARS
 CC=g++-4.9
-CC_FLAGS=--std=c++0x -Wall -Wextra -Wno-reorder -O3
+CC_FLAGS=--std=c++0x -Wall -Wextra -Wno-reorder -O3 -D__cplusplus=201103L
 LIB_DIR=lib
 SRC_DIR=src
 TEST_DIR=test

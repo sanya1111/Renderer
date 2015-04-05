@@ -16,3 +16,4 @@ drmModeCrtcPtr Renderer::Crtc::getDrmInstance() {
 size_t Renderer::Crtc::getUsed() {
 	return crtc.use_count();
 }
+
