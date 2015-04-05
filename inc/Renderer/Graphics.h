@@ -56,7 +56,7 @@ namespace Renderer {
 		void fill(const Rgba &color);
 		void fill2(const Rgba & color);
 		void drawPixel(const int32_t &screen_x,const int32_t &screen_y, const uint32_t &h, const Rgba & color);
-		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color, bool swapped = false);
+		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
 		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
 		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
 		void drawBegin(Buffer * buf, const CameraView &mainView_);

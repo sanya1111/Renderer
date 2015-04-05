@@ -54,7 +54,6 @@ struct LineStepper____{
 	}
 
 	int next(){
-		assert(x >= 0 && x <= 2000);
 		x++;
 		error2 += derror2;
 		if(error2 > dx){
@@ -75,7 +74,7 @@ static int32_t getLineY(V3i beg, V3i end, int32_t x){
 }
 
 static bool inBounds(float w, float b, float e){
-	return w  - eps >= b && w + eps <= e;
+	return w >= b  && w <= e;
 }
 
 static bool inBounds(int w, int b, int e){
@@ -161,11 +160,11 @@ void Renderer::Drawer::drawLine(V3i begin, V3i end, const Rgba & color) {
 	}
 	translateLineToScreenBounds(begin, end, swapped);
 	LineStepper____ step(begin, end);
-	for (int x=begin.x; x<=end.x; x++) {
+	while(!step.finish()){
 		if (swapped) {
-			drawPixel(step.y, x, step.z, color);
+			drawPixel(step.y, step.x, step.z, color);
 		} else {
-			drawPixel(x, step.y, step.z, color);
+			drawPixel(step.x, step.y, step.z, color);
 		}
 		step.next();
 	}
@@ -302,11 +301,14 @@ void Renderer::Drawer::drawTranslateTriangle(Geom::TriangleF triangle,
 void Renderer::Drawer::drawTranslateFilledTriangle(Geom::TriangleF triangle,
 		const Rgba& color) {
 	bool suc = true;
+	int cnt = 0;
 	for(int8_t i = 0; i < 3; i++){
 		triangle.vs[i] = translate(V3f(0, 0, 0), triangle.vs[i],
 				V3f(1, 1, 1), V3f(0, 0, 0), suc);
+		cnt += suc;
 	}
-	drawFilledTriangle(triangle, color);
+	if(cnt < 3)
+		drawFilledTriangle(triangle, color);
 }
 
 void Renderer::Drawer::drawModel(const MeshModel& model, Geom::V3f position,

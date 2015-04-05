@@ -29,12 +29,12 @@ public:
 			uint32_t usec, Buffer & buf){
 		counter++;
 		count += 0.025;
+
 		CameraView cam(V3f(0, 0, count * 20), V3f(0, 1, 0), V3f(0, 0, 1),
 						(60.0)/180.0 * 3.14, buf.width, buf.height, 1, 100);
 		drawer.drawBegin(&buf, cam);
 		drawer.fill2(white);
 		drawer.drawTranslateFilledTriangle(TriangleF(V3f(30, 30, 50 ),
-//		drawer.drawTranslateTriangle(TriangleF(V3f(30, 30, 50 ),
 				   V3f(50, -30, 50),
 				   V3f(-30, 0, 50)), black);
 		using namespace Geom;
