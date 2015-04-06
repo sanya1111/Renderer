@@ -7,7 +7,6 @@
 #include <vector>
 namespace Renderer {
 
-//functions
 	class Rgba{
 	public:
 		uint8_t a, r, g, b;
@@ -38,8 +37,6 @@ namespace Renderer {
 	};
 
 	class Drawer{
-	protected:
-		//screen : buf, zbuf
 		Buffer * buf;
 		std::vector<int32_t> zbuffer,
 							 check;
@@ -47,16 +44,18 @@ namespace Renderer {
 		bool zbufferAt(const int32_t &x, const int32_t &y, const int32_t &h);
 		void at(uint8_t * ptr,const Rgba & color);
 		bool inScreen(int32_t x, int32_t y);
+		void toScreenBounds(Geom::V3i & pt);
 		//views
 		CameraView mainView;
-		Geom::V3f toScreen(Geom::V3f pt);
-		Geom::V3f translate(Geom::V3f cen, Geom::V3f pt, Geom::V3f scale, Geom::V3f rot, bool &);
+		Geom::V3f toScreenTranslation(Geom::V3f pt);
+		Geom::V3f translationPipeline(Geom::V3f cen, Geom::V3f pt, Geom::V3f scale, Geom::V3f rot, bool &);
 	public:
-		void translateLineToScreenBounds(Geom::V3i & begin, Geom::V3i & end, bool swapped);
+		void LineToScreenBounds(Geom::V3i & begin, Geom::V3i & end);
 		void fill(const Rgba &color);
 		void fill2(const Rgba & color);
 		void drawPixel(const int32_t &screen_x,const int32_t &screen_y, const uint32_t &h, const Rgba & color);
 		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
+		void drawGLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
 		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
 		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
 		void drawBegin(Buffer * buf, const CameraView &mainView_);

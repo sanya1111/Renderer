@@ -109,7 +109,7 @@ template<class T >
 class V3 {
 public:
 	T x, y, z;
-	V3() = default;
+	V3() : x(0), y(0), z(0) {}
 	V3(T x, T y, T z) : x(x), y(y), z(z) {}
 	V3(const std::vector<T> &val ){
 		x = val[0];
@@ -122,6 +122,7 @@ public:
 		z = val[2];
 		return *this;
 	}
+
 	T & operator[](size_t id){
 		switch(id){
 		case 0 :
@@ -132,6 +133,7 @@ public:
 			return z;
 		}
 	}
+
 	V3 operator+(const V3 &with) {
 		return V3(x + with.x, y + with.y, z + with.z);
 	}
@@ -187,7 +189,8 @@ public:
 		return *this = (rowMatrix() * rotX(v.x) * rotY(v.y) * rotZ(v.z))[0];
 	}
 	void print(){
-		DEB("%f %f %f\n", x, y, z);
+//		DEB("%f %f %f\n", x, y, z);
+		DEB("%d %d %d\n", x, y, z);
 	}
 	T getLen(){
 		return sqrt(x * x + y * y + z * z);

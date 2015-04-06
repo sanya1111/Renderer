@@ -23,65 +23,70 @@ static inline void * mem(void *s, int32_t c, size_t count){
 	 return s;
 }
 
-
-
-struct LineStepper____{
-	int dx, error2, derror2, y, delta, z, x, sx;
-	LineStepper____(const V3i &begin, const V3i & end){
-		z = 0;
-		dx = end.x - begin.x;
-		x = sx = begin.x;
-		derror2 = std::abs(end.y - begin.y) * 2;
-		error2 = 0;
-		y = begin.y;
-		delta = (end.y > begin.y ? 1 : -1);
-	}
-	template<class T>
-	LineStepper____(const V3i &begin, const V3i & end, bool swapped ,T & func){
-		V3i tbegin = begin;
-		V3i tend = end;
-		func.translateLineToScreenBounds(tbegin, tend, swapped);
-		z = 0;
-		dx = tend.x - tbegin.x;
-		x = sx = tbegin.x;
-		derror2 = std::abs(tend.y - tbegin.y) * 2;
-		error2 = 0;
-		y = tbegin.y;
-		delta = (tend.y > tbegin.y ? 1 : -1);
-	}
-	bool finish(){
-		return x >= sx + dx;
-	}
-
-	int next(){
-		x++;
-		error2 += derror2;
-		if(error2 > dx){
-			int tim = ((error2  - dx)/ (dx * 2)) + (error2 % (dx * 2 ) > 0);
-			y += delta * tim;
-			error2 -= dx * 2 * tim;
-		}
-		return y;
-	}
-};
-
-static int32_t getLineY(V3i beg, V3i end, int32_t x){
-	if(end.x == beg.x){
-		return end.y;
-	}
-	return (float)beg.y + (float)(x - beg.x) * (float)(end.y - beg.y)/(float)
-			(end.x - beg.x);
-}
-
-static bool inBounds(float w, float b, float e){
+static inline bool inBounds(float w, float b, float e){
 	return w >= b  && w <= e;
 }
 
-static bool inBounds(int w, int b, int e){
+static inline bool inBounds(int w, int b, int e){
 	return w  >= b && w <= e;
 }
 
-Geom::V3f Renderer::Drawer::toScreen(Geom::V3f pt){
+static inline float segmSolver(float x_s, float x_e, float at){
+	if(x_s == x_e)
+		return INF;
+	return ( (at - x_s) / (x_e - x_s));
+}
+
+static inline float segmPointer(float x_s, float x_e, float al){
+	return x_s + al * (x_e - x_s);
+}
+
+struct LineStepper{
+	V3i begin, end, current, error2, derror2, delta;
+	int dx;
+	bool swapped;
+
+	LineStepper(const V3i &begin_, const V3i & end_) : begin(begin_), end(end_), current(begin){
+		swapped = false;
+		if (std::abs(begin.x - end.x) < std::abs(begin.y - end.y)) {
+			std::swap(begin.x, begin.y);
+			std::swap(end.x, end.y);
+			swapped = true;
+		}
+		if (begin.x > end.x) {
+			std::swap(begin, end);
+		}
+
+		for(int i = 1; i < 3; i++){
+				delta[i] = sign(end[i] - begin[i]);
+				derror2[i - 1] = std::abs(end[i] - begin[i]) * 2;
+		}
+		dx = end.x - begin.x;
+	}
+	bool finish(){
+		return current.x >= end.x;
+	}
+
+	void next(){
+		current.x++;
+		error2 = error2 + derror2;
+		for(int i = 0; i < 3; i++){
+			if(error2[i] > dx){
+				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2 ) > 0);
+				current[i] += delta[i] * tim;
+				error2[i] -= dx * 2 * tim;
+			}
+		}
+	}
+	V3i getP(){
+		V3i ret = current;
+		if(swapped)
+			swap(ret.x, ret.y);
+		return ret;
+	}
+};
+
+Geom::V3f Renderer::Drawer::toScreenTranslation(Geom::V3f pt){
 	Matrix44f transf{
 		buf->height / 2.0f, 0, 0, 0,
 		0, buf->width / 2.0f, 0, 0,
@@ -90,8 +95,14 @@ Geom::V3f Renderer::Drawer::toScreen(Geom::V3f pt){
 	return (V4f(pt).rowMatrix() * transf)[0];
 }
 
+void Renderer::Drawer::toScreenBounds(Geom::V3i & begin){
+	begin.x = std::max(begin.x, 0);
+	begin.x = std::min(begin.x, (int)buf->height - 1);
+	begin.y = std::max(begin.y, 0);
+	begin.y = std::min(begin.y, (int)buf->width - 1);
+}
 
-V3f Renderer::Drawer::translate(V3f cen, V3f pt, V3f scale, V3f rot, bool &success){
+V3f Renderer::Drawer::translationPipeline(V3f cen, V3f pt, V3f scale, V3f rot, bool &success){
 	V3f res = cen + (pt).rotate(rot).scale(scale);
 	res = mainView.translate(res);
 	if(!inBounds(res.x, -1.0, 1.0) ||
@@ -99,7 +110,7 @@ V3f Renderer::Drawer::translate(V3f cen, V3f pt, V3f scale, V3f rot, bool &succe
 	   !inBounds(res.z, -1.0, 1.0)){
 		success = false;
 	}
-	res = toScreen(res);
+	res = toScreenTranslation(res);
 
 	return res;
 }
@@ -109,14 +120,42 @@ bool Renderer::Drawer::inScreen(int32_t x, int32_t y){
 		   inBounds(y, 0, buf->width - 1 );
 }
 
-void Renderer::Drawer::translateLineToScreenBounds(Geom::V3i & begin, Geom::V3i & end, bool swapped){
-	V3i nbegin, nend;
-	nbegin.x = std::max(begin.x, 0);
-	nbegin.y = getLineY(begin, end, nbegin.x);
-	nend.x = std::min(end.x, swapped ? (int)buf->width : (int)buf->height);
-	nend.y = getLineY(begin, end, nend.x);
+void Renderer::Drawer::LineToScreenBounds(Geom::V3i & begin, Geom::V3i & end){
+	V3i bounds_mi = { 0, 0, 0 };
+	V3i bounds_ma = { buf->height, buf->width, INF};
+	V3i swapped = {0, 0, 0};
+	for(int i = 0; i < 3; i++){
+		if(begin[i] > end[i]){
+			swapped[i] = 1;
+			swap(begin[i], end[i]);
+		}
+	}
+	float al_mi = -INF,
+		  al_ma = INF;
+	for(int i = 0; i < 3; i++){
+		if(end[i] != begin[i]){
+			float al_mi_with = segmSolver(begin[i], end[i], bounds_mi[i]);
+			float al_ma_with = segmSolver(begin[i], end[i], bounds_ma[i]);
+			al_mi = max(al_mi, al_mi_with);
+			al_ma = min(al_ma, al_ma_with);
+		}
+	}
+
+	V3i nbegin = begin, nend = end;
+	for(int i = 0; i < 3; i++){
+		nbegin[i] = max(nbegin[i], (int)segmPointer(begin[i], end[i], al_mi));
+		nend[i] = min(nend[i], (int) segmPointer(begin[i], end[i], al_ma));
+	}
+
+	for(int i = 0; i < 3; i++){
+		if(swapped[i]){
+			swap(begin[i], end[i]);
+		}
+	}
 	begin = nbegin;
 	end = nend;
+
+
 }
 
 Renderer::Rgba::Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {
@@ -146,27 +185,36 @@ void Renderer::Drawer::fill(const Rgba& color) {
 	}
 }
 
+void Renderer::Drawer::drawGLine(Geom::V3i begin, Geom::V3i end,
+		const Rgba& color) {
+	if(!inScreen(begin.x, 0))
+		return;
+	if(begin.y == end.y)
+		return;
+//	toScreenBounds(begin, false);
+//	toScreenBounds(end, false);
+	int dy = sign(end.y - begin.y);
+	for(int i = begin.y; i != end.y; i += dy){
+		drawPixel(i, begin.y, begin.z, color);
+	}
+}
 
 
 void Renderer::Drawer::drawLine(V3i begin, V3i end, const Rgba & color) {
-	bool swapped = false;
-	if (std::abs(begin.x - end.x) < std::abs(begin.y - end.y)) {
-		std::swap(begin.x, begin.y);
-		std::swap(end.x, end.y);
-		swapped = true;
-	}
-	if (begin.x > end.x) {
-		std::swap(begin, end);
-	}
-	translateLineToScreenBounds(begin, end, swapped);
-	LineStepper____ step(begin, end);
+//	DEB("before : ");
+//	begin.print();
+//	end.print();
+	LineToScreenBounds(begin, end);
+//	DEB("after : ");
+//	begin.print();
+//	end.print();
+
+	LineStepper step(begin, end);
+	V3i pt;
 	while(!step.finish()){
-		if (swapped) {
-			drawPixel(step.y, step.x, step.z, color);
-		} else {
-			drawPixel(step.x, step.y, step.z, color);
-		}
 		step.next();
+		pt = step.getP();
+		drawPixel(pt.x, pt.y, pt.z, color);
 	}
 }
 
@@ -179,35 +227,37 @@ void Renderer::Drawer::drawTriangle(Triangle triangle,
 
 void Renderer::Drawer::drawFilledTriangle(Triangle triangle,
 		const Rgba& color) {
-	drawTriangle(triangle, color);
-	int mi_x = INF, ma_x=-INF, mi_y = INF, ma_y = -INF;
-	for(size_t i = 0; i < 3; i++) {
-		mi_x = std::min(mi_x, triangle.vs[i].x);
-		ma_x = std::max(ma_x, triangle.vs[i].x);
-		mi_y = std::min(mi_y, triangle.vs[i].y);
-		ma_y = std::max(ma_y, triangle.vs[i].y);
-	}
-	bool swapped = false;
-	if(ma_y - mi_y > ma_x - mi_x){
-		swapped = true;
-		for(size_t i = 0; i < 3; i++) {
-			std::swap(triangle.vs[i].x, triangle.vs[i].y);
-		}
-	}
-	std::sort(triangle.vs, triangle.vs + 3);
-	LineStepper____ f(triangle.vs[0], triangle.vs[1], swapped, * this);
-	LineStepper____ s(triangle.vs[0], triangle.vs[2], swapped, *this);
-	while(!s.finish()){
-		if(!swapped)
-			drawLine(V3i(s.x, f.y, f.z), V3i(s.x, s.y, s.z), color);
-		else
-			drawLine(V3i(f.y, s.x, f.z), V3i(s.y, s.x, s.z), color);
-		if(s.x == triangle.vs[1].x){
-			f = LineStepper____(triangle.vs[1], triangle.vs[2], swapped, * this);
-		}
-		f.next();
-		s.next();
-	}
+//	drawTriangle(triangle, color);
+//	int mi_x = INF, ma_x=-INF, mi_y = INF, ma_y = -INF;
+//	for(size_t i = 0; i < 3; i++) {
+//		mi_x = std::min(mi_x, triangle.vs[i].x);
+//		ma_x = std::max(ma_x, triangle.vs[i].x);
+//		mi_y = std::min(mi_y, triangle.vs[i].y);
+//		ma_y = std::max(ma_y, triangle.vs[i].y);
+//	}
+//	bool swapped = false;
+//	/*
+//	if(ma_y - mi_y > ma_x - mi_x){
+//		swapped = true;
+//		for(size_t i = 0; i < 3; i++) {
+//			std::swap(triangle.vs[i].x, triangle.vs[i].y);
+//		}
+//	}
+//	*/
+//	std::sort(triangle.vs, triangle.vs + 3);
+//	LineStepper f(triangle.vs[0], triangle.vs[1], swapped, * this);
+//	LineStepper s(triangle.vs[0], triangle.vs[2], swapped, *this);
+//	while(!s.finish()){
+//		if(!swapped)
+//			drawLine(V3i(s.x, f.y, f.z), V3i(s.x, s.y, s.z), color);
+//		else
+//			drawLine(V3i(f.y, s.x, f.z), V3i(s.y, s.x, s.z), color);
+//		if(s.x == triangle.vs[1].x){
+//			f = LineStepper(triangle.vs[1], triangle.vs[2], swapped, * this);
+//		}
+//		f.next();
+//		s.next();
+//	}
 }
 
 
@@ -292,7 +342,7 @@ void Renderer::Drawer::drawTranslateTriangle(Geom::TriangleF triangle,
 		const Rgba& color) {
 	bool suc = true;
 	for(int8_t i = 0; i < 3; i++){
-		triangle.vs[i] = translate(V3f(0, 0, 0), triangle.vs[i],
+		triangle.vs[i] = translationPipeline(V3f(0, 0, 0), triangle.vs[i],
 				V3f(1, 1, 1), V3f(0, 0, 0), suc);
 	}
 	drawTriangle(triangle, color);
@@ -301,14 +351,11 @@ void Renderer::Drawer::drawTranslateTriangle(Geom::TriangleF triangle,
 void Renderer::Drawer::drawTranslateFilledTriangle(Geom::TriangleF triangle,
 		const Rgba& color) {
 	bool suc = true;
-	int cnt = 0;
 	for(int8_t i = 0; i < 3; i++){
-		triangle.vs[i] = translate(V3f(0, 0, 0), triangle.vs[i],
+		triangle.vs[i] = translationPipeline(V3f(0, 0, 0), triangle.vs[i],
 				V3f(1, 1, 1), V3f(0, 0, 0), suc);
-		cnt += suc;
 	}
-	if(cnt < 3)
-		drawFilledTriangle(triangle, color);
+	drawFilledTriangle(triangle, color);
 }
 
 void Renderer::Drawer::drawModel(const MeshModel& model, Geom::V3f position,
@@ -318,7 +365,7 @@ void Renderer::Drawer::drawModel(const MeshModel& model, Geom::V3f position,
 		V3i mas[3];
 		bool suc = true;
 		for (int j=0; j<3; j++) {
-			V3f res = translate(position, model.verts[face[j]], scale, rot, suc);
+			V3f res = translationPipeline(position, model.verts[face[j]], scale, rot, suc);
 			mas[j] = V3i(res.x, res.y, res.z * 10000);
  		}
 		Rgba color(0, 0, 0, 0);
