@@ -46,7 +46,7 @@ struct LineStepper{
 	int dx;
 	bool swapped;
 
-	LineStepper(const V3i &begin_, const V3i & end_) : begin(begin_), end(end_), current(begin){
+	LineStepper(const V3i &begin_, const V3i & end_) : begin(begin_), end(end_){
 		swapped = false;
 		if (std::abs(begin.x - end.x) < std::abs(begin.y - end.y)) {
 			std::swap(begin.x, begin.y);
@@ -59,8 +59,9 @@ struct LineStepper{
 
 		for(int i = 1; i < 3; i++){
 				delta[i] = sign(end[i] - begin[i]);
-				derror2[i - 1] = std::abs(end[i] - begin[i]) * 2;
+				derror2[i] = std::abs(end[i] - begin[i]) * 2;
 		}
+		current = begin;
 		dx = end.x - begin.x;
 	}
 	bool finish(){
@@ -70,7 +71,7 @@ struct LineStepper{
 	void next(){
 		current.x++;
 		error2 = error2 + derror2;
-		for(int i = 0; i < 3; i++){
+		for(int i = 1; i < 3; i++){
 			if(error2[i] > dx){
 				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2 ) > 0);
 				current[i] += delta[i] * tim;
@@ -146,14 +147,14 @@ void Renderer::Drawer::LineToScreenBounds(Geom::V3i & begin, Geom::V3i & end){
 		nbegin[i] = max(nbegin[i], (int)segmPointer(begin[i], end[i], al_mi));
 		nend[i] = min(nend[i], (int) segmPointer(begin[i], end[i], al_ma));
 	}
+	begin = nbegin;
+	end = nend;
 
 	for(int i = 0; i < 3; i++){
 		if(swapped[i]){
 			swap(begin[i], end[i]);
 		}
 	}
-	begin = nbegin;
-	end = nend;
 
 
 }

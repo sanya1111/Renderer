@@ -34,7 +34,8 @@ public:
 						(60.0)/180.0 * 3.14, buf.width, buf.height, 1, 100);
 		drawer.drawBegin(&buf, cam);
 		drawer.fill2(white);
-		drawer.drawTranslateFilledTriangle(TriangleF(V3f(30, 30, 50 ),
+		drawer.drawLine(V3i(100, 400, 100), V3i(100, 500, 100), black);
+		drawer.drawTranslateTriangle(TriangleF(V3f(30, 30, 50 ),
 				   V3f(50, -30, 50),
 				   V3f(-30, 0, 50)), black);
 		using namespace Geom;

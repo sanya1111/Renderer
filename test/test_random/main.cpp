@@ -27,10 +27,7 @@ public:
 	}
 	virtual void onDraw(uint32_t frame, uint32_t sec,
 			uint32_t usec, Buffer & buf){
-		if(!counter){
-			DEB("%d %d\n", buf.width, buf.height);
-		}
-		counter++;
+
 		count += 0.025;
 
 		CameraView cam(V3f(0, 0, count * 20), V3f(0, 1, 0), V3f(0, 0, 1),
@@ -40,8 +37,11 @@ public:
 //		for(int i = 0; i < 100; i++){
 //			drawer.drawPixel(100, 400 + i, 0, black);
 //		}
-		drawer.drawLine(V3i(100, 400, 100), V3i(100, 500, 100), black);
+//		if(!counter)
+			drawer.drawLine(V3i(400, 100, 100), V3i(200, 200, 100), black);
+//		drawer.drawTriangle(Triangle(V3i(100, 100, 100), V3i(400, 100, 100), V3i(200, 200, 100)), black);
 		drawer.drawEnd();
+		counter++;
 	}
 };
 
