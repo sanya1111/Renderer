@@ -123,40 +123,46 @@ bool Renderer::Drawer::inScreen(int32_t x, int32_t y){
 
 void Renderer::Drawer::LineToScreenBounds(Geom::V3i & begin, Geom::V3i & end){
 	V3i bounds_mi = { 0, 0, 0 };
-	V3i bounds_ma = { buf->height, buf->width, INF};
+	V3i bounds_ma = { buf->height - 1, buf->width - 1, INF};
 	V3i swapped = {0, 0, 0};
+	V3i nbegin = begin, nend = end;
 	for(int i = 0; i < 3; i++){
-		if(begin[i] > end[i]){
+		if(nbegin[i] > nend[i]){
 			swapped[i] = 1;
-			swap(begin[i], end[i]);
+			swap(nbegin[i], nend[i]);
 		}
 	}
 	float al_mi = -INF,
 		  al_ma = INF;
 	for(int i = 0; i < 3; i++){
 		if(end[i] != begin[i]){
+			if(nbegin[i] < bounds_mi[i]){
 			float al_mi_with = segmSolver(begin[i], end[i], bounds_mi[i]);
-			float al_ma_with = segmSolver(begin[i], end[i], bounds_ma[i]);
 			al_mi = max(al_mi, al_mi_with);
+			}
+			if(nend[i] > bounds_ma[i]){
+			float al_ma_with = segmSolver(begin[i], end[i], bounds_ma[i]);
 			al_ma = min(al_ma, al_ma_with);
+			}
 		}
 	}
 
-	V3i nbegin = begin, nend = end;
+
 	for(int i = 0; i < 3; i++){
-		nbegin[i] = max(nbegin[i], (int)segmPointer(begin[i], end[i], al_mi));
-		nend[i] = min(nend[i], (int) segmPointer(begin[i], end[i], al_ma));
+		if(al_mi != -INF)
+			nbegin[i] = (int)segmPointer(begin[i], end[i], al_mi);
+		if(al_ma != INF)
+			nend[i] =  (int) segmPointer(begin[i], end[i], al_ma);
 	}
-	begin = nbegin;
-	end = nend;
 
 	for(int i = 0; i < 3; i++){
 		if(swapped[i]){
-			swap(begin[i], end[i]);
+			swap(nbegin[i], nend[i]);
 		}
 	}
 
-
+	begin = nbegin;
+	end = nend;
 }
 
 Renderer::Rgba::Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a) : r(r), g(g), b(b), a(a) {
@@ -172,7 +178,7 @@ inline void Renderer::Drawer::at(uint8_t* ptr, const Rgba& color) {
 
 
 void Renderer::Drawer::drawPixel(const int32_t& screen_x,const int32_t& screen_y, const uint32_t &h, const Rgba & color) {
-	if(inScreen(screen_x, screen_y) && zbufferAt(screen_x, screen_y, h)){
+	if(zbufferAt(screen_x, screen_y, h)){
 		uint8_t * ptr = buf->map + screen_x * buf->stride + screen_y * buf->bpp / 8;
 		at(ptr, color);
 	}
@@ -202,13 +208,13 @@ void Renderer::Drawer::drawGLine(Geom::V3i begin, Geom::V3i end,
 
 
 void Renderer::Drawer::drawLine(V3i begin, V3i end, const Rgba & color) {
-//	DEB("before : ");
-//	begin.print();
-//	end.print();
+	DEB("before : ");
+	begin.print();
+	end.print();
 	LineToScreenBounds(begin, end);
-//	DEB("after : ");
-//	begin.print();
-//	end.print();
+	DEB("after : ");
+	begin.print();
+	end.print();
 
 	LineStepper step(begin, end);
 	V3i pt;

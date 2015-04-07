@@ -38,8 +38,9 @@ public:
 //			drawer.drawPixel(100, 400 + i, 0, black);
 //		}
 //		if(!counter)
-			drawer.drawLine(V3i(400, 100, 100), V3i(200, 200, 100), black);
-//		drawer.drawTriangle(Triangle(V3i(100, 100, 100), V3i(400, 100, 100), V3i(200, 200, 100)), black);
+//			drawer.drawLine(V3i(400, 100, 100), V3i(200, 200, 100), black);
+		int t = 50 + count * 20;
+		drawer.drawTriangle(Triangle(V3i(100 + t, 800+ t, 100+ t), V3i(-100+ t, 200+ t, 100+ t), V3i(56+ t, 57+ t, 100+ t)), black);
 		drawer.drawEnd();
 		counter++;
 	}
