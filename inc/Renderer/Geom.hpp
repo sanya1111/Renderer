@@ -4,12 +4,12 @@
 #include <initializer_list>
 #include <vector>
 #include <cmath>
+#include <xmmintrin.h>
 #include <bits/stdc++.h>
 #include "Renderer/Log.h"
 namespace Renderer {
 
 namespace Geom {
-//help functions
 
 template<class T>
 int8_t sign(T a) {
@@ -26,6 +26,7 @@ template<class T, int N, int M>
 class Matrix{
 	std::vector<std::vector<T> > ma;
 public:
+	void M4x4_quick(float *A, float *B, float *C);
 	Matrix() :ma(std::vector<std::vector<T>>(N,std::vector<T>(M))) {}
 	Matrix(std::initializer_list<T > Li) : ma(std::vector<std::vector<T>>(N,std::vector<T>(M))){
 		int posx = 0, posy = 0;
@@ -303,5 +304,8 @@ using TriangleD = Triangle_<double>;
 
 }
 }
+
+
+
 
 #endif /* GEOM_H_ */
