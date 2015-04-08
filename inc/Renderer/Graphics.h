@@ -44,13 +44,12 @@ namespace Renderer {
 		bool zbufferAt(const int32_t &x, const int32_t &y, const int32_t &h);
 		void at(uint8_t * ptr,const Rgba & color);
 		bool inScreen(int32_t x, int32_t y);
-		void toScreenBounds(Geom::V3i & pt);
 		//views
 		CameraView mainView;
 		Geom::V3f toScreenTranslation(Geom::V3f pt);
 		Geom::V3f translationPipeline(Geom::V3f cen, Geom::V3f pt, Geom::V3f scale, Geom::V3f rot, bool &);
 	public:
-		void LineToScreenBounds(Geom::V3i & begin, Geom::V3i & end);
+		void LineToScreenBounds(Geom::V3i & begin, Geom::V3i & end, int ignored = 0);
 		void fill(const Rgba &color);
 		void fill2(const Rgba & color);
 		void drawPixel(const int32_t &screen_x,const int32_t &screen_y, const uint32_t &h, const Rgba & color);
