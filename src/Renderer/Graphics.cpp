@@ -320,7 +320,7 @@ void Renderer::Drawer::drawModel(const MeshModel& model, Geom::V3f position,
  		}
 		Rgba color(0, 0, 0, 0);
 		if(suc) {
-			drawFilledTriangle(Triangle(mas), color);
+			drawTriangle(Triangle(mas), color);
 		}
 	}
 }

@@ -7,6 +7,7 @@
 #include <xmmintrin.h>
 #include <bits/stdc++.h>
 #include "Renderer/Log.h"
+#include "Renderer/Utils.hpp"
 namespace Renderer {
 
 namespace Geom {
@@ -24,50 +25,78 @@ int8_t sign(T a) {
 
 template<class T, int N, int M>
 class Matrix{
-	std::vector<std::vector<T> > ma;
+	std::array<T, N * M> ma;
 public:
-	void M4x4_quick(float *A, float *B, float *C);
-	Matrix() :ma(std::vector<std::vector<T>>(N,std::vector<T>(M))) {}
-	Matrix(std::initializer_list<T > Li) : ma(std::vector<std::vector<T>>(N,std::vector<T>(M))){
-		int posx = 0, posy = 0;
-		for(auto it : Li){
-			ma[posx][posy] = it;
-			posy++;
-			if(posy == M) {
-				posx++;
-				posy = 0;
+	struct quick_multipler{
+		typedef Matrix<float ,4, 4> with;
+		void mult(with &A, const with &B, with &C){
+			__m128 row1 = _mm_load_ps(B[0]),
+				   row2 = _mm_load_ps(B[1]),
+				   row3 = _mm_load_ps(B[2]),
+				   row4 = _mm_load_ps(B[3]);
+			for(int i=0; i<4; i++) {
+				__m128 brod1 = _mm_set1_ps(A[i][0]),
+					   brod2 = _mm_set1_ps(A[i][1]),
+					   brod3 = _mm_set1_ps(A[i][2]),
+					   brod4 = _mm_set1_ps(A[i][3]);
+				_mm_store_ps(C[i], _mm_add_ps(
+						_mm_add_ps(
+							_mm_mul_ps(brod1, row1),
+							_mm_mul_ps(brod2, row2)),
+						_mm_add_ps(
+							_mm_mul_ps(brod3, row3),
+							_mm_mul_ps(brod4, row4))));
 			}
+		}
+	};
+	struct standart_multipler{
+		template<int M2>
+		void mult(Matrix<T, N, M> &A, const Matrix<T, M, M2> &B, Matrix<T, N, M2> &C){
+			for(int i = 0; i < N; i++){
+				for(int j = 0; j < M2; j++){
+					C[i][j] = 0;
+					for(int k = 0; k < M; k++){
+						C[i][j] += A[i][k] * B[k][j];
+					}
+				}
+			}
+		}
+	};
+	typedef typename Selector_<Matrix<T, N, M>, Matrix<float, 4, 4>, quick_multipler, standart_multipler>::result multipler_t;
+
+	Matrix() {}
+	Matrix(std::initializer_list<T > Li) {
+		int pos = 0;
+		for(auto it : Li){
+			ma[pos++] = it;
 		}
 	}
 	void print(){
 		for(int i = 0; i < N;i++){
 			for(int j = 0; j < M; j++){
-				DEB("%lf ", ma[i][j]);
+				DEB("%lf ", ma[i * M + j]);
 			}
 			DEB("\n");
 		}
 	}
-	std::vector<T> &operator [](size_t i){
-		return ma[i];
+	T* operator [](size_t i){
+		return &ma[i * M];
 	}
-	std::vector<T> colomn(size_t j){
-		std::vector<T> res;
+	const T * operator[](size_t i)const{
+		return &ma[i * M];
+	}
+	std::array<T, N> colomn(size_t j){
+		std::array<T, N> res;
 		for(int i = 0; i < N; i++){
-			res.push_back(ma[i][j]);
+			res[i] = ma[i * M + j];
 		}
 		return res;
 	}
+
 	template<int M2>
 	Matrix<T, N, M2> operator*(const Matrix<T, M, M2> &other){
 		Matrix<T, N, M2> ret;
-		for(int i = 0; i < N; i++){
-			for(int j = 0; j < M2; j++){
-				ret[i][j] = 0;
-				for(int k = 0; k < M; k++){
-					ret[i][j] += ma[i][k] * other.ma[k][j];
-				}
-			}
-		}
+		(typename int_Selector_<M, M2, multipler_t, standart_multipler>::result ()).mult(*this, other, ret);
 		return ret;
 	}
 
@@ -75,7 +104,7 @@ public:
 		Matrix ret;
 		for(int i = 0; i < N;i++){
 			for(int j = 0; j < M; j++){
-				ret[i][j] = ma[i][j] * value;
+				ret[i][j] = ma[i * M + j] * value;
 			}
 		}
 		return ret;
@@ -112,12 +141,17 @@ public:
 	T x, y, z;
 	V3() : x(0), y(0), z(0) {}
 	V3(T x, T y, T z) : x(x), y(y), z(z) {}
-	V3(const std::vector<T> &val ){
+	V3(const std::array<T,3> &val ){
 		x = val[0];
 		y = val[1];
 		z = val[2];
 	}
-	V3& operator=(const std::vector<T> &val){
+	V3(const T* val){
+		x = val[0];
+		y = val[1];
+		z = val[2];
+	}
+	V3& operator=(const std::array<T, 3> &val){
 		x = val[0];
 		y = val[1];
 		z = val[2];
@@ -304,8 +338,6 @@ using TriangleD = Triangle_<double>;
 
 }
 }
-
-
 
 
 #endif /* GEOM_H_ */
