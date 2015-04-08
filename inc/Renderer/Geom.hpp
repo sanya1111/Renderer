@@ -151,12 +151,6 @@ public:
 		y = val[1];
 		z = val[2];
 	}
-	V3& operator=(const std::array<T, 3> &val){
-		x = val[0];
-		y = val[1];
-		z = val[2];
-		return *this;
-	}
 
 	T & operator[](size_t id){
 		switch(id){
@@ -251,20 +245,11 @@ public:
 	V4() = default;
 	V4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w){}
 	V4(V3<T> f, T w) : x(f.x), y(f.y), z(f.z), w(w) {}
-	V4(const V3<T>& fr) : x(fr.x), y(fr.y), z(fr.z), w(1){
-	}
-	V4(const std::vector<T> &val ){
+	V4(T * val){
 		x = val[0];
 		y = val[1];
 		z = val[2];
 		w = val[3];
-	}
-	V4& operator=(const std::vector<T> &val){
-		x = val[0];
-		y = val[1];
-		z = val[2];
-		w = val[3];
-		return *this;
 	}
 	T & operator[](size_t id){
 		switch(id){

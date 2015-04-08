@@ -101,7 +101,7 @@ Geom::V3f Renderer::Drawer::toScreenTranslation(Geom::V3f pt){
 		0, buf->width / 2.0f, 0, 0,
 		0, 0, 1, 0,
 		buf->height / 2.0f, buf->width / 2.0f, 0, 1};
-	return (V4f(pt).rowMatrix() * transf)[0];
+	return (V4f(pt, 1).rowMatrix() * transf)[0];
 }
 
 

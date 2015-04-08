@@ -31,7 +31,7 @@ public:
 			uint32_t usec, Buffer & buf){
 		counter++;
 //		count += 0.025;
-		CameraView cam(V3f(0, 0, 0.2), V3f(0, 1, 0), V3f(0, 0, 1),
+		CameraView cam(V3f(0, 0, (float)counter/100.0), V3f(0, 1, 0), V3f(0, 0, 1),
 						(60.0)/180.0 * 3.14, buf.width, buf.height, 0.1, 100);
 		drawer.drawBegin(&buf, cam);
 		drawer.fill2(white);
