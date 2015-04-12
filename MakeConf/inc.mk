@@ -1,5 +1,5 @@
 #VARS
-CXX=g++-4.9
+CXX?=g++-4.9
 CXX_FLAGS=--std=c++11 -Wall -Wextra -Wno-reorder -O3
 LIB_DIR=lib
 SRC_DIR=src
