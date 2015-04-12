@@ -9,7 +9,7 @@ namespace Renderer{
 
 class Context{
 private:
-	Buffer * buffers;
+	std::vector<Buffer> buffers;
 	int32_t current_buffer;
 	size_t buffers_num;
 	std::vector<Connector> connectors;

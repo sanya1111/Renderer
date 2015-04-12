@@ -1,13 +1,11 @@
 #include "Renderer/Context.h"
+#include <algorithm>
 
 Renderer::Context::Context(size_t buffers_num, Connector& conn, Crtc& crtc,  std::unique_ptr<Drawable> &&drawable,
-		Device& dev) : dev(dev), buffers_num(buffers_num), connectors(), saved_crtc(crtc), drawable(std::move(drawable)){
+		Device& dev) : dev(dev), buffers_num(buffers_num), connectors(), saved_crtc(crtc), drawable(std::move(drawable)), buffers(buffers_num){
 	try{
-		buffers = new Buffer[buffers_num];
-		for(uint32_t i = 0 ; i < buffers_num; i++){
-			buffers[i] = dev.createBuffer(saved_crtc);
-		}
-	}catch(std::exception&){
+		std::generate(buffers.begin(), buffers.end(), [&dev, this](){return dev.createBuffer(saved_crtc);});
+	}catch(const std::exception&){
 		throw ContextException("cannot create buffers");
 	}
 	current_buffer = 0;
@@ -16,13 +14,8 @@ Renderer::Context::Context(size_t buffers_num, Connector& conn, Crtc& crtc,  std
 }
 
 Renderer::Context::~Context() {
-	for(uint32_t i = 0; i < buffers_num; i++){
-		dev.destroyBuffer(buffers[i]);
-	}
-	delete [] buffers;
-	for(auto &conn : connectors){
-			dev.setCrtc(conn, saved_crtc);
-	}
+	for_each(buffers.begin(), buffers.end(), [this](Buffer &cur){dev.destroyBuffer(cur);});
+	for_each(connectors.begin(), connectors.end(), [this](Connector & conn) {dev.setCrtc(conn, saved_crtc);});
 }
 
 void Renderer::Context::addConnector(Connector & conn) {

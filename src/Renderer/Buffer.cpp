@@ -59,7 +59,7 @@ void Renderer::Buffer::createMapping(int32_t fd) {
 		case (GEM_INTEL_MAPPING):
 			status = intelGemMapping(fd);
 		}
-	} catch (BufferException&) {
+	} catch (const BufferException&) {
 		switch (mapping_info) {
 		case (DUMB_MAPPING):
 			dumbDestroy(fd);

@@ -1,5 +1,5 @@
-#ifndef GEOM_H_
-#define GEOM_H_
+#ifndef GEOM_HPP_
+#define GEOM_HPP_
 
 #include <initializer_list>
 #include <vector>
@@ -8,6 +8,7 @@
 #include <bits/stdc++.h>
 #include "Renderer/Log.h"
 #include "Renderer/Utils.hpp"
+
 namespace Renderer {
 
 namespace Geom {
@@ -325,4 +326,4 @@ using TriangleD = Triangle_<double>;
 }
 
 
-#endif /* GEOM_H_ */
+#endif

@@ -23,14 +23,12 @@ namespace Renderer {
 
 
 class Buffer {
-	//methods
 	bool dumbMapping(int32_t fd);
 	bool intelGemMapping(int32_t fd);
 	void dumbDestroy(int32_t fd);
 	void intelGemDestroy(int32_t fd);
 	void destroy(int32_t fd);
 	void createMapping(int32_t fd);
-	//enums and contsants
 	enum MappingInfo {
 		DUMB_MAPPING = 0x1, GEM_INTEL_MAPPING = 0x2
 	} mapping_info;
@@ -63,7 +61,6 @@ class Buffer {
 										  (1ULL<<32) - (1U<<24)}
 	};
 	uint8_t format_desc_entry;
-	//var
 	friend class Drawer;
 	uint32_t handle;
 	uint8_t *map;
@@ -74,7 +71,6 @@ class Buffer {
 	uint32_t bpp;
 	uint32_t depth;
 	friend class Device;
-	//constructor
 	Buffer(int32_t fd, uint32_t width, uint32_t height, uint32_t format,  MappingInfo mapping_info);
 public:
 	uint32_t width;
