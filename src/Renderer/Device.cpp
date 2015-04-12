@@ -143,7 +143,9 @@ bool Renderer::Device::isCompatible(Connector &conn, Crtc &crtc_o) {
 		} else {
 			result = (enc->crtc_id == crtc);
 		}
-		drmModeFreeEncoder(enc);
+		if(enc){
+			drmModeFreeEncoder(enc);
+		}
 		if(result){
 			return true;
 		}

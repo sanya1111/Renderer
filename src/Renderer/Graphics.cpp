@@ -126,7 +126,7 @@ bool Renderer::Drawer::inScreen(int32_t x, int32_t y){
 
 void Renderer::Drawer::LineToScreenBounds(Geom::V3i & begin, Geom::V3i & end, int ignored ){
 	V3i bounds_mi = { 0, 0, 0};
-	V3i bounds_ma = { buf->height - 1, buf->width - 1, INF};
+	V3i bounds_ma = { (int)buf->height - 1, (int)buf->width - 1, (int)INF};
 	V3i nbegin = begin, nend = end;
 	for(int i = 0; i < 3; i++){
 		if(ignored &(1 <<i))

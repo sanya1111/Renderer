@@ -3,14 +3,14 @@ include MakeConf/inc.mk
 all:test src
 	
 test:src
-	cd $(TEST_DIR) && $(MAKE)
+	$(MAKE) -C $(TEST_DIR)
 	
 src:
-	cd $(SRC_DIR) && $(MAKE)
+	$(MAKE) -C $(SRC_DIR)
 	
 clean:
-	cd $(TEST_DIR) && $(MAKE_CLEAN)
-	cd $(SRC_DIR) && $(MAKE_CLEAN)
+	$(MAKE_CLEAN) -C $(TEST_DIR)
+	$(MAKE_CLEAN) -C $(SRC_DIR)
 	rm -rf $(LIB_DIR) $(BIN_DIR) $(OBJ_DIR)
 .PHONY:test src
 
