@@ -22,7 +22,7 @@ public:
 	MeshModel model;
 	float count = 0;
 	MyDraw() {
-		model.loadObj("../test/test_obj_load/obj/african_head.obj");
+		model.loadObj2("../test/test_obj_load/obj/african_head.obj");
 		white = Rgba(255, 255, 255, 0);
 		black = Rgba(0, 0, 0, 0);
 		count = 0;

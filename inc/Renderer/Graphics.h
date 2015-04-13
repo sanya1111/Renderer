@@ -3,7 +3,9 @@
 
 #include "Renderer/Buffer.h"
 #include "Renderer/Geom.hpp"
+#include "Renderer/Model.h"
 
+#include <string>
 #include <vector>
 namespace Renderer {
 
@@ -12,14 +14,6 @@ namespace Renderer {
 		uint8_t a, r, g, b;
 		Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 		Rgba() = default;
-	};
-
-	class MeshModel{
-			std::vector<Geom::V3f> verts;
-			std::vector<std::vector<int> > faces;
-		public:
-			void loadObj(const char *filename);
-		friend class Drawer;
 	};
 
 	class CameraView{

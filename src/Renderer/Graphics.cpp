@@ -245,35 +245,7 @@ bool Renderer::Drawer::zbufferAt(const int32_t& x, const int32_t& y,const int32_
 void Renderer::Drawer::drawEnd() {
 }
 
-void Renderer::MeshModel::loadObj(const char* filename) {
-	std::ifstream in;
-	in.open (filename, std::ifstream::in);
-	if(in.fail()){
-		DEB("%s\n", filename);
-		return;
-	}
-	std::string line;
-	while (!in.eof()) {
-		std::getline(in, line);
-		std::stringstream iss(line.c_str());
-		char trash;
-		if (!line.compare(0, 2, "v ")) {
-			iss >> trash;
-			V3f v;
-			for (int i=0;i<3;i++) iss >> v[i];
-				verts.push_back(v);
-		}  else if (!line.compare(0, 2, "f ")) {
-			 std::vector<int> f;
-			int itrash, idx;
-			iss >> trash;
-			while (iss >> idx >> trash >> itrash >> trash >> itrash) {
-			idx--;
-			f.push_back(idx);
-			}
-			faces.push_back(f);
-		}
-	}
-}
+
 
 Renderer::CameraView::CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, float angle, int32_t width, int32_t height, float near, float far) :
 		cen(cen) , f(f), aw(angle), near(near), far(far){
