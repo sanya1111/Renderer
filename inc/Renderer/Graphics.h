@@ -52,9 +52,9 @@ namespace Renderer {
 		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
 		void drawLine2(Geom::V4i begin, Geom::V4i end, const Rgba & color);
 		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
-		void drawTriangle2(Geom::Triangle triangle, const Rgba & color);
+		void drawTriangle2(Geom::Triangle4 triangle, const Rgba & color);
 		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
-		void drawFilledTriangle2(Geom::Triangle triangle, const Rgba & color, const Geom::V3i &iten);
+		void drawFilledTriangle2(Geom::Triangle4 triangle, const Rgba & color);
 		void drawBegin(Buffer * buf, const CameraView &mainView_);
 		void drawTranslateTriangle(Geom::TriangleF triangle, const Rgba &color);
 		void drawTranslateFilledTriangle(Geom::TriangleF triangle, const Rgba& color);

@@ -214,17 +214,23 @@ void Renderer::Drawer::drawTriangle(Triangle triangle,
 	}
 }
 
-void Renderer::Drawer::drawFilledTriangle2(Geom::Triangle triangle,
-		const Rgba& color, const Geom::V3i &iten) {
-	drawTriangle(triangle, color);
+void Renderer::Drawer::drawTriangle2(Geom::Triangle4 triangle,
+		const Rgba& color) {
+	for(int8_t i = 0; i < 3; i++){
+			drawLine2(triangle.vs[i], triangle.vs[(i + 1) % 3], color);
+	}
+}
+
+void Renderer::Drawer::drawFilledTriangle2(	Geom::Triangle4 triangle,
+		const Rgba& color) {
 	std::sort(triangle.vs, triangle.vs + 3);
-	LineStepper<V4i> a(V4i(triangle.vs[0], iten[0]), V4i(triangle.vs[2], iten[2]), 0, this, 6);
-	LineStepper<V4i> b(V4i(triangle.vs[0], iten[0]), V4i(triangle.vs[1], iten[1]), 0, this, 6);
+	LineStepper<V4i> a(triangle.vs[0], triangle.vs[2], 0, this, 6);
+	LineStepper<V4i> b(triangle.vs[0], triangle.vs[1], 0, this, 6);
 	V4i pa, pb;
 	while(!a.finish()){
 		pa = a.getP();
 		if(pa.x == triangle.vs[1].x){
-			b = LineStepper<V4i>(V4i(triangle.vs[1], iten[1]), V4i(triangle.vs[2], iten[2]), 0, this,  6);
+			b = LineStepper<V4i>(triangle.vs[1], triangle.vs[2], 0, this,  6);
 		}
 		pb = b.getP();
 		drawLine2(pa, pb, color);
@@ -340,6 +346,7 @@ void Renderer::Drawer::drawModel(const MeshModel& model, Geom::V3f position,
 	}
 }
 
+
 void Renderer::Drawer::drawModel2(const MeshModel& model, Geom::V3f position,
 		Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir) {
 	light_dir = light_dir.norm();
@@ -351,10 +358,13 @@ void Renderer::Drawer::drawModel2(const MeshModel& model, Geom::V3f position,
 			V3f res = translationPipeline(position, model.verts[model.faces[i][j]], scale, rot, suc);
 			mas[j] = V3i(res.x, res.y, scale_float(res.z));
 			inten[j] =  scale_float(model.normals[model.faces[i][j]].norm().scMul(light_dir));
+			if(inten[j] <= 0) {
+				suc = false;
+			}
 		}
 		Rgba color(255, 255, 255, 0);
 		if(suc) {
-			drawFilledTriangle2(Triangle(mas), color, inten);
+			drawFilledTriangle2(makeTriangle4(Triangle(mas), inten), color);
 		}
 	}
 }

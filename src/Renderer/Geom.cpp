@@ -1,4 +1,7 @@
 #include "Renderer/Geom.hpp"
+
+using namespace Renderer::Geom;
+
 Renderer::Geom::Matrix33f Renderer::Geom::MatrixFactory::e3() {
 	return Matrix33f{
 		1, 0, 0,
@@ -69,4 +72,10 @@ Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::withRotation(const V3<f
 	};
 }
 
-
+Triangle4 Renderer::Geom::makeTriangle4(const Triangle &a, const V3i& ot) {
+	Triangle4 res;
+	for(int i = 0; i < 3; i++){
+		res.vs[i] = V4i(a.vs[i], ot[i]);
+	}
+	return res;
+}

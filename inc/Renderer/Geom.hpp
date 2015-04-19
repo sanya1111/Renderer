@@ -296,6 +296,11 @@ public:
 	V4<T> operator+(const V4<T> &other){
 		return V4<T>(x + other.x, y + other.y, z + other.z, w + other.w);
 	}
+	bool operator<(const V4<T> &other) const{
+			return (x < other.x) || (x == other.x && y < other.y)
+			||	(x == other.x && y == other.y && z < other.z)
+			||  (x == other.x && y == other.y && z == other.z && w < other.w);
+	}
 };
 
 using V4i = V4<int32_t>;
@@ -307,20 +312,20 @@ using V4f = V4<float>;
 template<class T >
 class Triangle_{
 public:
-	V3<T> vs[3];
+	T vs[3];
 	Triangle_() {}
-	Triangle_(V3<T> from[]){
+	Triangle_(T from[]){
 		for(int8_t i = 0; i < 3; i++){
 			vs[i] = from[i];
 		}
 	}
-	Triangle_(const V3<T> &A, const V3<T> &B, const V3<T> &C){
+	Triangle_(const T &A, const T &B, const T &C){
 		vs[0] = A;
 		vs[1] = B;
 		vs[2] = C;
 	}
-	operator Triangle_<int>(){
-		Triangle_<int> outp;
+	operator Triangle_<V3i>(){
+		Triangle_<V3i> outp;
 		for(int8_t i = 0; i < 3; i++){
 			outp.vs[i] = vs[i];
 		}
@@ -328,10 +333,11 @@ public:
 	}
 };
 
-using Triangle = Triangle_<int32_t>;
-using TriangleF = Triangle_<float>;
-using TriangleD = Triangle_<double>;
+using Triangle = Triangle_<V3i>;
+using TriangleF = Triangle_<V3f>;
+using Triangle4 = Triangle_<V4i>;
 
+Triangle4 makeTriangle4(const Triangle &a, const V3i &ot);
 
 
 }
