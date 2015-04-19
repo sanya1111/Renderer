@@ -86,6 +86,7 @@ public:
 	const T * operator[](size_t i)const{
 		return &ma[i * M];
 	}
+
 	std::array<T, N> colomn(size_t j){
 		std::array<T, N> res;
 		for(int i = 0; i < N; i++){
@@ -139,6 +140,7 @@ namespace MatrixFactory{
 template<class T >
 class V3 {
 public:
+	static const int num = 3;
 	T x, y, z;
 	V3() : x(0), y(0), z(0) {}
 	V3(T x, T y, T z) : x(x), y(y), z(z) {}
@@ -242,6 +244,7 @@ using V3f = V3<float>;
 template<class T >
 class V4 {
 public:
+	static const int num = 4;
 	T x, y, z, w;
 	V4() = default;
 	V4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w){}

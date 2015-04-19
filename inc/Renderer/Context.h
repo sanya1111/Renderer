@@ -22,7 +22,7 @@ public:
 	public:
 		using std::runtime_error::runtime_error;
 	};
-	Context(size_t buffers_num, Connector &conn, Crtc & crtc, 	std::unique_ptr<Drawable> &&drawable	, Device & dev);
+	Context(size_t buffers_num, Connector &conn, Crtc & crtc, 	std::unique_ptr<Drawable> &&drawable, Device & dev);
 	~Context();
 	void addConnector(Connector & );
 	void startListenning();

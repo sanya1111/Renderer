@@ -13,7 +13,6 @@ using namespace Renderer::Geom;
 #include <fstream>
 #include <memory>
 
-
 int counter = 0;
 class MyDraw : public Drawable{
 public:
@@ -22,7 +21,7 @@ public:
 	MeshModel model;
 	float count = 0;
 	MyDraw() {
-		model.loadObj2("../test/test_obj_load/obj/african_head.obj");
+		model.loadObj2("../test/test_obj_load/obj/output.obj");
 		white = Rgba(255, 255, 255, 0);
 		black = Rgba(0, 0, 0, 0);
 		count = 0;
@@ -31,10 +30,10 @@ public:
 			uint32_t usec, Buffer & buf){
 		counter++;
 //		count += 0.025;
-		CameraView cam(V3f(0, 0, (float)counter/100.0), V3f(0, 1, 0), V3f(0, 0, 1),
+		CameraView cam(V3f(0, 0, 0.3), V3f(0, 1, 0), V3f(0, 0, 1),
 						(60.0)/180.0 * 3.14, buf.width, buf.height, 0.1, 100);
 		drawer.drawBegin(&buf, cam);
-		drawer.fill2(white);
+		drawer.fill2(black);
 		drawer.drawModel(model, V3f(0, 0, 1.7), V3f(1 + count, 1 + count, 1 + count), V3f(0, 3.14, 1.0/2.0* 3.14));
 		using namespace Geom;
 		drawer.drawEnd();

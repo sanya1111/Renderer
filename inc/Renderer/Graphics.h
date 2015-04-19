@@ -13,6 +13,7 @@ namespace Renderer {
 	public:
 		uint8_t a, r, g, b;
 		Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+		Rgba operator*(const float & intensity);
 		Rgba() = default;
 	};
 
@@ -48,9 +49,9 @@ namespace Renderer {
 		void fill2(const Rgba & color);
 		void drawPixel(const int32_t &screen_x,const int32_t &screen_y, const uint32_t &h, const Rgba & color);
 		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
-		void drawGLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
 		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
 		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
+		void drawFilledTriangle2(Geom::Triangle_ triangle, const Rgba & color, Geom::V3f iten);
 		void drawBegin(Buffer * buf, const CameraView &mainView_);
 		void drawTranslateTriangle(Geom::TriangleF triangle, const Rgba &color);
 		void drawTranslateFilledTriangle(Geom::TriangleF triangle, const Rgba& color);

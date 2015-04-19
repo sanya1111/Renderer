@@ -46,12 +46,13 @@ void toBounds(int &a, int l, int r){
 	a = min(a, r);
 }
 
+template<class V>
 struct LineStepper{
-	V3i begin, end, current, error2, derror2, delta;
+	V begin, end, current, error2, derror2, delta;
 	int dx;
 	bool swapped;
 
-	LineStepper(const V3i &begin_, const V3i & end_, int8_t force_asix = -1, Drawer * dr = NULL, int ignored = 0) : begin(begin_), end(end_){
+	LineStepper(const V &begin_, const V & end_, int8_t force_asix = -1, Drawer * dr = NULL, int ignored = 0) : begin(begin_), end(end_){
 		if(dr){
 			dr->LineToScreenBounds(begin, end, ignored);
 		}
@@ -65,7 +66,7 @@ struct LineStepper{
 			std::swap(begin, end);
 		}
 
-		for(int i = 1; i < 3; i++){
+		for(int i = 1; i < V.num; i++){
 				delta[i] = sign(end[i] - begin[i]);
 				derror2[i] = std::abs(end[i] - begin[i]) * 2;
 		}
@@ -79,7 +80,7 @@ struct LineStepper{
 	void next(){
 		current.x++;
 		error2 = error2 + derror2;
-		for(int i = 1; i < 3; i++){
+		for(int i = 1; i < V.num; i++){
 			if(error2[i] > dx){
 				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2 ) > 0);
 				current[i] += delta[i] * tim;
@@ -87,13 +88,14 @@ struct LineStepper{
 			}
 		}
 	}
-	V3i getP(){
-		V3i ret = current;
+	V getP(){
+		V ret = current;
 		if(swapped)
 			swap(ret.x, ret.y);
 		return ret;
 	}
 };
+
 
 Geom::V3f Renderer::Drawer::toScreenTranslation(Geom::V3f pt){
 	Matrix44f transf{
@@ -191,6 +193,25 @@ void Renderer::Drawer::drawTriangle(Triangle triangle,
 	}
 }
 
+void Renderer::Drawer::drawFilledTriangle2(Geom::Triangle_ triangle,
+		const Rgba& color, Geom::V3f iten) {
+	drawTriangle(triangle, color);
+	std::sort(triangle.vs, triangle.vs + 3);
+	LineStepper a(triangle.vs[0], triangle.vs[2], 0, this, 6);
+	LineStepper b(triangle.vs[0], triangle.vs[1], 0, this, 6);
+	V3i pa, pb;
+	while(!a.finish()){
+		pa = a.getP();
+		if(pa.x == triangle.vs[1].x){
+			b = LineStepper(triangle.vs[1], triangle.vs[2], 0, this,  6);
+		}
+		pb = b.getP();
+		drawLine(pa, pb, color);
+		a.next();
+		b.next();
+	}
+}
+
 void Renderer::Drawer::drawFilledTriangle(Triangle triangle,
 		const Rgba& color) {
 	drawTriangle(triangle, color);
@@ -280,6 +301,8 @@ void Renderer::Drawer::drawTranslateFilledTriangle(Geom::TriangleF triangle,
 	drawFilledTriangle(triangle, color);
 }
 
+
+
 void Renderer::Drawer::drawModel(const MeshModel& model, Geom::V3f position,
 		Geom::V3f scale, Geom::V3f rot) {
 	for (size_t i=0; i < model.faces.size(); i++) {
@@ -290,9 +313,9 @@ void Renderer::Drawer::drawModel(const MeshModel& model, Geom::V3f position,
 			V3f res = translationPipeline(position, model.verts[face[j]], scale, rot, suc);
 			mas[j] = V3i(res.x, res.y, res.z * 10000);
  		}
-		Rgba color(0, 0, 0, 0);
+		Rgba color(255, 255, 255, 0);
 		if(suc) {
-			drawTriangle(Triangle(mas), color);
+			drawFilledTriangle(Triangle(mas), color);
 		}
 	}
 }
@@ -306,4 +329,8 @@ Geom::V3f Renderer::CameraView::translate(Geom::V3f v) {
 	float bottom = -top;
 	Matrix44f summary { MatrixFactory::translation(cen) * MatrixFactory::withRotation(r, up, f)* MatrixFactory::projection(left, right, top, bottom, near, far)};
 	return V4f((V4f(v, 1).rowMatrix() * summary)[0]).norm();
+}
+
+Rgba Renderer::Rgba::operator *(const float& intensity) {
+	return Rgba((float)r * intensity, (float)g * intensity, (float)b * intensity, (float)a * intensity);
 }
