@@ -166,6 +166,16 @@ public:
 		}
 	}
 
+	T  operator[](size_t id) const{
+		switch(id){
+		case 0 :
+			return x;
+		case 1:
+			return y;
+		default:
+			return z;
+		}
+	}
 	V3 operator+(const V3 &with) {
 		return V3(x + with.x, y + with.y, z + with.z);
 	}
@@ -224,15 +234,12 @@ public:
 //		DEB("%f %f %f\n", x, y, z);
 		DEB("%d %d %d\n", x, y, z);
 	}
-	T getLen(){
+	T getLen()const{
 		return sqrt(x * x + y * y + z * z);
 	}
-	V3& norm(){
+	V3 norm()const{
 		T len = getLen();
-		x /= len;
-		y /= len;
-		z /= len;
-		return *this;
+		return V3<T>(x / len, y / len, z / len);
 	}
 };
 
@@ -248,7 +255,7 @@ public:
 	T x, y, z, w;
 	V4() : x(0), y(0), z(0), w(0) {}
 	V4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w){}
-	V4(V3<T> f, T w) : x(f.x), y(f.y), z(f.z), w(w) {}
+	V4(const V3<T> &f, T w) : x(f.x), y(f.y), z(f.z), w(w) {}
 	V4(T * val){
 		x = val[0];
 		y = val[1];

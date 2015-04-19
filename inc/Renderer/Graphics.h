@@ -54,12 +54,13 @@ namespace Renderer {
 		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
 		void drawTriangle2(Geom::Triangle triangle, const Rgba & color);
 		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
-		void drawFilledTriangle2(Geom::Triangle triangle, const Rgba & color, Geom::V3f iten);
+		void drawFilledTriangle2(Geom::Triangle triangle, const Rgba & color, const Geom::V3i &iten);
 		void drawBegin(Buffer * buf, const CameraView &mainView_);
 		void drawTranslateTriangle(Geom::TriangleF triangle, const Rgba &color);
 		void drawTranslateFilledTriangle(Geom::TriangleF triangle, const Rgba& color);
 		void drawEnd();
 		void drawModel(const MeshModel & model, Geom::V3f position, Geom::V3f scale, Geom::V3f rot);
+		void drawModel2(const MeshModel & model, Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir);
 		Drawer() : current_draw(0) {}
 	};
 

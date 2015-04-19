@@ -215,7 +215,7 @@ void Renderer::Drawer::drawTriangle(Triangle triangle,
 }
 
 void Renderer::Drawer::drawFilledTriangle2(Geom::Triangle triangle,
-		const Rgba& color, Geom::V3f iten) {
+		const Rgba& color, const Geom::V3i &iten) {
 	drawTriangle(triangle, color);
 	std::sort(triangle.vs, triangle.vs + 3);
 	LineStepper<V4i> a(V4i(triangle.vs[0], iten[0]), V4i(triangle.vs[2], iten[2]), 0, this, 6);
@@ -295,9 +295,9 @@ Renderer::CameraView::CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, floa
 	this->r = up1.vMul(this->f);
 	this->up = this->f.vMul(this->r);
 
-	this->f.norm();
-	this->up.norm();
-	this->r.norm();
+	this->f = this->f.norm();
+	this->up = this->up.norm();
+	this->r = this->r.norm();
 
 	ah = atan(tan(aw) * height / width);
 }
@@ -340,6 +340,24 @@ void Renderer::Drawer::drawModel(const MeshModel& model, Geom::V3f position,
 	}
 }
 
+void Renderer::Drawer::drawModel2(const MeshModel& model, Geom::V3f position,
+		Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir) {
+	light_dir = light_dir.norm();
+	for (size_t i=0; i < model.faces.size(); i++) {
+		V3i mas[3];
+		V3i inten;
+		bool suc = true;
+		for (int j=0; j<3; j++) {
+			V3f res = translationPipeline(position, model.verts[model.faces[i][j]], scale, rot, suc);
+			mas[j] = V3i(res.x, res.y, scale_float(res.z));
+			inten[j] =  scale_float(model.normals[model.faces[i][j]].norm().scMul(light_dir));
+		}
+		Rgba color(255, 255, 255, 0);
+		if(suc) {
+			drawFilledTriangle2(Triangle(mas), color, inten);
+		}
+	}
+}
 
 Geom::V3f Renderer::CameraView::translate(Geom::V3f v) {
 	float projection_plane_z = 1.0;
@@ -354,3 +372,5 @@ Geom::V3f Renderer::CameraView::translate(Geom::V3f v) {
 Rgba Renderer::Rgba::operator *(const float& intensity) const{
 	return Rgba((float)r * intensity, (float)g * intensity, (float)b * intensity, a);
 }
+
+
