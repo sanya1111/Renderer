@@ -13,7 +13,8 @@ class Texture{
 public:
 	uint32_t width, height;
 	Texture(const std::string &filename);
-	Rgba at(const uint32_t &x, const uint32_t &y);
+	Rgba at(const uint32_t &x, const uint32_t &y)const;
+	friend class Drawer;
 };
 
 class Material{
@@ -21,6 +22,7 @@ class Material{
 	std::vector<Texture> col[4];
 public:
 	void add(uint8_t type, const Texture & tex);
+	friend class Drawer;
 };
 
 class MeshModel{
@@ -29,6 +31,7 @@ class MeshModel{
 	std::vector<Geom::V3f> normals;
 	std::vector<std::vector<int> > faces;
 	std::vector<Material> mats;
+	size_t mat_index;
 public:
 	void loadObj(const std::string &);
 	void loadObj2(const std::string &);

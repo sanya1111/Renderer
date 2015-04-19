@@ -80,5 +80,15 @@ Triangle4 Renderer::Geom::makeTriangle4(const Triangle &a, const V3i& ot) {
 	return res;
 }
 
-
-
+TriangleX<6> Renderer::Geom::makeTriangle6(const Triangle &a, const V3i &norm, const V3i &u, const V3i &v){
+	TriangleX<6> res;
+	for(int i = 0; i < 3; i++){
+		for(int j = 0; j < 3; j++){
+			res.vs[i][j] = a.vs[i][j];
+		}
+		res.vs[i][3] = norm[i];
+		res.vs[i][4] = u[i];
+		res.vs[i][5] = v[i];
+	}
+	return res;
+}

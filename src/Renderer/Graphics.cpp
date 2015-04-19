@@ -208,7 +208,23 @@ void Renderer::Drawer::drawLine2(Geom::V4i begin, Geom::V4i end,
 			drawPixel(pt.x, pt.y, pt.z, Rgba(0, 0, 0, 0));
 		}
 	}
+}
 
+template<class Texture>
+void Renderer::Drawer::drawLine3(Geom::VXi<6> begin, Geom::VXi<6> end,
+		const Texture &tex) {
+	LineToScreenBounds(begin, end);
+	LineStepper<VXi<6>> step(begin, end);
+	VXi<6> pt;
+	while(!step.finish()){
+		step.next();
+		pt = step.getP();
+		if(pt[3] >= 0)
+			drawPixel(pt.x, pt.y, pt[2], tex.at(pt[3], pt[4]) * scale_int(pt[2]));
+		else{
+			drawPixel(pt.x, pt.y, pt[2], Rgba(0, 0, 0, 0));
+		}
+	}
 }
 
 void Renderer::Drawer::drawTriangle(Triangle triangle,
@@ -222,6 +238,33 @@ void Renderer::Drawer::drawTriangle2(Geom::Triangle4 triangle,
 		const Rgba& color) {
 	for(int8_t i = 0; i < 3; i++){
 			drawLine2(triangle.vs[i], triangle.vs[(i + 1) % 3], color);
+	}
+}
+
+template<class Texture>
+inline void Renderer::Drawer::drawTriangle3(Geom::TriangleX<6> triangle,
+		const Texture& tex) {
+	for(int8_t i = 0; i < 3; i++){
+			drawLine3(triangle.vs[i], triangle.vs[(i + 1) % 3], tex);
+	}
+}
+
+template<class Texture>
+inline void Renderer::Drawer::drawFilledTriangle3(Geom::TriangleX<6> triangle, const Texture &tex){
+	std::sort(triangle.vs, triangle.vs + 3);
+	drawTriangle3(triangle, tex);
+	LineStepper<VXi<6>> a(triangle.vs[0], triangle.vs[2], 0, this, 14);
+	LineStepper<VXi<6>> b(triangle.vs[0], triangle.vs[1], 0, this, 14);
+	VXi<6> pa, pb;
+	while(!a.finish()){
+		pa = a.getP();
+		if(pa.x == triangle.vs[1].x){
+			b = LineStepper<VXi<6>>(triangle.vs[1], triangle.vs[2], 0, this,  14);
+		}
+		pb = b.getP();
+		drawLine3(pa, pb, tex);
+		a.next();
+		b.next();
 	}
 }
 
@@ -380,6 +423,30 @@ void Renderer::Drawer::drawModel2(const MeshModel& model, Geom::V3f position,
 	}
 }
 
+void Renderer::Drawer::drawModel3(const MeshModel& model, Geom::V3f position,
+		Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir) {
+	light_dir = light_dir.norm();
+	for (size_t i=0; i < model.faces.size(); i++) {
+		V3i mas[3];
+		V3i inten;
+		V3i u;
+		V3i v;
+		bool suc = true;
+		for (int j=0; j<3; j++) {
+			V3f res = translationPipeline(position, model.verts[model.faces[i][j]], scale, rot, suc);
+			mas[j] = V3i(res.x, res.y, scale_float(res.z));
+			inten[j] =  scale_float((mainView.moveToCam((const V3f )model.normals[model.faces[i][j]].norm()).transform(position, rot, scale)).norm().scMul(light_dir));
+			u[j] = model.verts_tex[model.faces[i][j]][0];
+			v[j] = model.verts_tex[model.faces[i][j]][1];
+		}
+		Rgba color(255, 255, 255, 0);
+		if(suc) {
+			drawFilledTriangle3(makeTriangle6(Triangle(mas), inten, u, v), model.mats[model.mat_index].col[0][0]);
+		}
+	}
+}
+
+
 
 Geom::V3f Renderer::CameraView::moveToCam(const Geom::V3f &v) {
 	return V4f((V4f(v, 1).rowMatrix() * move_ma)[0]).norm();
@@ -392,3 +459,4 @@ Geom::V3f Renderer::CameraView::projection(const Geom::V3f& v) {
 	return V4f((V4f(v, 1).rowMatrix() * projection_ma)[0]).norm();
 
 }
+

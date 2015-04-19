@@ -56,6 +56,7 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 		    aiProcess_OptimizeMeshes);
 	for(unsigned i = 0; i < sc->mNumMeshes; i++){
 		aiMesh * mesh = sc->mMeshes[i];
+		mat_index = mesh->mMaterialIndex;
 		for(unsigned j = 0 ;j < mesh->mNumVertices; j++){
 			verts.push_back(V3f(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z));
 			normals.push_back(V3f(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z));
@@ -93,7 +94,7 @@ Renderer::Texture::Texture(const std::string& filename) : data((uint8_t *) stbi_
 		[](uint8_t * ptr){free(ptr);}) {
 }
 
-Rgba Renderer::Texture::at(const uint32_t& x, const uint32_t& y) {
+Rgba Renderer::Texture::at(const uint32_t& x, const uint32_t& y) const{
 	uint8_t * beg = data.get() + (x * width + y) * comp;
 	return Rgba(*beg, *(beg + 1), *(beg + 2), 0);
 }

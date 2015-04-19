@@ -21,7 +21,7 @@ public:
 	MeshModel model;
 	float count = 0;
 	MyDraw() {
-		model.loadObj2("../test/test_obj_load/obj/output.obj");
+		model.loadObj2("../test/test_obj_load/obj/output2.obj");
 //		model.loadObj2("../test/test_obj_load/obj/Wraith Raider Starship.obj");
 //		model.loadObj2("../test/test_obj_load/obj/reconstructed_head.obj");
 //		model.loadObj2("../test/test_obj_load/obj/pone/telefone.obj");

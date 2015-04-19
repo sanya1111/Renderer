@@ -27,6 +27,7 @@ int8_t sign(T a) {
 
 template<class T, int N, int M>
 class Matrix{
+protected:
 	std::array<T, N * M> ma;
 public:
 	struct quick_multipler{
@@ -135,6 +136,7 @@ namespace MatrixFactory{
 	Matrix44f translation(const V3<float> &with);
 	Matrix44f withRotation(const V3<float> & r, const V3<float> &up, const V3<float> &f);
 };
+
 
 
 
@@ -328,7 +330,45 @@ using V4i = V4<int32_t>;
 using V4d = V4<double>;
 using V4f = V4<float>;
 
+template<class T, int X>
+class VX : public Matrix<T, X, 1>{
+public:
+	static const int num = X;
+	using Matrix<T, X, 1>::ma;
+	T &x, &y;
+	VX() : x(ma[0]), y(ma[1]){
+	}
+	VX(const VX<T, X>&) = default;
 
+	VX<T, X>& operator=(const VX<T, X> &other) {
+		if(this != &other){
+			ma = other.ma;
+		}
+		return *this;
+	}
+
+	VX<T, X> operator+(const VX<T, X> &other){
+		VX<T, X> res;
+		for(int i = 0; i < X; i++){
+			res[i] = (*this)[i] + other[i];
+		}
+		return res;
+	}
+	bool operator<(const VX<T, X> &other){
+		return ma < other.ma;
+	}
+	T& operator [](size_t i){
+		return ma[i];
+	}
+	const T& operator[](size_t i)const{
+		return ma[i];
+	}
+};
+
+template<int X>
+using VXf = VX<float, X>;
+template<int X>
+using VXi = VX<int, X>;
 
 template<class T >
 class Triangle_{
@@ -358,7 +398,12 @@ using Triangle = Triangle_<V3i>;
 using TriangleF = Triangle_<V3f>;
 using Triangle4 = Triangle_<V4i>;
 
+template<int X>
+using TriangleX = Triangle_<VXi<X>>;
+
 Triangle4 makeTriangle4(const Triangle &a, const V3i &ot);
+
+TriangleX<6> makeTriangle6(const Triangle &a, const V3i &norm, const V3i &u, const V3i &v);
 
 }
 }
