@@ -176,31 +176,31 @@ public:
 			return z;
 		}
 	}
-	V3 operator+(const V3 &with) {
+	V3 operator+(const V3 &with)const {
 		return V3(x + with.x, y + with.y, z + with.z);
 	}
-	V3 operator-(const V3 &with) {
+	V3 operator-(const V3 &with)const{
 		return V3(x - with.x, y - with.y, y + with.y);
 	}
-	bool operator<(const V3 &other){
+	bool operator<(const V3 &other)const{
 		return (x < other.x) || (x == other.x && y < other.y)
 		||	(x == other.x && y == other.y && z < other.z);
 	}
-	Matrix33<T> rowMatrix(){
+	Matrix33<T> rowMatrix()const{
 		return Matrix33<T>{
 			x, y, z,
 			0, 0, 0,
 			0, 0, 0
 		};
 	}
-	Matrix33<T> colomnMatrix(){
+	Matrix33<T> colomnMatrix()const{
 		return Matrix33<T>{
 			x, 0, 0,
 			y, 0, 0,
 			z, 0, 0
 		};
 	}
-	Matrix33<T> skewSimMatrix(){
+	Matrix33<T> skewSimMatrix()const{
 		return Matrix33<T>{
 			0, -z, y,
 			z, 0, -x,
@@ -219,17 +219,36 @@ public:
 		return x * other.x + y * other.y + z * other.z;
 	}
 
-	V3& scale(V3 v){
-		return *this = (rowMatrix() * MatrixFactory::scale(v))[0];
-	}
-
 	operator V3<int> (){
 		return V3<int>(x, y, z);
 	}
-	V3& rotate(V3 v){
+
+	V3& scale(const V3 &v){
+		return *this = (rowMatrix() * MatrixFactory::scale(v))[0];
+	}
+
+	V3& rotate(const V3 &v){
 		using namespace MatrixFactory;
 		return *this = (rowMatrix() * rotX(v.x) * rotY(v.y) * rotZ(v.z))[0];
 	}
+
+	V3& transform(const V3<T> &cen, const V3<T> &rot, const V3<T> &scale){
+		return *this = cen + this->rotate(rot).scale(scale) ;
+	}
+
+	V3 scale(const V3 &v)const{
+		return rowMatrix() * MatrixFactory::scale(v)[0];
+	}
+
+	V3 rotate(const V3 &v)const{
+		using namespace MatrixFactory;
+		return rowMatrix() * rotX(v.x) * rotY(v.y) * rotZ(v.z)[0];
+	}
+
+	V3 transform(const V3<T> &cen, const V3<T> &rot, const V3<T> &scale)const{
+		return cen + this->rotate(rot).scale(scale) ;
+	}
+
 	void print(){
 //		DEB("%f %f %f\n", x, y, z);
 		DEB("%d %d %d\n", x, y, z);
@@ -241,6 +260,7 @@ public:
 		T len = getLen();
 		return V3<T>(x / len, y / len, z / len);
 	}
+
 };
 
 using V3i = V3<int32_t>;
@@ -274,7 +294,7 @@ public:
 			return w;
 		}
 	}
-	Matrix44<T> rowMatrix(){
+	Matrix44<T> rowMatrix()const{
 		return Matrix44<T>{
 			x, y, z, w,
 			0, 0, 0, 0,
@@ -338,7 +358,6 @@ using TriangleF = Triangle_<V3f>;
 using Triangle4 = Triangle_<V4i>;
 
 Triangle4 makeTriangle4(const Triangle &a, const V3i &ot);
-
 
 }
 }

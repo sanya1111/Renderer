@@ -79,3 +79,6 @@ Triangle4 Renderer::Geom::makeTriangle4(const Triangle &a, const V3i& ot) {
 	}
 	return res;
 }
+
+
+

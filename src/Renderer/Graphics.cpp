@@ -11,7 +11,7 @@ using namespace std;
 //Helpers
 static const int INF = 1e9;
 static const float eps = 1e-9;
-static const float SCALE_01FLOAT_TO_INT = 1e4;
+static const float SCALE_01FLOAT_TO_INT = 1e9;
 
 static inline int scale_float(float a){
 	return a * SCALE_01FLOAT_TO_INT;
@@ -104,7 +104,7 @@ struct LineStepper{
 };
 
 
-Geom::V3f Renderer::Drawer::toScreenTranslation(Geom::V3f pt){
+Geom::V3f Renderer::Drawer::toScreenTranslation(const Geom::V3f &pt){
 	Matrix44f transf{
 		buf->height / 2.0f, 0, 0, 0,
 		0, buf->width / 2.0f, 0, 0,
@@ -115,17 +115,17 @@ Geom::V3f Renderer::Drawer::toScreenTranslation(Geom::V3f pt){
 
 
 
-V3f Renderer::Drawer::translationPipeline(V3f cen, V3f pt, V3f scale, V3f rot, bool &success){
-	V3f res = cen + (pt).rotate(rot).scale(scale);
-	res = mainView.translate(res);
-	if(!inBounds(res.x, -1.0, 1.0) ||
-	   !inBounds(res.y, -1.0, 1.0) ||
-	   !inBounds(res.z, -1.0, 1.0)){
+V3f Renderer::Drawer::translationPipeline(const V3f &cen, V3f pt, const V3f &scale, const V3f &rot, bool &success){
+	pt.transform(cen, rot, scale);
+	pt = mainView.projection(pt);
+	if(!inBounds(pt.x, -1.0, 1.0) ||
+	   !inBounds(pt.y, -1.0, 1.0) ||
+	   !inBounds(pt.z, -1.0, 1.0)){
 		success = false;
 	}
-	res = toScreenTranslation(res);
+	pt = toScreenTranslation(pt);
 
-	return res;
+	return pt;
 }
 
 bool Renderer::Drawer::inScreen(int32_t x, int32_t y){
@@ -308,6 +308,13 @@ Renderer::CameraView::CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, floa
 	this->r = this->r.norm();
 
 	ah = atan(tan(aw) * height / width);
+
+	float projection_plane_z = 1.0;
+	float right = std::tan(aw) * projection_plane_z;
+	float left = -right;
+	float top = std::tan(ah) * projection_plane_z;
+	float bottom = -top;
+	projection_ma = MatrixFactory::projection(left, right, top, bottom, near, far);
 }
 
 void Renderer::Drawer::drawTranslateTriangle(Geom::TriangleF triangle,
@@ -368,18 +375,18 @@ void Renderer::Drawer::drawModel2(const MeshModel& model, Geom::V3f position,
 	}
 }
 
-Geom::V3f Renderer::CameraView::translate(Geom::V3f v) {
-	float projection_plane_z = 1.0;
-	float right = std::tan(aw) * projection_plane_z;
-	float left = -right;
-	float top = std::tan(ah) * projection_plane_z;
-	float bottom = -top;
-	Matrix44f summary { MatrixFactory::translation(cen) * MatrixFactory::withRotation(r, up, f)* MatrixFactory::projection(left, right, top, bottom, near, far)};
-	return V4f((V4f(v, 1).rowMatrix() * summary)[0]).norm();
+Matrix44f Renderer::CameraView::moveToCam_ma(const Geom::V3f &v){
+	return V4f(v, 1).rowMatrix() * MatrixFactory::translation(cen) * MatrixFactory::withRotation(r, up, f);
 }
 
+Geom::V3f Renderer::CameraView::moveToCam(const Geom::V3f &v) {
+	return V4f(moveToCam_ma(v)[0]).norm();
+}
 Rgba Renderer::Rgba::operator *(const float& intensity) const{
 	return Rgba((float)r * intensity, (float)g * intensity, (float)b * intensity, a);
 }
 
+Geom::V3f Renderer::CameraView::projection(const Geom::V3f& v) {
+	return V4f((moveToCam_ma(v) * projection_ma)[0]).norm();
 
+}

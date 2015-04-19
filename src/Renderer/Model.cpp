@@ -71,7 +71,7 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 		}
 	}
 
-	string glob_path = filename.substr(0, filename.find_last_of("/")) + "/";
+	/*string glob_path = filename.substr(0, filename.find_last_of("/")) + "/";
 	for(unsigned i = 0; i < sc->mNumMaterials; i++){
 		aiMaterial * mat = sc->mMaterials[i];
 		Material pmat;
@@ -79,12 +79,14 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 			for(unsigned j = 0; j < mat->GetTextureCount((aiTextureType)t); j++){
 				aiString path;
 				if(mat->GetTexture((aiTextureType)t, j, &path) == AI_SUCCESS) {
+					cerr << glob_path + string(path.C_Str()) << endl;
 					pmat.add(t, Texture(glob_path + string(path.C_Str())));
 				}
 			}
 		}
 		mats.push_back(pmat);
 	}
+	*/
 }
 
 Renderer::Texture::Texture(const std::string& filename) : data((uint8_t *) stbi_load(filename.c_str(), (int *)&width, (int *)&height, (int *)&comp, 0),

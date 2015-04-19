@@ -24,11 +24,14 @@ namespace Renderer {
 			f;
 		float aw, ah;
 		float near, far;
+		Geom::Matrix44f projection_ma;
 	public:
 		CameraView & operator=(const CameraView & other) = default;
 		CameraView() {}
 		CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, float angle, int32_t width, int32_t height, float near, float far);
-		Geom::V3f translate(Geom::V3f v);
+		Geom::V3f moveToCam(const Geom::V3f &v);
+		Geom::Matrix44f moveToCam_ma(const Geom::V3f &v);
+		Geom::V3f projection(const Geom::V3f &v);
 	};
 
 	class Drawer{
@@ -41,8 +44,8 @@ namespace Renderer {
 		bool inScreen(int32_t x, int32_t y);
 		//views
 		CameraView mainView;
-		Geom::V3f toScreenTranslation(Geom::V3f pt);
-		Geom::V3f translationPipeline(Geom::V3f cen, Geom::V3f pt, Geom::V3f scale, Geom::V3f rot, bool &);
+		Geom::V3f toScreenTranslation(const Geom::V3f &pt);
+		Geom::V3f translationPipeline(const Geom::V3f &cen, Geom::V3f pt, const Geom::V3f &scale, const Geom::V3f &rot, bool &);
 	public:
 		template<class V>
 		void LineToScreenBounds(V & begin, V & end, int ignored = 0);
