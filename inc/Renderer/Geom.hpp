@@ -13,6 +13,7 @@ namespace Renderer {
 
 namespace Geom {
 
+
 template<class T>
 int8_t sign(T a) {
 	if (a < 0)
@@ -31,10 +32,10 @@ public:
 	struct quick_multipler{
 		typedef Matrix<float ,4, 4> with;
 		void mult(with &A, const with &B, with &C){
-			__m128 row1 = _mm_load_ps(B[0]),
-				   row2 = _mm_load_ps(B[1]),
-				   row3 = _mm_load_ps(B[2]),
-				   row4 = _mm_load_ps(B[3]);
+			__m128 row1 = _mm_loadu_ps(B[0]),
+				   row2 = _mm_loadu_ps(B[1]),
+				   row3 = _mm_loadu_ps(B[2]),
+				   row4 = _mm_loadu_ps(B[3]);
 			for(int i=0; i<4; i++) {
 				__m128 brod1 = _mm_set1_ps(A[i][0]),
 					   brod2 = _mm_set1_ps(A[i][1]),

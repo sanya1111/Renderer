@@ -11,7 +11,7 @@ using namespace std;
 //Helpers
 static const int INF = 1e9;
 static const float eps = 1e-9;
-static const float SCALE_01FLOAT_TO_INT = 1e9;
+static const float SCALE_01FLOAT_TO_INT = 1e3;
 
 static inline int scale_float(float a){
 	return a * SCALE_01FLOAT_TO_INT;
@@ -204,6 +204,9 @@ void Renderer::Drawer::drawLine2(Geom::V4i begin, Geom::V4i end,
 		pt = step.getP();
 		if(pt.w >= 0)
 			drawPixel(pt.x, pt.y, pt.z, color * scale_int(pt.w));
+		else{
+			drawPixel(pt.x, pt.y, pt.z, Rgba(0, 0, 0, 0));
+		}
 	}
 
 }
@@ -297,24 +300,25 @@ void Renderer::Drawer::drawEnd() {
 
 
 
-Renderer::CameraView::CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, float angle, int32_t width, int32_t height, float near, float far) :
-		cen(cen) , f(f), aw(angle), near(near), far(far){
+Renderer::CameraView::CameraView(Geom::V3f cen_, Geom::V3f up1_, Geom::V3f f_, float angle_, int32_t width_, int32_t height_, float near_, float far_) :
+		cen(cen_) , f(f_), aw(angle_), near(near_), far(far_){
 
-	this->r = up1.vMul(this->f);
+	this->r = up1_.vMul(this->f);
 	this->up = this->f.vMul(this->r);
 
 	this->f = this->f.norm();
 	this->up = this->up.norm();
 	this->r = this->r.norm();
 
-	ah = atan(tan(aw) * height / width);
+	ah = atan(tan(aw) * height_ / width_);
 
 	float projection_plane_z = 1.0;
 	float right = std::tan(aw) * projection_plane_z;
 	float left = -right;
 	float top = std::tan(ah) * projection_plane_z;
 	float bottom = -top;
-	projection_ma = MatrixFactory::projection(left, right, top, bottom, near, far);
+	move_ma = MatrixFactory::translation(cen) * MatrixFactory::withRotation(r, up, f);
+	projection_ma = move_ma * MatrixFactory::projection(left, right, top, bottom, near, far);
 }
 
 void Renderer::Drawer::drawTranslateTriangle(Geom::TriangleF triangle,
@@ -366,7 +370,8 @@ void Renderer::Drawer::drawModel2(const MeshModel& model, Geom::V3f position,
 		for (int j=0; j<3; j++) {
 			V3f res = translationPipeline(position, model.verts[model.faces[i][j]], scale, rot, suc);
 			mas[j] = V3i(res.x, res.y, scale_float(res.z));
-			inten[j] =  scale_float(model.normals[model.faces[i][j]].norm().scMul(light_dir));
+			inten[j] =  scale_float((mainView.moveToCam((const V3f )model.normals[model.faces[i][j]].norm()).transform(position, rot, scale)).norm().scMul(light_dir));
+
 		}
 		Rgba color(255, 255, 255, 0);
 		if(suc) {
@@ -375,18 +380,15 @@ void Renderer::Drawer::drawModel2(const MeshModel& model, Geom::V3f position,
 	}
 }
 
-Matrix44f Renderer::CameraView::moveToCam_ma(const Geom::V3f &v){
-	return V4f(v, 1).rowMatrix() * MatrixFactory::translation(cen) * MatrixFactory::withRotation(r, up, f);
-}
 
 Geom::V3f Renderer::CameraView::moveToCam(const Geom::V3f &v) {
-	return V4f(moveToCam_ma(v)[0]).norm();
+	return V4f((V4f(v, 1).rowMatrix() * move_ma)[0]).norm();
 }
 Rgba Renderer::Rgba::operator *(const float& intensity) const{
 	return Rgba((float)r * intensity, (float)g * intensity, (float)b * intensity, a);
 }
 
 Geom::V3f Renderer::CameraView::projection(const Geom::V3f& v) {
-	return V4f((moveToCam_ma(v) * projection_ma)[0]).norm();
+	return V4f((V4f(v, 1).rowMatrix() * projection_ma)[0]).norm();
 
 }

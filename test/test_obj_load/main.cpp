@@ -39,7 +39,7 @@ public:
 						(60.0)/180.0 * 3.14, buf.width, buf.height, 0.1, 100); //phone
 		drawer.drawBegin(&buf, cam);
 		drawer.fill2(black);
-		drawer.drawModel2(model, V3f(0, 0, 1.7), V3f(1.7 + count, 1 + count, 1 + count), V3f(0, 3.14, 1.0/2.0* 3.14), V3f(0 , 0 , 1.0)); // africa
+		drawer.drawModel2(model, V3f(0, 0, 1.7), V3f(1.7 + count, 1 + count, 1 + count), V3f(0, 3.14, 1.0/2.0* 3.14), V3f(0 , 2.0, 1.0 )); // africa
 //		drawer.drawModel2(model, V3f(0, 0, 1.7), V3f(1.7 + count, 1 + count, 1 + count), V3f(0, 3.14 / 2.0, 3.14), V3f(0 , 0 , 1.0));//pone
 		using namespace Geom;
 		drawer.drawEnd();
