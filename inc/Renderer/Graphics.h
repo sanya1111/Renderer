@@ -13,7 +13,7 @@ namespace Renderer {
 	public:
 		uint8_t a, r, g, b;
 		Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
-		Rgba operator*(const float & intensity);
+		Rgba operator*(const float & intensity)const;
 		Rgba() = default;
 	};
 
@@ -44,14 +44,17 @@ namespace Renderer {
 		Geom::V3f toScreenTranslation(Geom::V3f pt);
 		Geom::V3f translationPipeline(Geom::V3f cen, Geom::V3f pt, Geom::V3f scale, Geom::V3f rot, bool &);
 	public:
-		void LineToScreenBounds(Geom::V3i & begin, Geom::V3i & end, int ignored = 0);
+		template<class V>
+		void LineToScreenBounds(V & begin, V & end, int ignored = 0);
 		void fill(const Rgba &color);
 		void fill2(const Rgba & color);
 		void drawPixel(const int32_t &screen_x,const int32_t &screen_y, const uint32_t &h, const Rgba & color);
 		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
+		void drawLine2(Geom::V4i begin, Geom::V4i end, const Rgba & color);
 		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
+		void drawTriangle2(Geom::Triangle triangle, const Rgba & color);
 		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
-		void drawFilledTriangle2(Geom::Triangle_ triangle, const Rgba & color, Geom::V3f iten);
+		void drawFilledTriangle2(Geom::Triangle triangle, const Rgba & color, Geom::V3f iten);
 		void drawBegin(Buffer * buf, const CameraView &mainView_);
 		void drawTranslateTriangle(Geom::TriangleF triangle, const Rgba &color);
 		void drawTranslateFilledTriangle(Geom::TriangleF triangle, const Rgba& color);

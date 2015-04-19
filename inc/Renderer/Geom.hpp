@@ -246,7 +246,7 @@ class V4 {
 public:
 	static const int num = 4;
 	T x, y, z, w;
-	V4() = default;
+	V4() : x(0), y(0), z(0), w(0) {}
 	V4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w){}
 	V4(V3<T> f, T w) : x(f.x), y(f.y), z(f.z), w(w) {}
 	V4(T * val){
@@ -281,11 +281,13 @@ public:
 			y, 0, 0, 0,
 			z, 0, 0, 0,
 			w, 0, 0, 0
-
 		};
 	}
 	V3<T> norm(){
 		return V3<T>(x / w, y / w, z / w);
+	}
+	V4<T> operator+(const V4<T> &other){
+		return V4<T>(x + other.x, y + other.y, z + other.z, w + other.w);
 	}
 };
 
