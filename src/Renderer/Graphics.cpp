@@ -202,7 +202,8 @@ void Renderer::Drawer::drawLine2(Geom::V4i begin, Geom::V4i end,
 	while(!step.finish()){
 		step.next();
 		pt = step.getP();
-		drawPixel(pt.x, pt.y, pt.z, color * scale_int(pt.w));
+		if(pt.w >= 0)
+			drawPixel(pt.x, pt.y, pt.z, color * scale_int(pt.w));
 	}
 
 }
@@ -224,13 +225,14 @@ void Renderer::Drawer::drawTriangle2(Geom::Triangle4 triangle,
 void Renderer::Drawer::drawFilledTriangle2(	Geom::Triangle4 triangle,
 		const Rgba& color) {
 	std::sort(triangle.vs, triangle.vs + 3);
-	LineStepper<V4i> a(triangle.vs[0], triangle.vs[2], 0, this, 6);
-	LineStepper<V4i> b(triangle.vs[0], triangle.vs[1], 0, this, 6);
+	drawTriangle2(triangle, color);
+	LineStepper<V4i> a(triangle.vs[0], triangle.vs[2], 0, this, 14);
+	LineStepper<V4i> b(triangle.vs[0], triangle.vs[1], 0, this, 14);
 	V4i pa, pb;
 	while(!a.finish()){
 		pa = a.getP();
 		if(pa.x == triangle.vs[1].x){
-			b = LineStepper<V4i>(triangle.vs[1], triangle.vs[2], 0, this,  6);
+			b = LineStepper<V4i>(triangle.vs[1], triangle.vs[2], 0, this,  14);
 		}
 		pb = b.getP();
 		drawLine2(pa, pb, color);
@@ -358,9 +360,6 @@ void Renderer::Drawer::drawModel2(const MeshModel& model, Geom::V3f position,
 			V3f res = translationPipeline(position, model.verts[model.faces[i][j]], scale, rot, suc);
 			mas[j] = V3i(res.x, res.y, scale_float(res.z));
 			inten[j] =  scale_float(model.normals[model.faces[i][j]].norm().scMul(light_dir));
-			if(inten[j] <= 0) {
-				suc = false;
-			}
 		}
 		Rgba color(255, 255, 255, 0);
 		if(suc) {
