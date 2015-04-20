@@ -335,8 +335,10 @@ class VX : public Matrix<T, X, 1>{
 public:
 	static const int num = X;
 	using Matrix<T, X, 1>::ma;
-	T &x, &y;
-	VX() : x(ma[0]), y(ma[1]){
+	VX(){
+		for(int i = 0; i < X; i++){
+			ma[i] = 0;
+		}
 	}
 	VX(const VX<T, X>&) = default;
 
@@ -346,6 +348,7 @@ public:
 		}
 		return *this;
 	}
+
 
 	VX<T, X> operator+(const VX<T, X> &other){
 		VX<T, X> res;

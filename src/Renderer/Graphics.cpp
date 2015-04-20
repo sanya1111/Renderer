@@ -73,13 +73,17 @@ struct LineStepper{
 			std::swap(begin, end);
 		}
 
+		for(int i = 0; i < V::num; i++){
+					delta[i] = derror2[i] = error2[i] = 0;
+		}
+
 		for(int i = 1; i < V::num; i++){
 				delta[i] = sign(end[i] - begin[i]);
 				derror2[i] = std::abs(end[i] - begin[i]) * 2;
 		}
+
 		current = begin;
 		dx = end[0] - begin[0];
-		DEB("beg cu end %d %d %d\n", begin[1], end[1], current[1]);
 	}
 	bool finish(){
 		return current[0] >= end[0];
@@ -101,7 +105,6 @@ struct LineStepper{
 		if(swapped) {
 			swap(ret[0], ret[1]);
 		}
-		DEB("HERE %d\n", current[1]);
 		return ret;
 	}
 };
@@ -224,11 +227,9 @@ void Renderer::Drawer::drawLine3(Geom::VXi<6> begin, Geom::VXi<6> end,
 		step.next();
 		pt = step.getP();
 		if(pt[3] >= 0){
-			int c1 = scale_int(pt[4]) * tex.height;
-			int c2 =  scale_int(pt[5]) * tex.width;
-			Rgba take = tex.at(c1, c2);
-			DEB("BITCHES ARE HERE!!!! %d %d %d %d\n", c1, c2, tex.height, tex.width);
-			std::cerr << "NO HERE" << pt[0] << " " << pt[1] << " " << pt[2] << endl;
+			int c1 = scale_int(pt[4]) * tex.width;
+			int c2 =  tex.height - scale_int(pt[5]) * tex.height;
+			Rgba take = tex.at(c2, c1);
 			drawPixel(pt[0], pt[1], pt[2], take * scale_int(pt[3]));
 		}
 		else{
@@ -268,7 +269,7 @@ inline void Renderer::Drawer::drawFilledTriangle3(Geom::TriangleX<6> triangle, T
 	VXi<6> pa, pb;
 	while(!a.finish()){
 		pa = a.getP();
-		if(pa.x == triangle.vs[1].x){
+		if(pa[0] == triangle.vs[1][0]){
 			b = LineStepper<VXi<6>>(triangle.vs[1], triangle.vs[2], 0, this,  14);
 		}
 		pb = b.getP();
