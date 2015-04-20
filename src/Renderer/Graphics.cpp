@@ -64,12 +64,12 @@ struct LineStepper{
 			dr->LineToScreenBounds(begin, end, ignored);
 		}
 		swapped = false;
-		if (force_asix != 0 && (force_asix == 1 ||  std::abs(begin.x - end.x) < std::abs(begin.y - end.y))) {
-			std::swap(begin.x, begin.y);
-			std::swap(end.x, end.y);
+		if (force_asix != 0 && (force_asix == 1 ||  std::abs(begin[0] - end[0]) < std::abs(begin[1] - end[1]))) {
+			std::swap(begin[0], begin[1]);
+			std::swap(end[0], end[1]);
 			swapped = true;
 		}
-		if (begin.x > end.x) {
+		if (begin[0] > end[0]) {
 			std::swap(begin, end);
 		}
 
@@ -78,14 +78,15 @@ struct LineStepper{
 				derror2[i] = std::abs(end[i] - begin[i]) * 2;
 		}
 		current = begin;
-		dx = end.x - begin.x;
+		dx = end[0] - begin[0];
+		DEB("beg cu end %d %d %d\n", begin[1], end[1], current[1]);
 	}
 	bool finish(){
-		return current.x >= end.x;
+		return current[0] >= end[0];
 	}
 
 	void next(){
-		current.x++;
+		current[0]++;
 		error2 = error2 + derror2;
 		for(int i = 1; i < V::num; i++){
 			if(error2[i] > dx){
@@ -97,8 +98,10 @@ struct LineStepper{
 	}
 	V getP(){
 		V ret = current;
-		if(swapped)
-			swap(ret.x, ret.y);
+		if(swapped) {
+			swap(ret[0], ret[1]);
+		}
+		DEB("HERE %d\n", current[1]);
 		return ret;
 	}
 };
@@ -135,8 +138,9 @@ bool Renderer::Drawer::inScreen(int32_t x, int32_t y){
 
 template<class V>
 void Renderer::Drawer::LineToScreenBounds(V & begin, V & end, int ignored ){
-	V4i bounds_mi = { 0, 0, 0, 0};
-	V4i bounds_ma = { (int)buf->height - 1, (int)buf->width - 1, (int)INF, (int)INF};
+
+	vector<int> bounds_mi = { 0, 0, 0, 0, 0, 0};
+	vector<int> bounds_ma = { (int)buf->height - 1, (int)buf->width - 1, (int)INF, (int)INF, (int) INF, (int) INF};
 	V nbegin = begin, nend = end;
 	for(int i = 0; i < V::num; i++){
 		if(ignored &(1 <<i))
@@ -212,17 +216,23 @@ void Renderer::Drawer::drawLine2(Geom::V4i begin, Geom::V4i end,
 
 template<class Texture>
 void Renderer::Drawer::drawLine3(Geom::VXi<6> begin, Geom::VXi<6> end,
-		const Texture &tex) {
+		Texture &tex) {
 	LineToScreenBounds(begin, end);
 	LineStepper<VXi<6>> step(begin, end);
 	VXi<6> pt;
 	while(!step.finish()){
 		step.next();
 		pt = step.getP();
-		if(pt[3] >= 0)
-			drawPixel(pt.x, pt.y, pt[2], tex.at(pt[3], pt[4]) * scale_int(pt[2]));
+		if(pt[3] >= 0){
+			int c1 = scale_int(pt[4]) * tex.height;
+			int c2 =  scale_int(pt[5]) * tex.width;
+			Rgba take = tex.at(c1, c2);
+			DEB("BITCHES ARE HERE!!!! %d %d %d %d\n", c1, c2, tex.height, tex.width);
+			std::cerr << "NO HERE" << pt[0] << " " << pt[1] << " " << pt[2] << endl;
+			drawPixel(pt[0], pt[1], pt[2], take * scale_int(pt[3]));
+		}
 		else{
-			drawPixel(pt.x, pt.y, pt[2], Rgba(0, 0, 0, 0));
+			drawPixel(pt[0], pt[1], pt[2], Rgba(0, 0, 0, 0));
 		}
 	}
 }
@@ -243,14 +253,14 @@ void Renderer::Drawer::drawTriangle2(Geom::Triangle4 triangle,
 
 template<class Texture>
 inline void Renderer::Drawer::drawTriangle3(Geom::TriangleX<6> triangle,
-		const Texture& tex) {
+		Texture& tex) {
 	for(int8_t i = 0; i < 3; i++){
 			drawLine3(triangle.vs[i], triangle.vs[(i + 1) % 3], tex);
 	}
 }
 
 template<class Texture>
-inline void Renderer::Drawer::drawFilledTriangle3(Geom::TriangleX<6> triangle, const Texture &tex){
+inline void Renderer::Drawer::drawFilledTriangle3(Geom::TriangleX<6> triangle, Texture &tex){
 	std::sort(triangle.vs, triangle.vs + 3);
 	drawTriangle3(triangle, tex);
 	LineStepper<VXi<6>> a(triangle.vs[0], triangle.vs[2], 0, this, 14);
@@ -436,12 +446,12 @@ void Renderer::Drawer::drawModel3(const MeshModel& model, Geom::V3f position,
 			V3f res = translationPipeline(position, model.verts[model.faces[i][j]], scale, rot, suc);
 			mas[j] = V3i(res.x, res.y, scale_float(res.z));
 			inten[j] =  scale_float((mainView.moveToCam((const V3f )model.normals[model.faces[i][j]].norm()).transform(position, rot, scale)).norm().scMul(light_dir));
-			u[j] = model.verts_tex[model.faces[i][j]][0];
-			v[j] = model.verts_tex[model.faces[i][j]][1];
+			u[j] = scale_float(model.verts_tex[model.faces[i][j]][0]);
+			v[j] = scale_float(model.verts_tex[model.faces[i][j]][1]);
 		}
 		Rgba color(255, 255, 255, 0);
 		if(suc) {
-			drawFilledTriangle3(makeTriangle6(Triangle(mas), inten, u, v), model.mats[model.mat_index].col[0][0]);
+			drawFilledTriangle3(makeTriangle6(Triangle(mas), inten, u, v), model.mats[model.mat_index].col[1][0]);
 		}
 	}
 }

@@ -58,17 +58,17 @@ namespace Renderer {
 		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
 		void drawLine2(Geom::V4i begin, Geom::V4i end, const Rgba & color);
 		template<class Texture>
-		void drawLine3(Geom::VXi<6> begin, Geom::VXi<6> end, const Texture &tex);
+		void drawLine3(Geom::VXi<6> begin, Geom::VXi<6> end, Texture &tex);
 
 		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
 		void drawTriangle2(Geom::Triangle4 triangle, const Rgba & color);
 		template<class Texture>
-		void drawTriangle3(Geom::TriangleX<6> triangle, const Texture &tex);
+		void drawTriangle3(Geom::TriangleX<6> triangle, Texture &tex);
 
 		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
 		void drawFilledTriangle2(Geom::Triangle4 triangle, const Rgba & color);
 		template<class Texture>
-		void drawFilledTriangle3(Geom::TriangleX<6> triangle, const Texture &tex);
+		void drawFilledTriangle3(Geom::TriangleX<6> triangle, Texture &tex);
 
 		void drawBegin(Buffer * buf, const CameraView &mainView_);
 

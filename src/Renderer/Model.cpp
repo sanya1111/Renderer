@@ -61,6 +61,7 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 			verts.push_back(V3f(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z));
 			normals.push_back(V3f(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z));
 			verts_tex.push_back(V3f(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y, mesh->mTextureCoords[0][j].z));
+			verts_tex.back().print();
 		}
 
 		for(unsigned j = 0; j < mesh->mNumFaces; j++){
@@ -72,7 +73,7 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 		}
 	}
 
-	/*string glob_path = filename.substr(0, filename.find_last_of("/")) + "/";
+	string glob_path = filename.substr(0, filename.find_last_of("/")) + "/";
 	for(unsigned i = 0; i < sc->mNumMaterials; i++){
 		aiMaterial * mat = sc->mMaterials[i];
 		Material pmat;
@@ -87,7 +88,6 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 		}
 		mats.push_back(pmat);
 	}
-	*/
 }
 
 Renderer::Texture::Texture(const std::string& filename) : data((uint8_t *) stbi_load(filename.c_str(), (int *)&width, (int *)&height, (int *)&comp, 0),

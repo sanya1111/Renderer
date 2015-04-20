@@ -254,7 +254,7 @@ public:
 
 	void print(){
 //		DEB("%f %f %f\n", x, y, z);
-		DEB("%d %d %d\n", x, y, z);
+//		DEB("%d %d %d\n", x, y, z);
 	}
 	T getLen()const{
 		return sqrt(x * x + y * y + z * z);

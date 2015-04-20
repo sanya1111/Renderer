@@ -90,5 +90,7 @@ TriangleX<6> Renderer::Geom::makeTriangle6(const Triangle &a, const V3i &norm, c
 		res.vs[i][4] = u[i];
 		res.vs[i][5] = v[i];
 	}
+	for(int i = 0; i < 3; i++)
+	DEB("yept %d %d\n", res.vs[i][4], res.vs[i][5]);
 	return res;
 }
