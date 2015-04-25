@@ -1,6 +1,9 @@
 #ifndef UTILS_HPP_
 #define UTILS_HPP_
 
+#define FOR(i, n) for(int i = 0; i < (n); i++)
+#define FORN(i, j, n) for(int i = (j); i < (n); i++)
+
 template<class now, class comp, class T, class U>
 struct Selector_{
 	typedef U result;

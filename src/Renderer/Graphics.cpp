@@ -54,6 +54,82 @@ void toBounds(int &a, int l, int r){
 }
 
 template<class V>
+void compWithXY(V3)
+
+//template<class V>
+//struct LineStepper{
+//	V end, begin, current, error2, derror2, delta, step;
+//	int DX;
+//	LineStepper(V begin_, const V & end_, int8_t force_asix = -1, Drawer * dr = NULL, int ignored = 0) : end(end_), begin(begin_){
+//		if(dr){
+//			dr->LineToScreenBounds(begin, end, ignored);
+//		}
+//		int dx = abs(begin[0] - end[0]);
+//		int dy = abs(begin[1] - end[1]);
+//
+//		if(force_asix == 0 || (force_asix != 1 && dx > dy)){
+//			if(begin[0] > end[0]){
+//				swap(begin, end);
+//			}
+//			step[0] = 1;
+//			DX = end[0]  - begin[0];
+//		} else {
+//			if(begin[1] > end[1]){
+//				swap(begin, end);
+//			}
+//			step[1] = 1;
+//			DX = end[1]  - begin[1];
+//		}
+//		FOR(i, V::num){
+//			if(!step[i]){
+//				derror2[i] = abs(end[i] - begin[i]) * 2;
+//				delta[i] = sign(end[i] - begin[i]);
+//			}
+//		}
+//		current = begin;
+//	}
+//	bool finish(){
+//		return current[0] >= end[0];
+//	}
+//
+//	void next(){
+//			current = current + step;
+//			error2 = error2 + derror2;
+//			FOR(i, 2){
+//				if(error2[i] > DX){
+//					current[i] += delta[i] ;
+//					error2[i] -= DX * 2 ;
+//				}
+//			}
+//	}
+//
+//	void nextForce(){
+//		current = current + step;
+//		error2 = error2 + derror2;
+//		FOR(i, 2){
+//			if(error2[i] > DX){
+//				int DX2 = DX * 2;
+//				int tim = ((error2[i]  - DX)/ (DX2)) + (error2[i] % (DX2 ) > 0);
+//				current[i] += delta[i] * tim;
+//				error2[i] -= DX2 * tim;
+//			}
+//		}
+//	}
+//
+//	V getBegin(){
+//		return begin;
+//	}
+//
+//	V getEnd(){
+//		return end;
+//	}
+//
+//	V getP(){
+//		return current;
+//	}
+//};
+
+template<class V>
 struct LineStepper{
 	V begin, end, current, error2, derror2, delta;
 	int dx;
@@ -89,11 +165,27 @@ struct LineStepper{
 		return current[0] >= end[0];
 	}
 
-	void next(){
+	void nextForce(){
 		current[0]++;
 		error2 = error2 + derror2;
 		for(int i = 1; i < V::num; i++){
 			if(error2[i] > dx){
+				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2 ) > 0);
+				current[i] += delta[i] * tim;
+				error2[i] -= dx * 2 * tim;
+			}
+		}
+	}
+
+	void next(){
+		current[0]++;
+		error2 = error2 + derror2;
+		for(int i = 1; i < V::num; i++){
+			if(i == 1 && error2[i] > dx){
+				current[i] += delta[i] ;
+				error2[i] -= dx * 2 ;
+			}
+			if(i != 1 && error2[i] > dx){
 				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2 ) > 0);
 				current[i] += delta[i] * tim;
 				error2[i] -= dx * 2 * tim;
@@ -274,8 +366,8 @@ inline void Renderer::Drawer::drawFilledTriangle3(Geom::TriangleX<6> triangle, T
 		}
 		pb = b.getP();
 		drawLine3(pa, pb, tex);
-		a.next();
-		b.next();
+		a.nextForce();
+		b.nextForce();
 	}
 }
 

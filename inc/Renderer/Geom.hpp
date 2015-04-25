@@ -297,6 +297,7 @@ public:
 			return w;
 		}
 	}
+
 	Matrix44<T> rowMatrix()const{
 		return Matrix44<T>{
 			x, y, z, w,
