@@ -53,122 +53,48 @@ void toBounds(int &a, int l, int r){
 	a = min(a, r);
 }
 
-template<class V>
-void compWithXY(V3)
 
-//template<class V>
-//struct LineStepper{
-//	V end, begin, current, error2, derror2, delta, step;
-//	int DX;
-//	LineStepper(V begin_, const V & end_, int8_t force_asix = -1, Drawer * dr = NULL, int ignored = 0) : end(end_), begin(begin_){
-//		if(dr){
-//			dr->LineToScreenBounds(begin, end, ignored);
-//		}
-//		int dx = abs(begin[0] - end[0]);
-//		int dy = abs(begin[1] - end[1]);
-//
-//		if(force_asix == 0 || (force_asix != 1 && dx > dy)){
-//			if(begin[0] > end[0]){
-//				swap(begin, end);
-//			}
-//			step[0] = 1;
-//			DX = end[0]  - begin[0];
-//		} else {
-//			if(begin[1] > end[1]){
-//				swap(begin, end);
-//			}
-//			step[1] = 1;
-//			DX = end[1]  - begin[1];
-//		}
-//		FOR(i, V::num){
-//			if(!step[i]){
-//				derror2[i] = abs(end[i] - begin[i]) * 2;
-//				delta[i] = sign(end[i] - begin[i]);
-//			}
-//		}
-//		current = begin;
-//	}
-//	bool finish(){
-//		return current[0] >= end[0];
-//	}
-//
-//	void next(){
-//			current = current + step;
-//			error2 = error2 + derror2;
-//			FOR(i, 2){
-//				if(error2[i] > DX){
-//					current[i] += delta[i] ;
-//					error2[i] -= DX * 2 ;
-//				}
-//			}
-//	}
-//
-//	void nextForce(){
-//		current = current + step;
-//		error2 = error2 + derror2;
-//		FOR(i, 2){
-//			if(error2[i] > DX){
-//				int DX2 = DX * 2;
-//				int tim = ((error2[i]  - DX)/ (DX2)) + (error2[i] % (DX2 ) > 0);
-//				current[i] += delta[i] * tim;
-//				error2[i] -= DX2 * tim;
-//			}
-//		}
-//	}
-//
-//	V getBegin(){
-//		return begin;
-//	}
-//
-//	V getEnd(){
-//		return end;
-//	}
-//
-//	V getP(){
-//		return current;
-//	}
-//};
 
 template<class V>
 struct LineStepper{
-	V begin, end, current, error2, derror2, delta;
+	V begin, end, current, error2, derror2, delta, step;
 	int dx;
-	bool swapped;
 
 	LineStepper(const V &begin_, const V & end_, int8_t force_asix = -1, Drawer * dr = NULL, int ignored = 0) : begin(begin_), end(end_){
 		if(dr){
 			dr->LineToScreenBounds(begin, end, ignored);
 		}
-		swapped = false;
-		if (force_asix != 0 && (force_asix == 1 ||  std::abs(begin[0] - end[0]) < std::abs(begin[1] - end[1]))) {
-			std::swap(begin[0], begin[1]);
-			std::swap(end[0], end[1]);
-			swapped = true;
-		}
-		if (begin[0] > end[0]) {
-			std::swap(begin, end);
+		if (force_asix == 0 || (force_asix != 1 &&  std::abs(begin[0] - end[0]) > std::abs(begin[1] - end[1]))) {
+			step[0] = 1;
+			if(end[0] < begin[0]){
+				swap(begin, end);
+			}
+			dx = end[0] - begin[0];
+		} else {
+			step[1] = 1;
+			if(end[1] < begin[1]){
+				swap(begin, end);
+			}
+			dx = end[1] - begin[1];
 		}
 
-		for(int i = 0; i < V::num; i++){
-					delta[i] = derror2[i] = error2[i] = 0;
-		}
-
-		for(int i = 1; i < V::num; i++){
-				delta[i] = sign(end[i] - begin[i]);
-				derror2[i] = std::abs(end[i] - begin[i]) * 2;
+		FOR(i, V::num){
+			if(step[i])
+				continue;
+			delta[i] = sign(end[i] - begin[i]);
+			derror2[i] = std::abs(end[i] - begin[i]) * 2;
 		}
 
 		current = begin;
-		dx = end[0] - begin[0];
 	}
 	bool finish(){
-		return current[0] >= end[0];
+		return (step[0] && current[0] >= end[0]) || (step[1] && current[1] >= end[1]);
 	}
 
 	void nextForce(){
-		current[0]++;
+		current = current + step;
 		error2 = error2 + derror2;
-		for(int i = 1; i < V::num; i++){
+		for(int i = 0; i < V::num; i++){
 			if(error2[i] > dx){
 				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2 ) > 0);
 				current[i] += delta[i] * tim;
@@ -178,9 +104,9 @@ struct LineStepper{
 	}
 
 	void next(){
-		current[0]++;
+		current = current + step;
 		error2 = error2 + derror2;
-		for(int i = 1; i < V::num; i++){
+		FOR(i, V::num){
 			if(i == 1 && error2[i] > dx){
 				current[i] += delta[i] ;
 				error2[i] -= dx * 2 ;
@@ -193,11 +119,7 @@ struct LineStepper{
 		}
 	}
 	V getP(){
-		V ret = current;
-		if(swapped) {
-			swap(ret[0], ret[1]);
-		}
-		return ret;
+		return current;
 	}
 };
 
