@@ -92,3 +92,17 @@ TriangleX<6> Renderer::Geom::makeTriangle6(const Triangle &a, const V3i &norm, c
 	}
 	return res;
 }
+
+TriangleXF<7> Renderer::Geom::makeTriangle7(Triangle_<V4f> a, V3f norm, V3f u, V3f v ){
+	TriangleXF<7> res;
+	FOR(i ,3){
+		FOR(j, 4){
+			res.vs[i][j] = a.vs[i][j];
+		}
+		res.vs[i][4] = norm[i];
+		res.vs[i][5] = u[i];
+		res.vs[i][6] = v[i];
+	}
+	return res;
+}
+

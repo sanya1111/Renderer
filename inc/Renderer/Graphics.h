@@ -32,7 +32,9 @@ namespace Renderer {
 		CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, float angle, int32_t width, int32_t height, float near, float far);
 		Geom::V3f moveToCam(const Geom::V3f &v);
 		Geom::V3f projection(const Geom::V3f &v);
+		Geom::V4f projection2(const Geom::V3f &v);
 	};
+
 
 	class Drawer{
 		Buffer * buf;
@@ -45,7 +47,9 @@ namespace Renderer {
 		//views
 		CameraView mainView;
 		Geom::V3f toScreenTranslation(const Geom::V3f &pt);
+		Geom::V4f toScreenTranslation2(const Geom::V4f &pt);
 		Geom::V3f translationPipeline(const Geom::V3f &cen, Geom::V3f pt, const Geom::V3f &scale, const Geom::V3f &rot, bool &);
+		Geom::V4f translationPipeline2(const Geom::V3f &cen, Geom::V3f pt, const Geom::V3f &scale, const Geom::V3f &rot, bool &success);
 	public:
 		template<class V>
 		void LineToScreenBounds(V & begin, V & end, int ignored = 0);
@@ -65,6 +69,8 @@ namespace Renderer {
 		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
 		void drawFilledTriangle2(Geom::Triangle4 triangle, const Rgba & color);
 		void drawFilledTriangle3(Geom::TriangleX<6> triangle, const Texture &tex);
+		void drawFilledTriangle4(Geom::TriangleX<6> triangle, const Texture &tex);
+		void drawFilledTriangle5(Geom::TriangleXF<7> triangle, const Texture &tex);
 
 		void drawBegin(Buffer * buf, const CameraView &mainView_);
 
@@ -77,6 +83,8 @@ namespace Renderer {
 		void drawModel(const MeshModel & model, Geom::V3f position, Geom::V3f scale, Geom::V3f rot);
 		void drawModel2(const MeshModel & model, Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir);
 		void drawModel3(const MeshModel &model,  Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir);
+		void drawModel4(const MeshModel &model,  Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir);
+
 		Texture saveSnapshot();
 		Drawer() : current_draw(0) {}
 	};

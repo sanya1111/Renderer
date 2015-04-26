@@ -81,6 +81,7 @@ public:
 	};
 
 	Buffer() = default;
+
 	~Buffer();
 };
 

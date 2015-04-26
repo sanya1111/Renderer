@@ -63,7 +63,6 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 			verts.push_back(V3f(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z));
 			normals.push_back(V3f(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z));
 			verts_tex.push_back(V3f(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y, mesh->mTextureCoords[0][j].z));
-			verts_tex.back().print();
 		}
 
 		for(unsigned j = 0; j < mesh->mNumFaces; j++){

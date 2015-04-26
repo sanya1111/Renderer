@@ -129,7 +129,14 @@ Geom::V3f Renderer::Drawer::toScreenTranslation(const Geom::V3f &pt){
 	return (V4f(pt, 1).rowMatrix() * transf)[0];
 }
 
-
+Geom::V4f Renderer::Drawer::toScreenTranslation2(const Geom::V4f &pt){
+	Matrix44f transf{
+			buf->height / 2.0f, 0, 0, 0,
+			0, buf->width / 2.0f, 0, 0,
+			0, 0, 1, 0,
+			buf->height / 2.0f, buf->width / 2.0f, 0, 1};
+	return (pt.rowMatrix() * transf)[0];
+}
 
 V3f Renderer::Drawer::translationPipeline(const V3f &cen, V3f pt, const V3f &scale, const V3f &rot, bool &success){
 	pt.transform(cen, rot, scale);
@@ -140,8 +147,18 @@ V3f Renderer::Drawer::translationPipeline(const V3f &cen, V3f pt, const V3f &sca
 		success = false;
 	}
 	pt = toScreenTranslation(pt);
-
 	return pt;
+}
+
+V4f Renderer::Drawer::translationPipeline2(const V3f &cen, V3f pt, const V3f &scale, const V3f &rot, bool &success){
+	pt.transform(cen, rot, scale);
+	V4f ret = mainView.projection2(pt);
+//	if(!inBounds(ret.x, -w, w) ||
+//	   !inBounds(ret.y, -w, w) ||
+//	   !inBounds(ret.z, -w, w)){
+//		success = false;
+//	}
+	return toScreenTranslation2(ret);
 }
 
 bool Renderer::Drawer::inScreen(int32_t x, int32_t y){
@@ -288,6 +305,116 @@ inline void Renderer::Drawer::drawFilledTriangle3(Geom::TriangleX<6> triangle, c
 		b.nextForce();
 	}
 }
+
+//void Renderer::Drawer::drawFilledTriangle4(Geom::Triangle triangle, const Rgba &color){
+//	V3i bboxmin(buf->height - 1, buf->width - 1, 0);
+//	V3i bboxmax(0, 0, 0);
+//	V3i clamp = bboxmin;
+//	for (int i = 0; i < 3; i++) {
+//		for (int j = 0; j < 2; j++) {
+//			bboxmin[j] = std::max(0, std::min(bboxmin[j], triangle.vs[i][j]));
+//			bboxmax[j] = std::min(clamp[j],
+//					std::max(bboxmax[j], triangle.vs[i][j]));
+//		}
+//	}
+//	V3i P;
+//	for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
+//		for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
+//			V3f bc_screen = barycentric(triangle, P);
+//			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0)
+//				continue;
+//			drawPixel(P.x, P.y, 10, color);
+//		}
+//	}
+//}
+
+
+void Renderer::Drawer::drawFilledTriangle5(Geom::TriangleXF<7> triangle, const Texture &tex){
+	V3i bboxmin(buf->height - 1, buf->width - 1, 0);
+	V3i bboxmax(0, 0, 0);
+	V3i clamp = bboxmin;
+	TriangleXF<7> cp = triangle;
+	FOR(i, 3){
+		FOR(j, 3){
+			cp.vs[i][j] /= cp.vs[i][3];
+		}
+		cp.vs[i][3] = 1;
+	}
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 2; j++) {
+			bboxmin[j] = std::max(0, std::min(bboxmin[j], (int)(triangle.vs[i][j] / triangle.vs[i][3])));
+			bboxmax[j] = std::min(clamp[j],
+					std::max(bboxmax[j], (int)(triangle.vs[i][j] / triangle.vs[i][3])));
+		}
+	}
+	V3i P;
+	for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
+		for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
+			V3f bc_screen = barycentric(cp, P);
+			if (bc_screen.x<0 || bc_screen.y<0 || bc_screen.z<0)
+				continue;
+			V3f bc_clip = V3f(bc_screen.x/triangle.vs[0][3],
+							  bc_screen.y/triangle.vs[1][3],
+							  bc_screen.z/triangle.vs[2][3]);
+			bc_clip = bc_clip * (1.0 / (bc_clip.x+bc_clip.y+bc_clip.z));
+			VXf<6> pt;
+			pt[0] = P.x;
+			pt[1] = P.y;
+//			drawPixel(pt[0], pt[1], 10, Rgba(255, 255, 255, 0));
+//			continue;
+			pt[2] = V3f(triangle.vs[0][2], triangle.vs[1][2], triangle.vs[2][2]).scMul(bc_clip);
+			for(int i = 4; i < 7; i++){
+				pt[i - 1] = V3f(triangle.vs[0][i], triangle.vs[1][i], triangle.vs[2][i]).scMul(bc_clip);
+			}
+			if(pt[3] >= 0){
+				int c1 = pt[4] * tex.width;
+				int c2 =  tex.height - pt[5] * tex.height;
+				Rgba take = tex.at(c2, c1);
+				drawPixel(pt[0], pt[1], pt[2] * 10000, take * pt[3]);
+			}
+			else{
+				drawPixel(pt[0], pt[1], pt[2], Rgba(0, 0, 0, 0));
+			}
+		}
+	}
+}
+void Renderer::Drawer::drawFilledTriangle4(Geom::TriangleX<6> triangle, const Texture &tex){
+//	V3i bboxmin(buf->height - 1, buf->width - 1, 0);
+//	V3i bboxmax(0, 0, 0);
+//	V3i clamp = bboxmin;
+//	for (int i = 0; i < 3; i++) {
+//		for (int j = 0; j < 2; j++) {
+//			bboxmin[j] = std::max(0, std::min(bboxmin[j], triangle.vs[i][j]));
+//			bboxmax[j] = std::min(clamp[j],
+//					std::max(bboxmax[j], triangle.vs[i][j]));
+//		}
+//	}
+//	V3i P;
+//	for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
+//		for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
+////			V3f bc_screen = barycentric(triangle, P);
+//			bc_screen = bc_screen * (1.0 / (bc_screen.x + bc_screen.y + bc_screen.y));
+//			if (bc_screen.x < 0 || bc_screen.y < 0 || bc_screen.z < 0)
+//				continue;
+//			VXi<6> pt;
+//			pt[0] = P.x;
+//			pt[1] = P.y;
+//			FORN(i, 2, 6){
+//				pt[i] = bc_screen.scMul(V3f(triangle.vs[0][i], triangle.vs[1][i], triangle.vs[2][i]));
+// 			}
+//			if(pt[3] >= 0){
+//				int c1 = scale_int(pt[4]) * tex.width;
+//				int c2 =  tex.height - scale_int(pt[5]) * tex.height;
+//				Rgba take = tex.at(c2, c1);
+//				drawPixel(pt[0], pt[1], pt[2], take * scale_int(pt[3]));
+//			}
+//			else{
+//				drawPixel(pt[0], pt[1], pt[2], Rgba(0, 0, 0, 0));
+//			}
+//		}
+//	}
+}
+
 
 void Renderer::Drawer::drawFilledTriangle2(	Geom::Triangle4 triangle,
 		const Rgba& color) {
@@ -454,6 +581,7 @@ void Renderer::Drawer::drawModel3(const MeshModel& model, Geom::V3f position,
 		V3i v;
 		bool suc = true;
 		for (int j=0; j<3; j++) {
+//			V3f res = translationPipeline2(position, model.verts[model.faces[i][j]], scale, rot, suc).norm();
 			V3f res = translationPipeline(position, model.verts[model.faces[i][j]], scale, rot, suc);
 			mas[j] = V3i(res.x, res.y, scale_float(res.z));
 			inten[j] =  scale_float((mainView.moveToCam((const V3f )model.normals[model.faces[i][j]].norm()).transform(position, rot, scale)).norm().scMul(light_dir));
@@ -467,18 +595,43 @@ void Renderer::Drawer::drawModel3(const MeshModel& model, Geom::V3f position,
 	}
 }
 
+void Renderer::Drawer::drawModel4(const MeshModel& model, Geom::V3f position,
+		Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir) {
+	light_dir = light_dir.norm();
+	for (size_t i=0; i < model.faces.size(); i++) {
+		V4f mas[3];
+		V3f inten;
+		V3f u;
+		V3f v;
+		bool suc = true;
+		for (int j=0; j<3; j++) {
+			mas[j] = translationPipeline2(position, model.verts[model.faces[i][j]], scale, rot, suc);
+			inten[j] =  mainView.moveToCam((const V3f )model.normals[model.faces[i][j]].norm()).transform(position, rot, scale).norm().scMul(light_dir);
+			u[j] = model.verts_tex[model.faces[i][j]][0];
+			v[j] = model.verts_tex[model.faces[i][j]][1];
+		}
+		Rgba color(255, 255, 255, 0);
+		if(suc) {
+			drawFilledTriangle5(makeTriangle7(Triangle_<V4f>(mas), inten, u, v), model.mats[model.mat_index].col[1][0]);
+		}
+	}
+}
 
 
 Geom::V3f Renderer::CameraView::moveToCam(const Geom::V3f &v) {
 	return V4f((V4f(v, 1).rowMatrix() * move_ma)[0]).norm();
 }
+
 Rgba Renderer::Rgba::operator *(const float& intensity) const{
 	return Rgba((float)r * intensity, (float)g * intensity, (float)b * intensity, a);
 }
 
 Geom::V3f Renderer::CameraView::projection(const Geom::V3f& v) {
-	return V4f((V4f(v, 1).rowMatrix() * projection_ma)[0]).norm();
+	return projection2(v).norm();
+}
 
+Geom::V4f Renderer::CameraView::projection2(const Geom::V3f& v) {
+	return V4f((V4f(v, 1).rowMatrix() * projection_ma)[0]);
 }
 
 Texture Renderer::Drawer::saveSnapshot() {
@@ -489,8 +642,9 @@ Texture Renderer::Drawer::saveSnapshot() {
 			FOR(k, 3){
 				new_buf.get()[i * buf->width * 3 + j * 3 + k] = ptr[2 - k];
 			}
-
 		}
 		return Texture(new_buf, buf->width, buf->height, 3);
 	}
 }
+
+

@@ -179,6 +179,10 @@ public:
 			return z;
 		}
 	}
+
+	V3 operator*(const T &with) const{
+		return V3(x * with, y * with, z * with);
+	}
 	V3 operator+(const V3 &with)const {
 		return V3(x + with.x, y + with.y, z + with.z);
 	}
@@ -214,11 +218,11 @@ public:
 		return V3<T>((skewSimMatrix() * other.colomnMatrix()).colomn(0));
 	}
 
-	V3 vSc(V3 & other){
+	V3 vSc(const V3 & other)const{
 		return V3(x * other.x, y * other.y, z * other.z);
 	}
 
-	float scMul(V3 &other){
+	float scMul(const V3 &other)const{
 		return x * other.x + y * other.y + z * other.z;
 	}
 
@@ -253,7 +257,7 @@ public:
 	}
 
 	void print(){
-//		DEB("%f %f %f\n", x, y, z);
+		DEB("%f %f %f\n", x, y, z);
 //		DEB("%d %d %d\n", x, y, z);
 	}
 	T getLen()const{
@@ -324,6 +328,9 @@ public:
 			return (x < other.x) || (x == other.x && y < other.y)
 			||	(x == other.x && y == other.y && z < other.z)
 			||  (x == other.x && y == other.y && z == other.z && w < other.w);
+	}
+	void print(){
+		DEB("%f %f %f %f\n", x, y, z, w);
 	}
 };
 
@@ -404,13 +411,64 @@ using Triangle4 = Triangle_<V4i>;
 
 template<int X>
 using TriangleX = Triangle_<VXi<X>>;
+template<int X>
+using TriangleXF = Triangle_<VXf<X>>;
 
 Triangle4 makeTriangle4(const Triangle &a, const V3i &ot);
 
 TriangleX<6> makeTriangle6(const Triangle &a, const V3i &norm, const V3i &u, const V3i &v);
 
+TriangleXF<7> makeTriangle7(Triangle_<V4f> a, V3f norm, V3f u, V3f v );
+
+//template<class ... T> struct summator{
+//	static constexpr int sum = 0;
+//};
+//
+//template<class T, class ... tail> struct summator<T, tail...>{
+//	static constexpr int sum = T::num + summator<tail...>::sum;
+//};
+//
+//template<class X>
+//TriangleXF<X::num> makeTriangleTemp(X from){
+//
+//}
+//template<class X, class ... T>
+//TriangleXF<X> makeTriangleXF(std::tuple<X, T...> tp){
+//	TriangleXF<X> > res;
+//	FOR(i, 3){
+//		FOR(j, summator<T...>::sum){
+//			res[i][j] =
+//		}
+//	}
+//}
+
+//template<int X>
+//TriangleXF<summator<T...>::sum > makeTriangleXF(std::tuple<T...> tp){
+//
+//}
+
+
+template<int X>
+V3f barycentric(const TriangleXF<X>& a, const V3i &p){
+	V3f s[2];
+	FOR(i, 2){
+		s[i][0] = a.vs[2][i]-a.vs[0][i];
+		s[i][1] = a.vs[1][i]-a.vs[0][i];
+		s[i][2] = a.vs[0][i] - p[i];
+	}
+	V3f u = s[0].vMul(s[1]);
+	if (std::abs(u[2]) < 1) // dont forget that u[2] is integer. If it is zero then triangle ABC is degenerate
+		return V3f(-1,1,1);
+	return V3f(1.f-(u.x+u.y)/u.z, u.y/u.z, u.x/u.z);
+	; // in this case generate negative coordinates, it will be thrown away by the rasterizator
+}
+
+
+
+
 }
 }
+
 
 
 #endif
