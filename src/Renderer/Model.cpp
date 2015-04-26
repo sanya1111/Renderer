@@ -8,7 +8,9 @@
 #include <assimp/scene.h>
 
 #define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "Wrapper/stb_image.h"
+#include "Wrapper/stb_image_write.h"
 
 using namespace std;
 using namespace Renderer::Geom;
@@ -101,4 +103,25 @@ Rgba Renderer::Texture::at(const uint32_t& x, const uint32_t& y) const{
 
 void Renderer::Material::add(uint8_t type, const Texture& tex) {
 	col[type].push_back(tex);
+}
+
+void Renderer::Texture::writePng(const string &filename) {
+	stbi_write_png(filename.c_str(), width, height, comp, data.get(), comp * width);
+}
+
+void Renderer::Texture::writeBmp(const std::string& filename) {
+	stbi_write_bmp(filename.c_str(), width, height, comp, data.get());
+}
+
+void Renderer::Texture::writeHdr(const std::string& filename) {
+	//float * what the?????
+//	stbi_write_hdr(filename.c_str(), width, height, comp, data.get());
+}
+
+void Renderer::Texture::writeTga(const std::string& filename) {
+	stbi_write_tga(filename.c_str(), width, height, comp, data.get());
+}
+
+Renderer::Texture::Texture(shared_ptr<uint8_t> data,
+		uint32_t width, uint32_t height, uint32_t comp) : comp(comp), width(width), height(height), data(data){
 }

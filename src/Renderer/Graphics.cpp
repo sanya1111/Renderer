@@ -4,6 +4,7 @@
 #include <sstream>
 #include <algorithm>
 #include "Renderer/Log.h"
+#include "Renderer/Model.h"
 
 using namespace Renderer;
 using namespace Geom;
@@ -11,7 +12,7 @@ using namespace std;
 //Helpers
 static const int INF = 1e9;
 static const float eps = 1e-9;
-static const float SCALE_01FLOAT_TO_INT = 1e3;
+static const float SCALE_01FLOAT_TO_INT = 1e9;
 
 static inline int scale_float(float a){
 	return a * SCALE_01FLOAT_TO_INT;
@@ -91,30 +92,25 @@ struct LineStepper{
 		return (step[0] && current[0] >= end[0]) || (step[1] && current[1] >= end[1]);
 	}
 
-	void nextForce(){
+	void nextForce() {
 		current = current + step;
 		error2 = error2 + derror2;
 		for(int i = 0; i < V::num; i++){
 			if(error2[i] > dx){
-				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2 ) > 0);
+				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2) > 0);
 				current[i] += delta[i] * tim;
 				error2[i] -= dx * 2 * tim;
 			}
 		}
 	}
 
-	void next(){
+	void next() {
 		current = current + step;
 		error2 = error2 + derror2;
 		FOR(i, V::num){
-			if(i == 1 && error2[i] > dx){
+			if(error2[i] > dx){
 				current[i] += delta[i] ;
 				error2[i] -= dx * 2 ;
-			}
-			if(i != 1 && error2[i] > dx){
-				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2 ) > 0);
-				current[i] += delta[i] * tim;
-				error2[i] -= dx * 2 * tim;
 			}
 		}
 	}
@@ -209,7 +205,7 @@ void Renderer::Drawer::drawLine(V3i begin, V3i end, const Rgba & color) {
 	LineStepper<V3i> step(begin, end);
 	V3i pt;
 	while(!step.finish()){
-		step.next();
+		step.nextForce();
 		pt = step.getP();
 		drawPixel(pt.x, pt.y, pt.z, color);
 	}
@@ -221,7 +217,7 @@ void Renderer::Drawer::drawLine2(Geom::V4i begin, Geom::V4i end,
 	LineStepper<V4i> step(begin, end);
 	V4i pt;
 	while(!step.finish()){
-		step.next();
+		step.nextForce();
 		pt = step.getP();
 		if(pt.w >= 0)
 			drawPixel(pt.x, pt.y, pt.z, color * scale_int(pt.w));
@@ -231,15 +227,17 @@ void Renderer::Drawer::drawLine2(Geom::V4i begin, Geom::V4i end,
 	}
 }
 
-template<class Texture>
 void Renderer::Drawer::drawLine3(Geom::VXi<6> begin, Geom::VXi<6> end,
-		Texture &tex) {
+		const Texture &tex) {
 	LineToScreenBounds(begin, end);
 	LineStepper<VXi<6>> step(begin, end);
 	VXi<6> pt;
 	while(!step.finish()){
-		step.next();
+		step.nextForce();
 		pt = step.getP();
+//		float alp = begin[0] != end[0] ? segmSolver(begin[0], end[0], pt[0]) : segmSolver(begin[1], end[1], pt[1]);
+//		pt[4] = (segmPointer(begin[4], end[4], alp));
+//		pt[5] = (segmPointer(begin[5], end[5], alp));
 		if(pt[3] >= 0){
 			int c1 = scale_int(pt[4]) * tex.width;
 			int c2 =  tex.height - scale_int(pt[5]) * tex.height;
@@ -266,16 +264,14 @@ void Renderer::Drawer::drawTriangle2(Geom::Triangle4 triangle,
 	}
 }
 
-template<class Texture>
 inline void Renderer::Drawer::drawTriangle3(Geom::TriangleX<6> triangle,
-		Texture& tex) {
+		const Texture& tex) {
 	for(int8_t i = 0; i < 3; i++){
 			drawLine3(triangle.vs[i], triangle.vs[(i + 1) % 3], tex);
 	}
 }
 
-template<class Texture>
-inline void Renderer::Drawer::drawFilledTriangle3(Geom::TriangleX<6> triangle, Texture &tex){
+inline void Renderer::Drawer::drawFilledTriangle3(Geom::TriangleX<6> triangle, const Texture &tex){
 	std::sort(triangle.vs, triangle.vs + 3);
 	drawTriangle3(triangle, tex);
 	LineStepper<VXi<6>> a(triangle.vs[0], triangle.vs[2], 0, this, 14);
@@ -307,8 +303,8 @@ void Renderer::Drawer::drawFilledTriangle2(	Geom::Triangle4 triangle,
 		}
 		pb = b.getP();
 		drawLine2(pa, pb, color);
-		a.next();
-		b.next();
+		a.nextForce();
+		b.nextForce();
 	}
 }
 
@@ -326,8 +322,8 @@ void Renderer::Drawer::drawFilledTriangle(Triangle triangle,
 		}
 		pb = b.getP();
 		drawLine(pa, pb, color);
-		a.next();
-		b.next();
+		a.nextForce();
+		b.nextForce();
 	}
 }
 
@@ -485,3 +481,16 @@ Geom::V3f Renderer::CameraView::projection(const Geom::V3f& v) {
 
 }
 
+Texture Renderer::Drawer::saveSnapshot() {
+	if(buf->format_desc[buf->format_desc_entry].bpp == 32){
+		shared_ptr<uint8_t> new_buf(new uint8_t[buf->size / 4 * 3]);
+		FOR(i, buf->height) FOR(j, buf->width){
+			uint8_t * ptr = buf->map + i * buf->stride + j * 4;
+			FOR(k, 3){
+				new_buf.get()[i * buf->width * 3 + j * 3 + k] = ptr[2 - k];
+			}
+
+		}
+		return Texture(new_buf, buf->width, buf->height, 3);
+	}
+}

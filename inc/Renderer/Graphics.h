@@ -54,21 +54,17 @@ namespace Renderer {
 		void fill2(const Rgba & color);
 
 		void drawPixel(const int32_t &screen_x,const int32_t &screen_y, const uint32_t &h, const Rgba & color);
-
 		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
 		void drawLine2(Geom::V4i begin, Geom::V4i end, const Rgba & color);
-		template<class Texture>
-		void drawLine3(Geom::VXi<6> begin, Geom::VXi<6> end, Texture &tex);
+		void drawLine3(Geom::VXi<6> begin, Geom::VXi<6> end, const Texture &tex);
 
 		void drawTriangle(Geom::Triangle triangle, const Rgba & color);
 		void drawTriangle2(Geom::Triangle4 triangle, const Rgba & color);
-		template<class Texture>
-		void drawTriangle3(Geom::TriangleX<6> triangle, Texture &tex);
+		void drawTriangle3(Geom::TriangleX<6> triangle, const Texture &tex);
 
 		void drawFilledTriangle(Geom::Triangle triangle, const Rgba &color);
 		void drawFilledTriangle2(Geom::Triangle4 triangle, const Rgba & color);
-		template<class Texture>
-		void drawFilledTriangle3(Geom::TriangleX<6> triangle, Texture &tex);
+		void drawFilledTriangle3(Geom::TriangleX<6> triangle, const Texture &tex);
 
 		void drawBegin(Buffer * buf, const CameraView &mainView_);
 
@@ -81,7 +77,7 @@ namespace Renderer {
 		void drawModel(const MeshModel & model, Geom::V3f position, Geom::V3f scale, Geom::V3f rot);
 		void drawModel2(const MeshModel & model, Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir);
 		void drawModel3(const MeshModel &model,  Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir);
-
+		Texture saveSnapshot();
 		Drawer() : current_draw(0) {}
 	};
 
