@@ -381,6 +381,7 @@ using VXf = VX<float, X>;
 template<int X>
 using VXi = VX<int, X>;
 
+
 template<class T >
 class Triangle_{
 public:
