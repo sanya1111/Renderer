@@ -11,8 +11,7 @@ using namespace Geom;
 using namespace std;
 //Helpers
 static const int INF = 1e9;
-static const float eps = 1e-9;
-static const float SCALE_01FLOAT_TO_INT = 1e9;
+static const float SCALE_01FLOAT_TO_INT = 1e5;
 
 static inline int scale_float(float a){
 	return a * SCALE_01FLOAT_TO_INT;
@@ -153,11 +152,12 @@ V3f Renderer::Drawer::translationPipeline(const V3f &cen, V3f pt, const V3f &sca
 V4f Renderer::Drawer::translationPipeline2(const V3f &cen, V3f pt, const V3f &scale, const V3f &rot, bool &success){
 	pt.transform(cen, rot, scale);
 	V4f ret = mainView.projection2(pt);
-//	if(!inBounds(ret.x, -w, w) ||
-//	   !inBounds(ret.y, -w, w) ||
-//	   !inBounds(ret.z, -w, w)){
-//		success = false;
-//	}
+	float w = fabs(ret.w);
+	if(!inBounds(ret.x, -w, w) ||
+	   !inBounds(ret.y, -w, w) ||
+	   !inBounds(ret.z, -w, w)){
+		success = false;
+	}
 	return toScreenTranslation2(ret);
 }
 
@@ -202,8 +202,10 @@ inline void Renderer::Drawer::at(uint8_t* ptr, const Rgba& color) {
 }
 
 
-void Renderer::Drawer::drawPixel(const int32_t& screen_x,const int32_t& screen_y, const uint32_t &h, const Rgba & color) {
-	if(zbufferAt(screen_x, screen_y, h)){
+void Renderer::Drawer::drawPixel(int32_t screen_x, int32_t screen_y, uint32_t h, Rgba color) {
+	int32_t pos = screen_x * buf->width + screen_y;
+	if(zbuffer[pos] > h){
+		zbuffer[pos] = h;
 		uint8_t * ptr = buf->map + screen_x * buf->stride + screen_y * buf->bpp / 8;
 		at(ptr, color);
 	}
@@ -370,7 +372,7 @@ void Renderer::Drawer::drawFilledTriangle5(Geom::TriangleXF<7> triangle, const T
 				int c1 = pt[4] * tex.width;
 				int c2 =  tex.height - pt[5] * tex.height;
 				Rgba take = tex.at(c2, c1);
-				drawPixel(pt[0], pt[1], pt[2] * 10000, take * pt[3]);
+				drawPixel(pt[0], pt[1], scale_float(pt[2]), take * pt[3]);
 			}
 			else{
 				drawPixel(pt[0], pt[1], pt[2], Rgba(0, 0, 0, 0));
@@ -465,24 +467,10 @@ void Renderer::Drawer::fill2(const Rgba& color) {
 
 void Renderer::Drawer::drawBegin(Buffer * buf, const CameraView &mainView_) {
 	this->buf = buf;
-	current_draw++;
-	zbuffer.resize(buf->size);
-	check.resize(buf->size);
+	zbuffer.assign(buf->size, INF);
 	mainView = mainView_;
 }
 
-bool Renderer::Drawer::zbufferAt(const int32_t& x, const int32_t& y,const int32_t& h) {
-	int32_t pos = x * buf->width + y;
-	if(check[pos] != current_draw){
-		check[pos] = current_draw;
-		zbuffer[pos] = INF;
-	}
-	if(zbuffer[pos] > h){
-		zbuffer[pos] = h;
-		return true;
-	}
-	return false;
-}
 
 
 
@@ -587,6 +575,9 @@ void Renderer::Drawer::drawModel3(const MeshModel& model, Geom::V3f position,
 			inten[j] =  scale_float((mainView.moveToCam((const V3f )model.normals[model.faces[i][j]].norm()).transform(position, rot, scale)).norm().scMul(light_dir));
 			u[j] = scale_float(model.verts_tex[model.faces[i][j]][0]);
 			v[j] = scale_float(model.verts_tex[model.faces[i][j]][1]);
+		}
+		FOR(j, 3){
+			inten[j] = max(inten[j], 0);
 		}
 		Rgba color(255, 255, 255, 0);
 		if(suc) {

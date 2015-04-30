@@ -38,10 +38,7 @@ namespace Renderer {
 
 	class Drawer{
 		Buffer * buf;
-		std::vector<int32_t> zbuffer,
-							 check;
-		int32_t current_draw;
-		bool zbufferAt(const int32_t &x, const int32_t &y, const int32_t &h);
+		std::vector<int32_t> zbuffer;
 		void at(uint8_t * ptr,const Rgba & color);
 		bool inScreen(int32_t x, int32_t y);
 		//views
@@ -57,7 +54,7 @@ namespace Renderer {
 		void fill(const Rgba &color);
 		void fill2(const Rgba & color);
 
-		void drawPixel(const int32_t &screen_x,const int32_t &screen_y, const uint32_t &h, const Rgba & color);
+		void drawPixel(int32_t screen_x,int32_t screen_y, uint32_t h, Rgba color);
 		void drawLine(Geom::V3i begin, Geom::V3i end, const Rgba & color);
 		void drawLine2(Geom::V4i begin, Geom::V4i end, const Rgba & color);
 		void drawLine3(Geom::VXi<6> begin, Geom::VXi<6> end, const Texture &tex);
@@ -86,7 +83,7 @@ namespace Renderer {
 		void drawModel4(const MeshModel &model,  Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir);
 
 		Texture saveSnapshot();
-		Drawer() : current_draw(0) {}
+		Drawer() {}
 	};
 
 }
