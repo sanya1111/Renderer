@@ -25,21 +25,21 @@ public:
 };
 
 class Material{
+public:
 	//0 - DIFFUSE, 1 - SPECULAR, 2 - AMBIENT , 3 - EMMISIVE
 	std::vector<Texture> col[4];
-public:
 	void add(uint8_t type, const Texture & tex);
 	friend class Drawer;
 };
 
 class MeshModel{
+public:
 	std::vector<Geom::V3f> verts;
 	std::vector<Geom::V3f> verts_tex;
 	std::vector<Geom::V3f> normals;
 	std::vector<std::vector<int> > faces;
-	std::vector<Material> mats;
 	size_t mat_index;
-public:
+	std::vector<Material> mats;
 	void loadObj(const std::string &);
 	void loadObj2(const std::string &);
 	friend class ModelStage;

@@ -34,7 +34,7 @@ class Pipe{
 	PixelStage pixel_stage;
 	Rasterizator<PixelStage> rasterizator;
 public:
-	Pipe(BaseStage base_stage, VertexStage vertex_stage, PixelStage pixel_stage, Rasterizator rasterizator):
+	Pipe(BaseStage base_stage, VertexStage vertex_stage, PixelStage pixel_stage, Rasterizator<PixelStage> rasterizator):
 		base_stage(base_stage), vertex_stage(vertex_stage), pixel_stage(pixel_stage), rasterizator(rasterizator){}
 	void refresh(typename VertexStage::param p1, typename PixelStage::param p2){
 		vertex_stage.refresh(p1);
@@ -49,6 +49,7 @@ public:
 			typename VertexStage::result res_vertex = vertex_stage.process(res_base, ret);
 			if(ret)
 				continue;
+			pixel_stage.process(res_vertex);
 			rasterizator.draw(res_vertex, pixel_stage);
 		}
 	}

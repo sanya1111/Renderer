@@ -29,6 +29,12 @@ bool between(T b, T pt, T e){
 	return pt >= b && pt <= e;
 }
 
+const int INF = 1e9;
+
+float segmSolver(float x_s, float x_e, float at);
+
+float segmPointer(float x_s, float x_e, float al);
+
 
 
 #endif /* UTILS_HPP_ */

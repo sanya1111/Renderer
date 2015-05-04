@@ -146,7 +146,32 @@ namespace MatrixFactory{
 
 
 
-
+template<class T>
+class V2{
+public:
+	static const int num = 2;
+	T x, y;
+	V2() : x(0), y(0){}
+	V2(T x, T y) : x(x), y(y) {}
+	V2(T * val){
+		x = val[0];
+		y = val[1];
+	}
+	T & operator[](size_t id){
+		if(!id)
+			return x;
+		return y;
+	}
+	V2<T> operator+(const V2<T> &other){
+		return V2<T>(x + other.x, y + other.y);
+	}
+	bool operator<(const V2<T> &other) const{
+			return (x < other.x) || (x == other.x && y < other.y);
+	}
+	void print(){
+//		DEB("%f %f %f %f\n", x, y, z, w);
+	}
+};
 template<class T >
 class V3 {
 public:
@@ -516,6 +541,8 @@ V3f barycentric(const TriangleXF<X>& a, const V3i &p){
 	return V3f(1.f-(u.x+u.y)/u.z, u.y/u.z, u.x/u.z);
 	; // in this case generate negative coordinates, it will be thrown away by the rasterizator
 }
+
+
 
 
 

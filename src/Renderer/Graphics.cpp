@@ -5,12 +5,12 @@
 #include <algorithm>
 #include "Renderer/Log.h"
 #include "Renderer/Model.h"
+#include "Renderer/Utils.hpp"
 
 using namespace Renderer;
 using namespace Geom;
 using namespace std;
 //Helpers
-static const int INF = 1e9;
 static const float SCALE_01FLOAT_TO_INT = 1e5;
 
 static inline int scale_float(float a){
@@ -38,15 +38,6 @@ static inline bool inBounds(int w, int b, int e){
 	return w  >= b && w <= e;
 }
 
-static inline float segmSolver(float x_s, float x_e, float at){
-	if(x_s == x_e)
-		return INF;
-	return ( (at - x_s) / (x_e - x_s));
-}
-
-static inline float segmPointer(float x_s, float x_e, float al){
-	return x_s + al * (x_e - x_s);
-}
 
 void toBounds(int &a, int l, int r){
 	a = max(a, l);
@@ -137,6 +128,17 @@ Geom::V4f Renderer::Drawer::toScreenTranslation2(const Geom::V4f &pt){
 	return (pt.rowMatrix() * transf)[0];
 }
 
+void Renderer::Drawer::toScreenTranslation3(Geom::TriangleF4 &tr){
+	Geom::Matrix44f pt = Geom::Matrix44f{
+		 tr[0].x, tr[0].y, tr[0].z, tr[0].w,
+		 tr[1].x, tr[1].y, tr[1].z, tr[1].w,
+		 tr[2].x, tr[2].y, tr[2].z, tr[2].w,
+		 0,       0,       0,       0
+	 } * world_to_screen;
+	 FOR(i, 3) FOR(j, 4){
+		 tr[i][j] = pt[i][j];
+	 }
+}
 V3f Renderer::Drawer::translationPipeline(const V3f &cen, V3f pt, const V3f &scale, const V3f &rot, bool &success){
 	pt.transform(cen, rot, scale);
 	pt = mainView.projection(pt);
@@ -469,7 +471,15 @@ void Renderer::Drawer::drawBegin(Buffer * buf, const CameraView &mainView_) {
 	this->buf = buf;
 	zbuffer.assign(buf->size, INF);
 	mainView = mainView_;
+	world_to_screen = {
+				buf->height / 2.0f, 0, 0, 0,
+				0, buf->width / 2.0f, 0, 0,
+				0, 0, 1, 0,
+				buf->height / 2.0f, buf->width / 2.0f, 0, 1
+	};
 }
+
+
 
 
 
@@ -590,6 +600,9 @@ void Renderer::Drawer::drawModel4(const MeshModel& model, Geom::V3f position,
 }
 
 
+
+
+
 Rgba Renderer::Rgba::operator *(const float& intensity) const{
 	return Rgba((float)r * intensity, (float)g * intensity, (float)b * intensity, a);
 }
@@ -609,4 +622,63 @@ Texture Renderer::Drawer::saveSnapshot() {
 	}
 }
 
+template<class Inp, class BaseStage, class VertexStage, class PixelStage>
+void Renderer::Drawer::drawModel_new(Inp model, BaseStage bstage, VertexStage vstage, PixelStage pstage) {
+	while(bstage.have()){
+		bool ret = true;
+		typename BaseStage::result res_base = bstage.process(ret);
+		DEB("OK1\n");
+		if(ret)
+			continue;
+		DEB("here\n");
+		typename VertexStage::result res_vertex = vstage.process(res_base, ret);
+		DEB("OK2\n");
+		if(ret)
+			continue;
+		DEB("here2\n");
+		pstage.process(res_vertex);
+		draw(get<0>(res_vertex), pstage);
+		DEB("OK3\n");
+	}
+}
 
+template<class PixelStage>
+inline void Renderer::Drawer::draw(Geom::TriangleF4 &tr, PixelStage pstage) {
+	toScreenTranslation3(tr);
+	std::sort(tr.vs, tr.vs + 3);
+	V2<int> triangle[3];
+	FOR(i, 3){
+		triangle[i] = V2<int>(tr[i].x, tr[i].y);
+	}
+	LineStepper<V2<int>> a(triangle[0], triangle[2], 0, this, 14);
+	LineStepper<V2<int>> b(triangle[0], triangle[1], 0, this, 14);
+	V2<int> pa, pb;
+	while(!a.finish()){
+		pa = a.getP();
+		if(pa[0] == triangle[1][0]){
+			b = LineStepper<V2<int>>(triangle[1], triangle[2], 0, this,  14);
+		}
+		pb = b.getP();
+		drawLine_new(pa, pb, pstage);
+		a.next();
+		b.next();
+	}
+}
+
+template<class PixelStage>
+inline void Renderer::Drawer::drawLine_new(Geom::V2<int> begin, Geom::V2<int> end, PixelStage pstage){
+//	V2<int> begin(begin_t.x, begin_t.y);
+//	V2<int> end(end_t.x, end_t.y);
+	LineToScreenBounds(begin, end);
+	LineStepper<V2<int>> step(begin, end);
+	V2<int> pt;
+	while(!step.finish()){
+		step.next();
+		pt = step.getP();
+		if(pstage.apply(pt)){
+			drawPixel(pt.x, pt.y, pstage.getZ(), pstage.getColor());
+		}
+	}
+}
+
+template void Renderer::Drawer::drawModel_new<Renderer::MeshModel&, Renderer::ModelStage, Renderer::DefaultVertexStage, Renderer::DefaultPixelStage>(Renderer::MeshModel&, Renderer::ModelStage, Renderer::DefaultVertexStage, Renderer::DefaultPixelStage);
