@@ -24,6 +24,11 @@ struct int_Selector_<now, now, T, U>{
 	typedef T result;
 };
 
+template<class T>
+bool between(T b, T pt, T e){
+	return pt >= b && pt <= e;
+}
+
 
 
 #endif /* UTILS_HPP_ */

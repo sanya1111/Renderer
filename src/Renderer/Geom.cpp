@@ -34,6 +34,33 @@ Renderer::Geom::Matrix33f Renderer::Geom::MatrixFactory::rotZ(float angle) {
 	};
 }
 
+Matrix44f Renderer::Geom::MatrixFactory::rotX4(float angle) {
+	return Matrix44f{
+		1, 0 ,           0,           0,
+		0, cosf(angle),  sinf(angle), 0,
+		0, -sinf(angle), cosf(angle), 0,
+		0, 0,            0,           1
+	};
+}
+
+Matrix44f Renderer::Geom::MatrixFactory::rotY4(float angle) {
+	return Matrix44f{
+			cosf(angle),  0, sinf(angle), 0,           0,
+			0,            1,              0,           0,
+			-sinf(angle), 0,              cosf(angle), 0,
+			0,            0,              0,           1
+	};
+}
+
+Matrix44f Renderer::Geom::MatrixFactory::rotZ4(float angle) {
+	return Matrix44f{
+			cosf(angle),  sinf(angle), 0, 0,
+			-sinf(angle), cosf(angle), 0, 0,
+			0 ,           0,           1, 0,
+			0,            0,           0, 1
+	};
+}
+
 Renderer::Geom::Matrix33f Renderer::Geom::MatrixFactory::scale(const V3<float> &with) {
 	return Matrix33f{
 		with.x, 0, 0,
@@ -42,6 +69,14 @@ Renderer::Geom::Matrix33f Renderer::Geom::MatrixFactory::scale(const V3<float> &
 	};
 }
 
+Matrix44f Renderer::Geom::MatrixFactory::scale4(const V3<float>& with) {
+	return Matrix44f{
+		with.x, 0,      0,      0,
+		0,      with.y, 0,      0,
+		0,      0,      with.z, 0,
+		0,      0,      0,      1
+	};
+}
 
 Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::projection(float left, float right,
 		float top, float bottom, float near, float far) {
@@ -59,7 +94,7 @@ Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::translation(const V3<fl
 			1.0f, 0.0f, 0.0f, 0.0f,
 			0.0f, 1.0f, 0.0f, 0.0f,
 			0.0f, 0.0f, 1.0f, 0.0f,
-			-with.x, -with.y, -with.z, 1.0f
+			with.x, with.y, with.z, 1.0f
 	};
 }
 
@@ -68,7 +103,7 @@ Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::withRotation(const V3<f
 			r.x, up.x, f.x, 0.0f,
 			r.y, up.y, f.y, 0.0f,
 			r.z, up.z, f.z, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
+			0.0f, 0.0f, 0.0f, 1.0f
 	};
 }
 
@@ -105,4 +140,12 @@ TriangleXF<7> Renderer::Geom::makeTriangle7(Triangle_<V4f> a, V3f norm, V3f u, V
 	}
 	return res;
 }
+
+
+
+Matrix44f Renderer::Geom::MatrixFactory::transform(const V3<float>& cen,
+		const V3<float>& rot, const V3<float> scale) {
+	return (rotX4(rot.x) * rotY4(rot.y) * rotZ4(rot.z) * scale4(scale)) * translation(cen);
+}
+
 

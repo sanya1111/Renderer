@@ -4,6 +4,7 @@
 #include "Renderer/Buffer.h"
 #include "Renderer/Geom.hpp"
 #include "Renderer/Model.h"
+#include "Renderer/Camera.h"
 
 #include <string>
 #include <vector>
@@ -15,24 +16,6 @@ namespace Renderer {
 		Rgba(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
 		Rgba operator*(const float & intensity)const;
 		Rgba() = default;
-	};
-
-	class CameraView{
-		Geom::V3f cen,
-			up,
-			r,
-			f;
-		float aw, ah;
-		float near, far;
-		Geom::Matrix44f projection_ma;
-		Geom::Matrix44f move_ma;
-	public:
-		CameraView & operator=(const CameraView & other) = default;
-		CameraView() {}
-		CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, float angle, int32_t width, int32_t height, float near, float far);
-		Geom::V3f moveToCam(const Geom::V3f &v);
-		Geom::V3f projection(const Geom::V3f &v);
-		Geom::V4f projection2(const Geom::V3f &v);
 	};
 
 

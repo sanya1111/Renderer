@@ -67,7 +67,9 @@ public:
 	};
 	typedef typename Selector_<Matrix<T, N, M>, Matrix<float, 4, 4>, quick_multipler, standart_multipler>::result multipler_t;
 
-	Matrix() {}
+	Matrix() {
+		std::fill(ma.begin(), ma.end(), 0);
+	}
 	Matrix(std::initializer_list<T > Li) {
 		int pos = 0;
 		for(auto it : Li){
@@ -130,11 +132,16 @@ namespace MatrixFactory{
 	Matrix33f rotX(float angle);
 	Matrix33f rotY(float angle);
 	Matrix33f rotZ(float angle);
+	Matrix44f rotX4(float angle);
+	Matrix44f rotY4(float angle);
+	Matrix44f rotZ4(float angle);
 	Matrix33f scale(const V3<float> &with);
+	Matrix44f scale4(const V3<float> &with);
 	Matrix44f projection(float left, float right, float top, float bottom,
 			             float near, float far);
 	Matrix44f translation(const V3<float> &with);
 	Matrix44f withRotation(const V3<float> & r, const V3<float> &up, const V3<float> &f);
+	Matrix44f transform(const V3<float> &cen, const V3<float> &rot, const V3<float> scale);
 };
 
 
@@ -156,6 +163,13 @@ public:
 		x = val[0];
 		y = val[1];
 		z = val[2];
+	}
+
+	std::array<T, 3> arr(){
+		return {x, y, z};
+	};
+	std::array<T, 4> arr4(){
+		return {x, y, z, 1};
 	}
 
 	T & operator[](size_t id){
@@ -301,7 +315,6 @@ public:
 			return w;
 		}
 	}
-
 	Matrix44<T> rowMatrix()const{
 		return Matrix44<T>{
 			x, y, z, w,
@@ -344,9 +357,8 @@ public:
 	static const int num = X;
 	using Matrix<T, X, 1>::ma;
 	VX(){
-		for(int i = 0; i < X; i++){
-			ma[i] = 0;
-		}
+		std::fill(ma.begin(), ma.end(), 0);
+//		for(int i = 0; i < X; i++){s
 	}
 	VX(const VX<T, X>&) = default;
 
@@ -392,6 +404,9 @@ public:
 			vs[i] = from[i];
 		}
 	}
+	T& operator[](size_t id){
+		return vs[id];
+	}
 	Triangle_(const T &A, const T &B, const T &C){
 		vs[0] = A;
 		vs[1] = B;
@@ -409,6 +424,7 @@ public:
 using Triangle = Triangle_<V3i>;
 using TriangleF = Triangle_<V3f>;
 using Triangle4 = Triangle_<V4i>;
+using TriangleF4 = Triangle_<V4f>;
 
 template<int X>
 using TriangleX = Triangle_<VXi<X>>;
@@ -420,6 +436,43 @@ Triangle4 makeTriangle4(const Triangle &a, const V3i &ot);
 TriangleX<6> makeTriangle6(const Triangle &a, const V3i &norm, const V3i &u, const V3i &v);
 
 TriangleXF<7> makeTriangle7(Triangle_<V4f> a, V3f norm, V3f u, V3f v );
+
+/*template<class ...T>
+struct Summator_{
+	static const int num = 0;
+};
+
+template<class W,class ...T>
+struct Summator_<W, T...>{
+	static const int num = W::num + Summator_<T...>::num;
+};
+
+template<class T, int last, class ... Other>
+struct makerTriangle_{
+	void operator()(T * ret, Other ... ot){
+
+	}
+};
+
+template<class T, int last, class W, class ... Other>
+struct makerTriangle_<T, last, W, Other...>{
+	void operator()(T * ret, W now, Other... ot){
+		makerTriangle_<T, last + W::num, Other ...>()(ret, ot...);
+		for(int i = last; i < last + W::num; i++){
+			ret[i] = now[i - last];
+		}
+	}
+};
+
+
+template<template<class> class W, class ...T>
+Triangle_<W<Summator<T...>::num> > makeTriangle(T ... classes){
+	const int sum =Summator<T...>::num;
+	W from[sum];
+	makerPi<W, 0, T...>()(from, classes...);
+	return Pi<W, sum>(from);
+}
+*/
 
 //template<class ... T> struct summator{
 //	static constexpr int sum = 0;

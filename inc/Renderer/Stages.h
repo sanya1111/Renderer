@@ -27,28 +27,30 @@ class Rasterizator{
 
 */
 
-template<typename InpType, typename VertexStage, typename PixelStage, typename Rasterizator>
+template<class BaseStage, class VertexStage, class PixelStage, template<class> class Rasterizator>
 class Pipe{
+	BaseStage base_stage;
 	VertexStage vertex_stage;
 	PixelStage pixel_stage;
-	Rasterizator rasterizator;
+	Rasterizator<PixelStage> rasterizator;
 public:
-	Pipe(VertexStage vertex_stage, PixelStage pixel_stage, Rasterizator rasterizator):
-		vertex_stage(vertex_stage), pixel_stage(pixel_stage), rasterizator(rasterizator){}
+	Pipe(BaseStage base_stage, VertexStage vertex_stage, PixelStage pixel_stage, Rasterizator rasterizator):
+		base_stage(base_stage), vertex_stage(vertex_stage), pixel_stage(pixel_stage), rasterizator(rasterizator){}
 	void refresh(typename VertexStage::param p1, typename PixelStage::param p2){
 		vertex_stage.refresh(p1);
 		pixel_stage.refresh(p2);
 	}
-	void process(InpType inp){
-		bool ret = true;
-		InpType res =vertex_stage.process(inp, ret);
-		if(ret){
-			rasterizator.draw(res, pixel_stage);
+	void process(){
+		while(base_stage.have()){
+			bool ret = true;
+			typename BaseStage::result res_base = base_stage.process(ret);
+			if(ret)
+				continue;
+			typename VertexStage::result res_vertex = vertex_stage.process(res_base, ret);
+			if(ret)
+				continue;
+			rasterizator.draw(res_vertex, pixel_stage);
 		}
-	}
-	void ref_proc(InpType inp,typename VertexStage::param p1, typename PixelStage::param p2){
-		refresh(p1, p2);
-		process(inp);
 	}
 
 };

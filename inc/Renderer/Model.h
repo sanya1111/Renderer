@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory.h>
 #include "Renderer/Geom.hpp"
+
 namespace Renderer{
 
 class Rgba;
@@ -41,6 +42,7 @@ class MeshModel{
 public:
 	void loadObj(const std::string &);
 	void loadObj2(const std::string &);
+	friend class ModelStage;
 	friend class Drawer;
 };
 
