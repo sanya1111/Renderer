@@ -8,6 +8,7 @@ bool Renderer::ModelStage::have() {
 	return ptr < model->faces.size();
 }
 
+
 ModelStage::result Renderer::ModelStage::process ( bool& fin ) {
 	result res;
 	FOR(j,3){

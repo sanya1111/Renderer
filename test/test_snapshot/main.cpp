@@ -48,12 +48,14 @@ public:
 						(60.0)/180.0 * 3.14, buf.width, buf.height, 0.1, 100); //phone
 		drawer.drawBegin(&buf, cam);
 		drawer.fill2(black);
+
 //		drawer.drawModel4(model, V3f(0, 0, 1.7), V3f(2, 1 , 1 ), V3f(0, 3.14, 1.0/2.0* 3.14), V3f(0 , -1, 1.0 )); // africa
-		ModelStage model_stage(model);
-		DefaultVertexStage vstage(cam, V3f(0, 0, 1), V3f(1, 1 , 1 ), V3f(3.14/5.0 , 3.14, 3.14/2.0 ), V3f(-1, 0, 1 ));
-		DefaultPixelStage pstage(model.mats[model.mat_index].col[1][0]);
-		drawer.drawModel_new<MeshModel&, ModelStage, DefaultVertexStage, DefaultPixelStage>(model, model_stage, vstage, pstage);
-//		drawer.drawModel4(model, V3f(0,0, 1), V3f(1, 1 , 1 ), V3f(3.14/5.0 , 3.14, 3.14/2.0 ), V3f(-1, 0, 1 )); // floor
+//		ModelStage model_stage(model);
+//		DefaultVertexStage vstage(cam, V3f(0, 0, 1), V3f(1, 1 , 1 ), V3f(3.14/5.0 , 3.14, 3.14/2.0 ), V3f(-1, 0, 1 ));
+//		DefaultPixelStage pstage(model.mats[model.mat_index].col[1][0]);
+//		drawer.drawModel_new(model_stage, vstage, pstage);
+
+		drawer.drawModel4(model, V3f(0,0, 1), V3f(1, 1 , 1 ), V3f(3.14/5.0 , 3.14, 3.14/2.0 ), V3f(-1, 0, 1 )); // floor
 //		drawer.drawModel2(model, V3f(0, 0, 1.7), V3f(1.7 + count, 1 + count, 1 + count), V3f(0, 3.14 / 2.0, 3.14), V3f(0 , 0 , 1.0));//pone
 		using namespace Geom;
 		drawer.drawEnd();

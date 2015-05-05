@@ -45,7 +45,7 @@ Matrix44f Renderer::Geom::MatrixFactory::rotX4(float angle) {
 
 Matrix44f Renderer::Geom::MatrixFactory::rotY4(float angle) {
 	return Matrix44f{
-			cosf(angle),  0, sinf(angle), 0,           0,
+			cosf(angle),  0,              sinf(angle), 0,
 			0,            1,              0,           0,
 			-sinf(angle), 0,              cosf(angle), 0,
 			0,            0,              0,           1
@@ -89,11 +89,11 @@ Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::projection(float left, 
 	};
 }
 
-Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::translation(const V3<float> &with) {
+Matrix44f MatrixFactory::translation(const V3<float> &with) {
 	return Matrix44f{
-			1.0f, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
+			1.0f, 0.0f, 0.0f, 0,
+			0.0f, 1.0f, 0.0f, 0,
+			0.0f, 0.0f, 1.0f, 0,
 			with.x, with.y, with.z, 1.0f
 	};
 }
@@ -145,7 +145,7 @@ TriangleXF<7> Renderer::Geom::makeTriangle7(Triangle_<V4f> a, V3f norm, V3f u, V
 
 Matrix44f Renderer::Geom::MatrixFactory::transform(const V3<float>& cen,
 		const V3<float>& rot, const V3<float> scale) {
-	return (rotX4(rot.x) * rotY4(rot.y) * rotZ4(rot.z) * scale4(scale)) * translation(cen);
+	return  (scale4(scale) * rotX4(rot.x) * rotY4(rot.y) * rotZ4(rot.z) ) * translation(cen) ;
 }
 
 

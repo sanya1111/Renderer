@@ -24,7 +24,6 @@ public:
 			 tr[2].x, tr[2].y, tr[2].z, tr[2].w,
 			 0,       0,       0,       0
 		 } * transform_matrix;
-
 		 ret = false;
 		 FOR(i, 3){
 			 float mi = -tr[i].w;
@@ -60,6 +59,7 @@ public:
 			 s[1][i] = std::get<2>(tu)[i];
 			 s[2][i] = std::get<3>(tu)[i];
 		 }
+		 f[0].print();
 		 return res;
 	}
 };

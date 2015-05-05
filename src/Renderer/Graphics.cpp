@@ -152,8 +152,10 @@ V3f Renderer::Drawer::translationPipeline(const V3f &cen, V3f pt, const V3f &sca
 }
 
 V4f Renderer::Drawer::translationPipeline2(const V3f &cen, V3f pt, const V3f &scale, const V3f &rot, bool &success){
-	pt.transform(cen, rot, scale);
-	V4f ret = mainView.projection2(pt);
+//	pt.transform(cen, rot, scale);
+	V4f ret = (V4f(pt, 1).rowMatrix() * Geom::MatrixFactory::transform(cen, rot, scale) * mainView.projection_matrix())[0];
+//	ret.print();
+//	V4f ret = mainView.projection2(pt);
 	float w = fabs(ret.w);
 	if(!inBounds(ret.x, -w, w) ||
 	   !inBounds(ret.y, -w, w) ||
@@ -622,18 +624,23 @@ Texture Renderer::Drawer::saveSnapshot() {
 	}
 }
 
-template<class Inp, class BaseStage, class VertexStage, class PixelStage>
-void Renderer::Drawer::drawModel_new(Inp model, BaseStage bstage, VertexStage vstage, PixelStage pstage) {
+
+
+template<class BaseStage, class VertexStage, class PixelStage>
+void Renderer::Drawer::drawModel_new(BaseStage &bstage, VertexStage &vstage, PixelStage &pstage) {
 	while(bstage.have()){
 		bool ret = true;
 		typename BaseStage::result res_base = bstage.process(ret);
+		FOR(i, 3){
+			get<0>(res_base)[0].print();
+		}
 		DEB("OK1\n");
-		if(ret)
+		if(!ret)
 			continue;
 		DEB("here\n");
 		typename VertexStage::result res_vertex = vstage.process(res_base, ret);
 		DEB("OK2\n");
-		if(ret)
+		if(!ret)
 			continue;
 		DEB("here2\n");
 		pstage.process(res_vertex);
@@ -681,4 +688,4 @@ inline void Renderer::Drawer::drawLine_new(Geom::V2<int> begin, Geom::V2<int> en
 	}
 }
 
-template void Renderer::Drawer::drawModel_new<Renderer::MeshModel&, Renderer::ModelStage, Renderer::DefaultVertexStage, Renderer::DefaultPixelStage>(Renderer::MeshModel&, Renderer::ModelStage, Renderer::DefaultVertexStage, Renderer::DefaultPixelStage);
+template void Renderer::Drawer::drawModel_new<Renderer::ModelStage, Renderer::DefaultVertexStage, Renderer::DefaultPixelStage>(Renderer::ModelStage&, Renderer::DefaultVertexStage&, Renderer::DefaultPixelStage&);
