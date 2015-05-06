@@ -15,7 +15,7 @@ class DefaultPixelStage{
 	Texture * tex;
 public:
 	DefaultPixelStage(Texture &with) : tex(&with) {};
-	void process(std::tuple<Geom::TriangleF4, Geom::TriangleF> &result);
+	void save(std::tuple<Geom::TriangleF4, Geom::TriangleF> &result);
 	bool apply(Geom::V2<int> &pt);
 	int getZ();
 	Rgba getColor();

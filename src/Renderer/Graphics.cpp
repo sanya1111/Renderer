@@ -6,6 +6,7 @@
 #include "Renderer/Log.h"
 #include "Renderer/Model.h"
 #include "Renderer/Utils.hpp"
+#include "Renderer/Rast.h"
 
 using namespace Renderer;
 using namespace Geom;
@@ -630,8 +631,8 @@ Texture Renderer::Drawer::saveSnapshot() {
 
 
 
-template<class BaseStage, class VertexStage, class PixelStage>
-void Renderer::Drawer::drawModel_new(BaseStage &bstage, VertexStage &vstage, PixelStage &pstage) {
+template<class BaseStage, class VertexStage, class Rast, class PixelStage>
+void Renderer::Drawer::drawModel_new(BaseStage &bstage, VertexStage &vstage, Rast &rast, PixelStage &pstage) {
 	while(bstage.have()){
 		bool ret = true;
 		typename BaseStage::result res_base = bstage.process(ret);
@@ -640,9 +641,19 @@ void Renderer::Drawer::drawModel_new(BaseStage &bstage, VertexStage &vstage, Pix
 		typename VertexStage::result res_vertex = vstage.process(res_base, ret);
 		if(!ret)
 			continue;
-		toScreenTranslation3(get<0>(res_vertex));
-		pstage.process(res_vertex);
-		draw(get<0>(res_vertex), pstage);
+		rast.process(res_vertex, ret);
+		if(!ret)
+			continue;
+		pstage.save(res_vertex);
+		while(rast.have()){
+			bool need = true;
+			tuple<V3i, Rgba> summary = pstage.apply(rast.next(), need);
+			if(need){
+				V3i& pt = get<0>(summary);
+				Rgba& color = get<1>(summary);
+				drawPixel(pt.x, pt.y, pt.z, color);
+			}
+		}
 	}
 }
 
@@ -690,7 +701,7 @@ inline void Renderer::Drawer::drawLine_new(Geom::V2<int> begin, Geom::V2<int> en
 	LineStepper<V2<int>> step(begin, end);
 	V2<int> pt;
 	while(!step.finish()){
-		step.next();
+		step.nextForce();
 		pt = step.getP();
 		if(pstage.apply(pt)){
 			drawPixel(pt.x, pt.y, pstage.getZ(), pstage.getColor());
@@ -698,4 +709,4 @@ inline void Renderer::Drawer::drawLine_new(Geom::V2<int> begin, Geom::V2<int> en
 	}
 }
 
-template void Renderer::Drawer::drawModel_new<Renderer::ModelStage, Renderer::DefaultVertexStage, Renderer::DefaultPixelStage>(Renderer::ModelStage&, Renderer::DefaultVertexStage&, Renderer::DefaultPixelStage&);
+template void Renderer::Drawer::drawModel_new<Renderer::ModelStage, Renderer::DefaultVertexStage, Renderer::DefaultRast, Renderer::DefaultPixelStage>(Renderer::ModelStage&, Renderer::DefaultVertexStage&, Renderer::DefaultRast&, Renderer::DefaultPixelStage&);

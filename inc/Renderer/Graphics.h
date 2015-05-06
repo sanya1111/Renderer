@@ -72,8 +72,8 @@ namespace Renderer {
 		void drawModel4(const MeshModel &model,  Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir);
 
 		//newwww
-		template<class BaseStage, class VertexStage, class PixelStage>
-		void drawModel_new(BaseStage &bstage, VertexStage &vstage, PixelStage &pstage);
+		template<class BaseStage, class VertexStage, class Rast, class PixelStage>
+		void drawModel_new(BaseStage &bstage, VertexStage &vstage, Rast &rast, PixelStage &pstage);
 		template<class PixelStage>
 		void draw(Geom::TriangleF4 &inp, PixelStage &pstage);
 		template<class PixelStage>

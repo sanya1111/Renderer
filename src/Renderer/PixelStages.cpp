@@ -19,7 +19,7 @@ static inline V3f barycentric2(TriangleF4 a, V2<int> p){
 	return V3f(1.f-(u.x+u.y)/u.z, u.y/u.z, u.x/u.z);
 }
 
-void Renderer::DefaultPixelStage::process(std::tuple<Geom::TriangleF4,Geom::TriangleF>& result){
+void Renderer::DefaultPixelStage::save(std::tuple<Geom::TriangleF4,Geom::TriangleF>& result){
 	tr = &get<0>(result);
 	FOR(i, 3){
 		FOR(j, 3){

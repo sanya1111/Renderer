@@ -24,8 +24,8 @@ public:
 	MeshModel model;
 	float count = 0;
 	MyDraw() {
-//		model.loadObj2("../test/test_snapshot/obj/floor/floor.obj");
-		model.loadObj2("../test/test_obj_load/obj/output.obj");
+		model.loadObj2("../test/test_snapshot/obj/floor/floor.obj");
+//		model.loadObj2("../test/test_obj_load/obj/output.obj");
 //		model.loadObj2("../test/test_obj_load/obj/reconstructed_head.obj");
 //		model.loadObj2("../test/test_obj_load/obj/pone/telefone.obj");
 		white = Rgba(255, 255, 255, 0);
@@ -48,14 +48,14 @@ public:
 //		CameraView cam(V3f(0, 0, 0), V3f(0, 1, 0), V3f(0, 0, 1),
 //						(60.0)/180.0 * 3.14, buf.width, buf.height, 0.1, 100); //phone
 //		DEB("%f\n", count);
-		CameraView cam(V3f(0, 0, -count), V3f(0, 1, 0), V3f(0, 0, 1),
+		CameraView cam(V3f(0, 0, 0), V3f(0, 1, 0), V3f(0, 0, 1),
 					(60.0)/180.0 * 3.14, buf.width, buf.height, 0.1, 100); //phone
 		drawer.drawBegin(&buf, cam);
 		drawer.fill2(black);
 
 		ModelStage model_stage(model);
-//		DefaultVertexStage vstage(cam, V3f(0, 0, 1), V3f(1, 1 , 1 ), V3f(3.14/5.0 , 3.14, 3.14/2.0 ), V3f(-1, 1, 1 ));
-		DefaultVertexStage vstage(cam, V3f(0, 0, 1.7), V3f(1.3, 1.3 , 1.3 ), V3f(0, 3.14, 3.14/2.0), V3f(1 , -1, 1.0 ));
+		DefaultVertexStage vstage(cam, V3f(0, 0, 1), V3f(1, 1 , 1 ), V3f(3.14/5.0 , 3.14, 3.14/2.0 ), V3f(-1, 1, 1 ));
+//		DefaultVertexStage vstage(cam, V3f(0, 0, 1.7), V3f(1.3, 1.3 , 1.3 ), V3f(0, 3.14, 3.14/2.0), V3f(1 , -1, 1.0 ));
 		DefaultPixelStage pstage(model.mats[model.mat_index].col[1][0]);
 		drawer.drawModel_new(model_stage, vstage, pstage);
 
