@@ -10,9 +10,10 @@ namespace Renderer{
 class DefaultVertexStage{
 	Geom::Matrix44f transform_matrix;
 	Geom::V3f light_dir;
+	CameraView * main_view;
 public:
 	typedef std::tuple<Geom::TriangleF4, Geom::TriangleF> result;
-	DefaultVertexStage(const CameraView &main_view, Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir) : light_dir(light_dir){
+	DefaultVertexStage(CameraView &main_view, Geom::V3f position, Geom::V3f scale, Geom::V3f rot, Geom::V3f light_dir) : main_view(&main_view),light_dir(light_dir){
 		transform_matrix = Geom::MatrixFactory::transform(position, rot, scale) * main_view.projection_matrix();
 	}
 	result process(std::tuple<Geom::TriangleF4, Geom::TriangleF, Geom::V3f, Geom::V3f> &tu, bool &ret){
@@ -26,28 +27,26 @@ public:
 		 } * transform_matrix;
 		 ret = false;
 		 FOR(i, 3){
-			 float mi = -tr[i].w;
-			 float ma = tr[i].w;
-			 if(mi > ma)
-				 std::swap(mi, ma);
-			 bool yep = true;
-			 FOR(j, 3){
-				 if(!between(mi, tr[i][j], ma)){
-					 yep = false;
-					 break;
-				 }
-			 }
-			 if(yep){
+			 if(main_view->inProjection(Geom::V4f(pt[i]))){
 				 ret = true;
 				 break;
 			 }
 		 }
 		 if(!ret)
 			 return res;
-
 		 Geom::V3f intensity;
+		 Geom::TriangleF& tr_o = std::get<1>(tu);
+		 Geom::Matrix44f pt_int = Geom::Matrix44f{
+			 tr_o[0].x, tr_o[0].y, tr_o[0].z, 1,
+			 tr_o[1].x, tr_o[1].y, tr_o[1].z, 1,
+			 tr_o[2].x, tr_o[2].y, tr_o[2].z, 1,
+			 0,       0,       0,       0
+		 } * transform_matrix;
+
 		 FOR(i, 3) {
-			 intensity[i] = std::get<1>(tu)[i].scMul(light_dir);
+			 intensity[i] = (Geom::V4f(pt_int[i]).norm().norm()).scMul(light_dir.norm());
+			 intensity[i] = std::max(0.0f, intensity[i]);
+//			 assert(intensity[i] <= 1.0f);
 		 }
 		 Geom::TriangleF4 &f = std::get<0>(res);
 		 Geom::TriangleF &s = std::get<1>(res);
@@ -55,11 +54,10 @@ public:
 			 FOR(j, 4){
 				 f[i][j] = pt[i][j];
 			 }
-			 s[0][i] = intensity[i];
-			 s[1][i] = std::get<2>(tu)[i];
-			 s[2][i] = std::get<3>(tu)[i];
+			 s[i][0] = intensity[i];
+			 s[i][1] = std::get<2>(tu)[i];
+			 s[i][2] = std::get<3>(tu)[i];
 		 }
-		 f[0].print();
 		 return res;
 	}
 };

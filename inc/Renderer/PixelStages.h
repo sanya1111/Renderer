@@ -11,7 +11,6 @@ class Rgba;
 class DefaultPixelStage{
 	Geom::TriangleF4 * tr;
 	Geom::TriangleF * other;
-	Geom::V2<int> *last;
 	Geom::V3f bc_clip;
 	Texture * tex;
 public:

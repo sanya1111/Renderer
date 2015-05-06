@@ -14,5 +14,6 @@ DEBUB_LOG=-DDEBUG_LOG
 CXX_PROJECT_PARAMS=$(shell for i in $(INCLUDE_EXTERNAL_DIRS); do echo "-I$$i "; done) $(DEBUB_LOG)
 CXX_PROJECT_LIBS=$(shell for i in $(EXTERNAL_LIBS); do echo "-l$$i "; done)
 MAKE_TESTS=true
+TESTS_FLAGS=-g -rdynamic
 #FUNCTIONS
 get_objects=$(patsubst  $1/%.cpp,$1/%.o,$(wildcard $1/*.cpp))

@@ -20,6 +20,7 @@ public:
 	Geom::V3f projection(const Geom::V3f &v);
 	Geom::Matrix44f projection_matrix()const;
 	Geom::V4f projection2(const Geom::V3f &v);
+	bool inProjection(const Geom::V4f &pt);
 };
 
 }

@@ -151,6 +151,7 @@ class V2{
 public:
 	static const int num = 2;
 	T x, y;
+	V2(const V2 &other) = default;
 	V2() : x(0), y(0){}
 	V2(T x, T y) : x(x), y(y) {}
 	V2(T * val){
@@ -356,7 +357,7 @@ public:
 			w, 0, 0, 0
 		};
 	}
-	V3<T> norm(){
+	V3<T> norm() const{
 		return V3<T>(x / w, y / w, z / w);
 	}
 	V4<T> operator+(const V4<T> &other){

@@ -86,7 +86,7 @@ struct LineStepper{
 		current = current + step;
 		error2 = error2 + derror2;
 		for(int i = 0; i < V::num; i++){
-			if(error2[i] > dx){
+			if(error2[i] > dx && dx){
 				int tim = ((error2[i]  - dx)/ (dx * 2)) + (error2[i] % (dx * 2) > 0);
 				current[i] += delta[i] * tim;
 				error2[i] -= dx * 2 * tim;
@@ -306,6 +306,7 @@ inline void Renderer::Drawer::drawFilledTriangle3(Geom::TriangleX<6> triangle, c
 			b = LineStepper<VXi<6>>(triangle.vs[1], triangle.vs[2], 0, this,  14);
 		}
 		pb = b.getP();
+
 		drawLine3(pa, pb, tex);
 		a.nextForce();
 		b.nextForce();
@@ -339,13 +340,7 @@ void Renderer::Drawer::drawFilledTriangle5(Geom::TriangleXF<7> triangle, const T
 	V3i bboxmin(buf->height - 1, buf->width - 1, 0);
 	V3i bboxmax(0, 0, 0);
 	V3i clamp = bboxmin;
-	TriangleXF<7> cp = triangle;
-	FOR(i, 3){
-		FOR(j, 3){
-			cp.vs[i][j] /= cp.vs[i][3];
-		}
-		cp.vs[i][3] = 1;
-	}
+	V3f last;
 	for (int i = 0; i < 3; i++) {
 		for (int j = 0; j < 2; j++) {
 			bboxmin[j] = std::max(0, std::min(bboxmin[j], (int)(triangle.vs[i][j] / triangle.vs[i][3])));
@@ -353,10 +348,16 @@ void Renderer::Drawer::drawFilledTriangle5(Geom::TriangleXF<7> triangle, const T
 					std::max(bboxmax[j], (int)(triangle.vs[i][j] / triangle.vs[i][3])));
 		}
 	}
+	FOR(i, 3){
+		FOR(j, 3){
+			triangle.vs[i][j] /= triangle.vs[i][3];
+		}
+//		triangle.vs[i][3] = 1;
+	}
 	V3i P;
 	for (P.x = bboxmin.x; P.x <= bboxmax.x; P.x++) {
 		for (P.y = bboxmin.y; P.y <= bboxmax.y; P.y++) {
-			V3f bc_screen = barycentric(cp, P);
+			V3f bc_screen = barycentric(triangle, P);
 			if (bc_screen.x<0 || bc_screen.y<0 || bc_screen.z<0)
 				continue;
 			V3f bc_clip = V3f(bc_screen.x/triangle.vs[0][3],
@@ -590,9 +591,12 @@ void Renderer::Drawer::drawModel4(const MeshModel& model, Geom::V3f position,
 		bool suc = true;
 		for (int j=0; j<3; j++) {
 			mas[j] = translationPipeline2(position, model.verts[model.faces[i][j]], scale, rot, suc);
-			inten[j] =  mainView.moveToCam((const V3f )model.normals[model.faces[i][j]].norm()).transform(position, rot, scale).norm().scMul(light_dir);
+			inten[j] =  mainView.moveToCam((const V3f )model.normals[model.faces[i][j]].norm()).transform(position, rot, scale).norm().scMul(light_dir.norm());
 			u[j] = model.verts_tex[model.faces[i][j]][0];
 			v[j] = model.verts_tex[model.faces[i][j]][1];
+		}
+		FOR(j, 3){
+			inten[j] = max(inten[j], 0.0f);
 		}
 		Rgba color(255, 255, 255, 0);
 		if(suc) {
@@ -631,32 +635,38 @@ void Renderer::Drawer::drawModel_new(BaseStage &bstage, VertexStage &vstage, Pix
 	while(bstage.have()){
 		bool ret = true;
 		typename BaseStage::result res_base = bstage.process(ret);
-		FOR(i, 3){
-			get<0>(res_base)[0].print();
-		}
-		DEB("OK1\n");
 		if(!ret)
 			continue;
-		DEB("here\n");
 		typename VertexStage::result res_vertex = vstage.process(res_base, ret);
-		DEB("OK2\n");
 		if(!ret)
 			continue;
-		DEB("here2\n");
+		toScreenTranslation3(get<0>(res_vertex));
 		pstage.process(res_vertex);
 		draw(get<0>(res_vertex), pstage);
-		DEB("OK3\n");
 	}
 }
 
 template<class PixelStage>
-inline void Renderer::Drawer::draw(Geom::TriangleF4 &tr, PixelStage pstage) {
-	toScreenTranslation3(tr);
-	std::sort(tr.vs, tr.vs + 3);
+inline void Renderer::Drawer::draw(Geom::TriangleF4 &tr, PixelStage &pstage) {
+//	DEB("BEG\n");
+	V2<int> cnt;
+	FOR(i, 3){
+		V3f tpt = tr[i].norm();
+		if(between(0.0f, tpt.x, (float)buf->height))
+			cnt.x++;
+		if(between(0.0f, tpt.y, (float)buf->width))
+			cnt.y++;
+	}
+	if(!cnt.x|| !cnt.y)
+		return;
+//	DEB("EN\n");
 	V2<int> triangle[3];
 	FOR(i, 3){
-		triangle[i] = V2<int>(tr[i].x, tr[i].y);
+		int a = tr[i][0];
+		int b = tr[i][1];
+		triangle[i] = V2<int>(a, b );
 	}
+	sort(triangle, triangle + 3);
 	LineStepper<V2<int>> a(triangle[0], triangle[2], 0, this, 14);
 	LineStepper<V2<int>> b(triangle[0], triangle[1], 0, this, 14);
 	V2<int> pa, pb;
@@ -667,13 +677,13 @@ inline void Renderer::Drawer::draw(Geom::TriangleF4 &tr, PixelStage pstage) {
 		}
 		pb = b.getP();
 		drawLine_new(pa, pb, pstage);
-		a.next();
-		b.next();
+		a.nextForce();
+		b.nextForce();
 	}
 }
 
 template<class PixelStage>
-inline void Renderer::Drawer::drawLine_new(Geom::V2<int> begin, Geom::V2<int> end, PixelStage pstage){
+inline void Renderer::Drawer::drawLine_new(Geom::V2<int> begin, Geom::V2<int> end, PixelStage &pstage){
 //	V2<int> begin(begin_t.x, begin_t.y);
 //	V2<int> end(end_t.x, end_t.y);
 	LineToScreenBounds(begin, end);

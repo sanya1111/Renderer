@@ -75,9 +75,9 @@ namespace Renderer {
 		template<class BaseStage, class VertexStage, class PixelStage>
 		void drawModel_new(BaseStage &bstage, VertexStage &vstage, PixelStage &pstage);
 		template<class PixelStage>
-		void draw(Geom::TriangleF4 &inp, PixelStage pstage);
+		void draw(Geom::TriangleF4 &inp, PixelStage &pstage);
 		template<class PixelStage>
-		void drawLine_new(Geom::V2<int> begin, Geom::V2<int> end, PixelStage pstage);
+		void drawLine_new(Geom::V2<int> begin, Geom::V2<int> end, PixelStage &pstage);
 		Texture saveSnapshot();
 		Drawer() {	}
 	};

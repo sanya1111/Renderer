@@ -39,3 +39,8 @@ Geom::Matrix44f Renderer::CameraView::projection_matrix()const {
 Geom::V4f Renderer::CameraView::projection2(const Geom::V3f& v) {
 	return V4f((V4f(v, 1).rowMatrix() * projection_ma)[0]);
 }
+
+bool Renderer::CameraView::inProjection(const Geom::V4f& pt) {
+	V3f good = pt.norm();
+	return between(-1.0f, good.x, 1.0f) && between(-1.0f, good.y, 1.0f) && between(near, good.z, far);
+}

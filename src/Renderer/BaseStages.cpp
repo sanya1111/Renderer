@@ -5,6 +5,7 @@ using namespace Geom;
 using namespace std;
 
 bool Renderer::ModelStage::have() {
+//	return ptr < 300;
 	return ptr < model->faces.size();
 }
 
@@ -20,6 +21,7 @@ ModelStage::result Renderer::ModelStage::process ( bool& fin ) {
 		get<2>(res)[j] = model->verts_tex[model->faces[ptr][j]][0]; //u
 		get<3>(res)[j] = model->verts_tex[model->faces[ptr][j]][1]; //v
 	}
+	ptr++;
 	return res;
 }
 
