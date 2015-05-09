@@ -13,7 +13,11 @@ void Renderer::DefaultRast::convert(Geom::TriangleF4 &tr, bool &ret){
 	 0,       0,       0,       0
 	} * screen_ma;
 	FOR(i, 3) FOR(j, 4){
-		tr[i][j] = pt[i][j];
+		tr[i][j] = pt[i][j] ;
+	}
+	FOR(i, 3){
+		FOR(j, 3)
+				tr[i][j] /= tr[i][3];
 	}
 	V2<int> cnt(0, 0);
 	FOR(i, 3){
@@ -60,9 +64,6 @@ void Renderer::DefaultRast::fix(){
 void Renderer::DefaultRast::init(Geom::TriangleF4 tr, bool &ret){
 	sort(tr.vs, tr.vs + 3);
 	FOR(i, 3){
-		FOR(j, 2){
-			tr[i][j] /= tr[i][3];
-		}
 	}
     if (tr[0].x == tr[2].x){
     	ret = false;
