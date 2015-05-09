@@ -47,6 +47,7 @@ void Renderer::DefaultRast::fix(){
 		if(x > mid.x && !half){
 			half = 1;
 			y1 = mid.y + add3 * (x - mid.x);
+			add2 = add3;
 			fix_y();
 		}
 		if(x > finish_x){
@@ -54,6 +55,8 @@ void Renderer::DefaultRast::fix(){
 		}
 		if(it_y > bound_y){
 			x++;
+			y1 += add2;
+			y2 += add1;
 			fix_y();
 			continue;
 		}
@@ -63,8 +66,6 @@ void Renderer::DefaultRast::fix(){
 
 void Renderer::DefaultRast::init(Geom::TriangleF4 tr, bool &ret){
 	sort(tr.vs, tr.vs + 3);
-	FOR(i, 3){
-	}
     if (tr[0].x == tr[2].x){
     	ret = false;
     	return;
@@ -77,13 +78,8 @@ void Renderer::DefaultRast::init(Geom::TriangleF4 tr, bool &ret){
     add3 = (tr[2].x == tr[1].x ? 0 : (tr[2].y - tr[1].y) / (tr[2].x - tr[1].x));
 	x = start_x;
 	y2 = tr[0].y + add1 * (x - tr[0].x);
-	if(x > tr[1].x){
-		half = 1;
-		y1 = tr[1].y + add3 * (x - tr[1].x);
-	} else {
-		half = 0;
-		y1 = tr[0].y + add2 * (x - tr[0].x);
-	}
+	y1 = tr[0].y + add2 * (x - tr[0].x);
+	half = 0;
 	fix_y();
 	fix();
     /*for(int i = max(start, 0); i <= min((int)height - 1, finish); i++){
@@ -119,9 +115,6 @@ void Renderer::DefaultRast::init(Geom::TriangleF4 tr, bool &ret){
 void Renderer::DefaultRast::process(
 		std::tuple<Geom::TriangleF4, Geom::TriangleF>& inp, bool& ret) {
 	convert(get<0>(inp), ret);
-	FOR(i, 3){
-		get<0>(inp)[i].print();
-	}
 	init(get<0>(inp), ret);
 }
 

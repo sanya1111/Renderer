@@ -598,6 +598,7 @@ void Renderer::Drawer::drawModel4(const MeshModel& model, Geom::V3f position,
 		}
 		FOR(j, 3){
 			inten[j] = max(inten[j], 0.0f);
+			mas[j].norm().print();
 		}
 		Rgba color(255, 255, 255, 0);
 		if(suc) {
