@@ -51,14 +51,14 @@ public:
 //		DEB("%f\n", count);
 		CameraView cam(V3f(0, 0, 0), V3f(0, 1, 0), V3f(0, 0, 1),
 					(60.0)/180.0 * 3.14, buf.width, buf.height, 0.1, 100); //phone
-		drawer.drawBegin(&buf, cam);
+		drawer.drawBegin(&buf);
 		drawer.fill2(black);
 
 		ModelStage model_stage(model);
 //		DefaultVertexStage vstage(cam, V3f(0, 0, 1), V3f(1, 1 , 1 ), V3f(3.14/5.0 , 3.14, 3.14/2.0 ), V3f(-1, 1, 1 ));
-		DefaultVertexStage vstage(cam, V3f(0, 0, 1.7 - count), V3f(1.3, 1.3 , 1.3 ), V3f(0, 3.14, 3.14/2.0), V3f(1 , -1, 1.0 ));
-		DefaultPixelStage pstage(model.mats[model.mat_index].col[1][0]);
+		DefaultVertexStage vstage(cam, V3f(0, 0, 1.7), V3f(1.3, 1.3 , 1.3 ), V3f(0, 3.14, 3.14/2.0 + count), V3f(1 , -1, 1.0 ));
 		DefaultRast rast(buf.height, buf.width);
+		DefaultPixelStage pstage(model.mats[model.mat_index].col[1][0]);
 		drawer.drawModel_new(model_stage, vstage, rast, pstage);
 
 //		drawer.drawModel4(model, V3f(0,0, 1), V3f(1, 1 , 1 ), V3f(3.14/5.0 , 3.14, 3.14/2.0 ), V3f(-1, 0, 1 )); // floor

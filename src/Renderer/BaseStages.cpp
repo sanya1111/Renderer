@@ -5,7 +5,6 @@ using namespace Geom;
 using namespace std;
 
 bool Renderer::ModelStage::have() {
-//	return ptr < 300;
 	return ptr < model->faces.size();
 }
 
