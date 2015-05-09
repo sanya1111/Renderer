@@ -36,7 +36,27 @@ namespace Renderer {
 		void drawEnd();
 		//newwww
 		template<class BaseStage, class VertexStage, class Rast, class PixelStage>
-		void drawModel_new(BaseStage &bstage, VertexStage &vstage, Rast &rast, PixelStage &pstage);
+		void drawModel_new(BaseStage &bstage, VertexStage &vstage, Rast &rast, PixelStage &pstage) {
+			while(bstage.have()){
+				bool ret = true;
+				typename BaseStage::result res_base = bstage.process(ret);
+				if(!ret)
+					continue;
+				typename VertexStage::result res_vertex = vstage.process(res_base, ret);
+				if(!ret)
+					continue;
+				rast.process(res_vertex, ret);
+				if(!ret)
+					continue;
+				pstage.save(res_vertex);
+				while(rast.have()){
+					Geom::V2<int> pt = rast.next();
+					if(pstage.apply(pt)){
+						drawPixel(pt.x, pt.y, pstage.getZ(), pstage.getColor());
+					}
+				}
+			}
+		}
 		Texture saveSnapshot();
 		Drawer() {	}
 	};

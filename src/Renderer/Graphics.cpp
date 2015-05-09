@@ -94,32 +94,3 @@ Texture Renderer::Drawer::saveSnapshot() {
 		return Texture(new_buf, buf->width, buf->height, 3);
 	}
 }
-
-
-
-template<class BaseStage, class VertexStage, class Rast, class PixelStage>
-void Renderer::Drawer::drawModel_new(BaseStage &bstage, VertexStage &vstage, Rast &rast, PixelStage &pstage) {
-	while(bstage.have()){
-		bool ret = true;
-		typename BaseStage::result res_base = bstage.process(ret);
-		if(!ret)
-			continue;
-		typename VertexStage::result res_vertex = vstage.process(res_base, ret);
-		if(!ret)
-			continue;
-		rast.process(res_vertex, ret);
-		if(!ret)
-			continue;
-		pstage.save(res_vertex);
-		while(rast.have()){
-			bool need = true;
-			V2<int> pt = rast.next();
-			if(pstage.apply(pt)){
-				drawPixel(pt.x, pt.y, pstage.getZ(), pstage.getColor());
-			}
-		}
-	}
-}
-
-
-template void Renderer::Drawer::drawModel_new<Renderer::ModelStage, Renderer::DefaultVertexStage, Renderer::DefaultRast, Renderer::DefaultPixelStage>(Renderer::ModelStage&, Renderer::DefaultVertexStage&, Renderer::DefaultRast&, Renderer::DefaultPixelStage&);
