@@ -2,21 +2,30 @@
 #define RAST_H_
 #include "Renderer/Geom.hpp"
 
+
+//Get Triangle from world, translale to screen, iterate and output points
+
 namespace Renderer{
 
 class DefaultRast{
 	float  width, height;
+	int start_x,
+		finish_x,
+		x,
+		it_y,
+		bound_y;
+	float y1, y2,
+		add1,
+		add2,
+		add3;
+	bool half;
+	Geom::V2<float> mid;
+	Geom::V3f delta1, delta2, delta3;
 	Geom::Matrix44f screen_ma;
-	Geom::TriangleF4 saved_tr;
-	float bleft, bright;
-	float aty, toy;
-	Geom::V2<float> dleft, dright;
-	Geom::V2<float> p1, p2, p3, p4;
-	bool now;
-	void init(Geom::TriangleF4 );
-	void changeT();
-	void moveP();
-	void change();
+	void init(Geom::TriangleF4, bool &ret );
+	void convert(Geom::TriangleF4 &, bool &ret);
+	void fix();
+	void fix_y();
 public:
 	DefaultRast(int height,int width);
 	void process(std::tuple<Geom::TriangleF4, Geom::TriangleF> &inp, bool &ret);

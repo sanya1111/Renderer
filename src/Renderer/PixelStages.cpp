@@ -54,6 +54,6 @@ Rgba Renderer::DefaultPixelStage::getColor(){
 	int c2 = tex->height - 1 - (V3f(other->vs[0][2], other->vs[1][2], other->vs[2][2]).scMul(bc_clip)) * tex->height;
 //	inten = max(inten, 0.0f);
 //	inten = min(inten, 1.0f);
-	return tex->at(c2, c1) * inten;
+//	return tex->at(c2, c1) * inten;
 	return Rgba(255, 255 ,255, 0);
 }

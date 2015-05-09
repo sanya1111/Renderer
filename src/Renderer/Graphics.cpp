@@ -647,11 +647,9 @@ void Renderer::Drawer::drawModel_new(BaseStage &bstage, VertexStage &vstage, Ras
 		pstage.save(res_vertex);
 		while(rast.have()){
 			bool need = true;
-			tuple<V3i, Rgba> summary = pstage.apply(rast.next(), need);
-			if(need){
-				V3i& pt = get<0>(summary);
-				Rgba& color = get<1>(summary);
-				drawPixel(pt.x, pt.y, pt.z, color);
+			V2<int> pt = rast.next();
+			if(pstage.apply(pt)){
+				drawPixel(pt.x, pt.y, pstage.getZ(), pstage.getColor());
 			}
 		}
 	}
