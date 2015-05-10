@@ -37,15 +37,17 @@ bool Renderer::DefaultPixelStage::apply( Geom::V2<int>& pt) {
 
 
 
-int Renderer::DefaultPixelStage::getZ(){
+float Renderer::DefaultPixelStage::getZ(){
 //	return 10000;
-	return 100000 * (V3f(tr->vs[0][2], tr->vs[1][2], tr->vs[2][2]).scMul(bc_clip));
+	return (V3f(tr->vs[0][2], tr->vs[1][2], tr->vs[2][2]).scMul(bc_clip));
 }
 
 Rgba Renderer::DefaultPixelStage::getColor(){
 	float inten = V3f(other->vs[0][0], other->vs[1][0], other->vs[2][0]).scMul(bc_clip);
 	int c1 = (V3f(other->vs[0][1], other->vs[1][1], other->vs[2][1]).scMul(bc_clip)) * tex->width;
 	int c2 = tex->height - 1 - (V3f(other->vs[0][2], other->vs[1][2], other->vs[2][2]).scMul(bc_clip)) * tex->height;
+//	inten = max(inten, 0.0f);
+//	inten = min(inten, 1.0f);
 	return tex->at(c2, c1) * inten;
-	return Rgba(255, 255 ,255, 0);
+	return Rgba(255 * inten, 255 * inten,255*inten, 0);
 }

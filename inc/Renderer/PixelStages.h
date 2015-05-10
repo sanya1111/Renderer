@@ -14,10 +14,11 @@ class DefaultPixelStage{
 	Geom::V3f bc_clip;
 	Texture * tex;
 public:
-	DefaultPixelStage(Texture &with) : tex(&with) {};
+	DefaultPixelStage(Texture &with) : tex(&with) {
+	};
 	void save(std::tuple<Geom::TriangleF4, Geom::TriangleF> &result);
 	bool apply(Geom::V2<int> &pt);
-	int getZ();
+	float getZ();
 	Rgba getColor();
 };
 

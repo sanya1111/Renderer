@@ -12,7 +12,6 @@ using namespace Renderer;
 using namespace Geom;
 using namespace std;
 //Helpers
-static const float SCALE_01FLOAT_TO_INT = 1e5;
 
 static inline void * mem(void *s, int32_t c, size_t count){
 	 asm volatile("rep\n\t"
@@ -36,7 +35,7 @@ inline void Renderer::Drawer::at(uint8_t* ptr, const Rgba& color) {
 }
 
 
-void Renderer::Drawer::drawPixel(int32_t screen_x, int32_t screen_y, uint32_t h, Rgba color) {
+void Renderer::Drawer::drawPixel(int32_t screen_x, int32_t screen_y, float h, Rgba color) {
 	int32_t pos = screen_x * buf->width + screen_y;
 	if(zbuffer[pos] > h){
 		zbuffer[pos] = h;

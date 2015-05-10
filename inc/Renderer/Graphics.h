@@ -24,19 +24,20 @@ namespace Renderer {
 
 	class Drawer{
 		Buffer * buf;
-		std::vector<int32_t> zbuffer;
+		std::vector<float> zbuffer;
 		void at(uint8_t * ptr,const Rgba & color);
 		bool inScreen(int32_t x, int32_t y);
 		//views
 	public:
 		void fill(const Rgba &color);
 		void fill2(const Rgba & color);
-		void drawPixel(int32_t screen_x,int32_t screen_y, uint32_t h, Rgba color);
+		void drawPixel(int32_t screen_x,int32_t screen_y, float h, Rgba color);
 		void drawBegin(Buffer * buf);
 		void drawEnd();
 		//newwww
 		template<class BaseStage, class VertexStage, class Rast, class PixelStage>
 		void drawModel_new(BaseStage &bstage, VertexStage &vstage, Rast &rast, PixelStage &pstage) {
+			bstage.start();
 			while(bstage.have()){
 				bool ret = true;
 				typename BaseStage::result res_base = bstage.process(ret);
