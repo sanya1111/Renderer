@@ -16,6 +16,7 @@ class DefaultPixelStage{
 public:
 	DefaultPixelStage(Texture &with) : tex(&with) {
 	};
+	DefaultPixelStage() {}
 	void save(std::tuple<Geom::TriangleF4, Geom::TriangleF> &result);
 	bool apply(Geom::V2<int> &pt);
 	float getZ();

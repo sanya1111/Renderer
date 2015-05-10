@@ -26,7 +26,6 @@ namespace Renderer {
 		Buffer * buf;
 		std::vector<float> zbuffer;
 		void at(uint8_t * ptr,const Rgba & color);
-		bool inScreen(int32_t x, int32_t y);
 		//views
 	public:
 		void fill(const Rgba &color);
@@ -34,6 +33,7 @@ namespace Renderer {
 		void drawPixel(int32_t screen_x,int32_t screen_y, float h, Rgba color);
 		void drawBegin(Buffer * buf);
 		void drawEnd();
+		void cleanZ();
 		//newwww
 		template<class BaseStage, class VertexStage, class Rast, class PixelStage>
 		void drawModel_new(BaseStage &bstage, VertexStage &vstage, Rast &rast, PixelStage &pstage) {

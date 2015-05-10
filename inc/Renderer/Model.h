@@ -38,16 +38,13 @@ public:
 	std::vector<Geom::V3f> verts_tex;
 	std::vector<Geom::V3f> normals;
 	std::vector<std::vector<int> > faces;
-	size_t mat_index;
-	std::vector<Material> mats;
 	void loadObj(const std::string &);
-	void loadObj2(const std::string &);
-	friend class ModelStage;
-	friend class Drawer;
 };
 
 class Model{
 	std::vector<MeshModel> meshs;
+	std::vector<size_t> mat_index;
+	std::vector<Material> mats;
 public:
 
 };

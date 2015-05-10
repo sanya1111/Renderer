@@ -30,8 +30,11 @@ public:
 //		model.loadObj2("../test/test_obj_load/obj/output.obj");
 //		model.loadObj2("../test/test_obj_load/obj/reconstructed_head.obj");
 //		model.loadObj2("../test/test_obj_load/obj/pone/telefone.obj");
-		model.loadObj2("../test/test_snapshot/obj/eye/eyeball_obj.obj");
-		model.mat_index = 2;
+//		model.loadObj2("../test/test_snapshot/obj/eye/eyeball_obj.obj");
+//		model.loadObj2("../test/test_snapshot/obj/eyea/Realistic Eye.obj");
+//		model.loadObj2("../test/test_snapshot/obj/an1/glasses2.obj");
+		model.loadObj2("../test/test_snapshot/obj/gl_pack/Glass Pack.obj");
+//		model.mat_index = 4;
 		DEB("OK\n");
 		model_stage = std::move(ModelStage(model));
 		white = Rgba(255, 255, 255, 0);
@@ -54,22 +57,24 @@ public:
 //		CameraView cam(V3f(0, 0, 0), V3f(0, 1, 0), V3f(0, 0, 1),
 //						(60.0)/180.0 * 3.14, buf.width, buf.height, 0.1, 100); //phone
 //		DEB("%f\n", count);
-		CameraView cam(V3f(0, 0, -0.8 ), V3f(0, 1, 0), V3f(0, 0, 1),
+		CameraView cam(V3f(0, 0, -0.75 ), V3f(0, 1, 0), V3f(0, 0, 1),
 					(60.0)/180.0 * 3.14, buf.width, buf.height, 0.000001f, 100); //phone
 		drawer.drawBegin(&buf);
 		drawer.fill2(black);
 
 
 //		DefaultVertexStage vstage(cam, V3f(0, 0, 1), V3f(1.0/2, 1.0/2 , 1.0/2 ), V3f(3.14/5.0 , 3.14, 3.14/2.0 ), V3f(-1, 1, 1 ));
-//		DefaultVertexStage vstage(cam, V3f(0, 0, 1.7), V3f(1/4.0, 1 / 1.25 , 1/5.0 ), V3f(0, 3.14, 3.14/2.0 ), V3f(0, 0, 1 ));
-		DefaultVertexStage vstage(cam, V3f(0, 0, 3), V3f(1 , 1  , 1 ), V3f(3.14 / 2, 3.14, 3.14 ), V3f(0, 0, 1 ));
+//		DefaultVertexStage vstage(cam, V3f(0, 0, 1.7), V3f(1/4.0, 1 / 1.25 , 1/5.0 ), V3f(0, 3.14 , 3.14/2.0), V3f(0, 0, 1 ));
+		DefaultVertexStage vstage(cam, V3f(0, 0, 3), V3f(1 , 1/2.0  , 1/3.0 ), V3f(3.14 / 2, 3.14/2 + count , 0 ), V3f(1, 0, 1 ));
 		DefaultRast rast(buf.height, buf.width);
-		DefaultPixelStage pstage(model.mats[model.mat_index].col[1][0]);
+//		DefaultPixelStage pstage(model.mats[model.mat_index].col[1][0]);
+		DefaultPixelStage pstage;
+//		DefaultPixelStage pstage2(model.mats[2].col[1][0]);
 //		DEB("%d\n", model.mat_index);
-//		DEB("%d\n", model.mats[model.mat_index].col[1].size());
-//		DEB("TEXTURE EPT %d\n", model.mats[model.mat_index].col[1][0].width);
+//		DEB("%d\n", model.mats[4].col[1].size());
+//		DEB("TEXTURE EPT %d\n", model.mats[model.mat_index].col[1][0].height);
+//		drawer.drawModel_new(model_stage, vstage, rast, pstage);
 		drawer.drawModel_new(model_stage, vstage, rast, pstage);
-
 		using namespace Geom;
 		drawer.drawEnd();
 	}

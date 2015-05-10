@@ -56,7 +56,7 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 		    aiProcess_Triangulate |
 		    aiProcess_JoinIdenticalVertices |
 		    aiProcess_OptimizeMeshes);
-	for(unsigned i = 0; i < sc->mNumMeshes; i++){
+	for(unsigned i = 4; i < 6; i++){
 		aiMesh * mesh = sc->mMeshes[i];
 		mat_index = mesh->mMaterialIndex;
 		for(unsigned j = 0 ;j < mesh->mNumVertices; j++){
@@ -64,6 +64,7 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 			normals.push_back(V3f(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z));
 			verts_tex.push_back(V3f(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y, mesh->mTextureCoords[0][j].z));
 		}
+//		DEB("OUT\n");
 
 		for(unsigned j = 0; j < mesh->mNumFaces; j++){
 			vector<int> res;
@@ -73,7 +74,6 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 			faces.push_back(res);
 		}
 	}
-
 	string glob_path = filename.substr(0, filename.find_last_of("/")) + "/";
 	for(unsigned i = 0; i < sc->mNumMaterials; i++){
 		aiMaterial * mat = sc->mMaterials[i];

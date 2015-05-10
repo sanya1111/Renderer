@@ -25,6 +25,7 @@ ModelStage::result Renderer::ModelStage::process ( bool& fin ) {
 }
 
 
+
 Renderer::ModelStage::ModelStage(const MeshModel& model)  : model(&model), norm_v(model.verts), ptr(0){
 	V3f m(0, 0, 0);
 	for_each(model.verts.begin(), model.verts.end(), [&m](const V3f &v){

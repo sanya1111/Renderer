@@ -63,7 +63,7 @@ void Renderer::Drawer::fill2(const Rgba& color) {
 
 void Renderer::Drawer::drawBegin(Buffer * buf) {
 	this->buf = buf;
-	zbuffer.assign(buf->size, INF);
+	cleanZ();
 }
 
 
@@ -79,7 +79,9 @@ Rgba Renderer::Rgba::operator *(const float& intensity) const{
 	return Rgba((float)r * intensity, (float)g * intensity, (float)b * intensity, a);
 }
 
-
+void Renderer::Drawer::cleanZ() {
+	zbuffer.assign(buf->size, INF);
+}
 
 Texture Renderer::Drawer::saveSnapshot() {
 	if(buf->format_desc[buf->format_desc_entry].bpp == 32){
