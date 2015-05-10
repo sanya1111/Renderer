@@ -16,53 +16,29 @@ using namespace std;
 using namespace Renderer::Geom;
 using namespace Renderer;
 
-void Renderer::MeshModel::loadObj(const string &filename) {
-
-	std::ifstream in;
-	in.open (filename, std::ifstream::in);
-	if(in.fail()){
-		DEB("%s\n", filename.c_str());
-		return;
-	}
-	std::string line;
-	while (!in.eof()) {
-		std::getline(in, line);
-		std::stringstream iss(line.c_str());
-		char trash;
-		if (!line.compare(0, 2, "v ")) {
-			iss >> trash;
-			V3f v;
-			for (int i=0;i<3;i++) iss >> v[i];
-				verts.push_back(v);
-		}  else if (!line.compare(0, 2, "f ")) {
-			 std::vector<int> f;
-			int itrash, idx;
-			iss >> trash;
-			while (iss >> idx >> trash >> itrash >> trash >> itrash) {
-			idx--;
-			f.push_back(idx);
-			}
-			faces.push_back(f);
-		}
-	}
+void Renderer::Model::clean() {
+	vector<MeshModel>().swap(meshs);
+	vector<size_t>().swap(mat_index);
+	vector<Material>().swap(mats);
 }
 
-
-
-void Renderer::MeshModel::loadObj2(const string &filename) {
+void Renderer::Model::loadObj2(const string &filename) {
+	clean();
 	Assimp::Importer imp;
 	const aiScene* sc = imp.ReadFile(filename,
 		    aiProcess_GenSmoothNormals |
 		    aiProcess_Triangulate |
 		    aiProcess_JoinIdenticalVertices |
 		    aiProcess_OptimizeMeshes);
-	for(unsigned i = 4; i < 6; i++){
+	meshs.resize(sc->mNumMeshes);
+	mat_index.resize(sc->mNumMeshes);
+	for(unsigned i = 0; i < 3; i++){
 		aiMesh * mesh = sc->mMeshes[i];
-		mat_index = mesh->mMaterialIndex;
+		mat_index[i] = mesh->mMaterialIndex;
 		for(unsigned j = 0 ;j < mesh->mNumVertices; j++){
-			verts.push_back(V3f(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z));
-			normals.push_back(V3f(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z));
-			verts_tex.push_back(V3f(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y, mesh->mTextureCoords[0][j].z));
+			meshs[i].verts.push_back(V3f(mesh->mVertices[j].x, mesh->mVertices[j].y, mesh->mVertices[j].z));
+			meshs[i].normals.push_back(V3f(mesh->mNormals[j].x, mesh->mNormals[j].y, mesh->mNormals[j].z));
+			meshs[i].verts_tex.push_back(V3f(mesh->mTextureCoords[0][j].x, mesh->mTextureCoords[0][j].y, mesh->mTextureCoords[0][j].z));
 		}
 //		DEB("OUT\n");
 
@@ -71,7 +47,7 @@ void Renderer::MeshModel::loadObj2(const string &filename) {
 			for(unsigned k = 0; k < mesh->mFaces[j].mNumIndices; k++){
 				res.push_back(mesh->mFaces[j].mIndices[k]);
 			}
-			faces.push_back(res);
+			meshs[i].faces.push_back(res);
 		}
 	}
 	string glob_path = filename.substr(0, filename.find_last_of("/")) + "/";

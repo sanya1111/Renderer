@@ -38,15 +38,15 @@ public:
 	std::vector<Geom::V3f> verts_tex;
 	std::vector<Geom::V3f> normals;
 	std::vector<std::vector<int> > faces;
-	void loadObj(const std::string &);
 };
 
 class Model{
+	void clean();
+public:
 	std::vector<MeshModel> meshs;
 	std::vector<size_t> mat_index;
 	std::vector<Material> mats;
-public:
-
+	void loadObj2(const std::string &);
 };
 
 
