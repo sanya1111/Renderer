@@ -9,14 +9,16 @@
 namespace Renderer{
 
 class DefaultVertexStage{
-	Geom::Matrix44f transform_matrix;
+	Geom::Matrix44f to_world,
+					to_cam;
 	Phong light;
 	CameraView * main_view;
 public:
 	typedef std::tuple<Geom::TriangleF4, Geom::TriangleF> result;
 	DefaultVertexStage(CameraView &main_view, const Geom::V3f &position, const Geom::V3f &scale, const Geom::V3f &rot, const Phong &light)
 		: main_view(&main_view), light(light){
-		transform_matrix = Geom::MatrixFactory::transform(position, rot, scale) * main_view.projection_matrix();
+		to_world = Geom::MatrixFactory::transform(position, rot, scale);
+		to_cam = main_view.projection_matrix();
 	}
 	DefaultVertexStage() {}
 	result process(std::tuple<Geom::TriangleF4, Geom::TriangleF, Geom::V3f, Geom::V3f> &tu, bool &ret);

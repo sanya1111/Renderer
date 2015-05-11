@@ -9,12 +9,13 @@ DefaultVertexStage::result Renderer::DefaultVertexStage::process(
 		bool& ret) {
 	 result res;
 	 Geom::TriangleF4 &tr = std::get<0>(tu);
-	 Geom::Matrix44f pt = Geom::Matrix44f{
+	 Geom::Matrix44f pt_world = Geom::Matrix44f{
 		 tr[0].x, tr[0].y, tr[0].z, tr[0].w,
 		 tr[1].x, tr[1].y, tr[1].z, tr[1].w,
 		 tr[2].x, tr[2].y, tr[2].z, tr[2].w,
 		 0,       0,       0,       0
-	 } * transform_matrix;
+	 } * to_world;
+	 Geom::Matrix44f pt = pt_world * to_cam;
 	 ret = false;
 	 FOR(i, 3){
 		 if(main_view->inProjection(Geom::V4f(pt[i]))){
@@ -31,10 +32,10 @@ DefaultVertexStage::result Renderer::DefaultVertexStage::process(
 		 tr_o[1].x, tr_o[1].y, tr_o[1].z, 1,
 		 tr_o[2].x, tr_o[2].y, tr_o[2].z, 1,
 		 0,       0,       0,       0
-	 } * transform_matrix;
+	 } * to_world;
 
 	 FOR(i, 3) {
-		 V3f pt = (V4f(tr[i]).norm());
+		 V3f pt = (V4f(pt_world[i]).norm());
 		 V3f to_eye = main_view->get_center() - pt;
 		 intensity[i] = light.getForce(Geom::V4f(pt_int[i]).norm().norm(), to_eye, pt);
 		 intensity[i] = std::max(0.0f, intensity[i]);
