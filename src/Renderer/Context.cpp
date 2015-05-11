@@ -65,3 +65,7 @@ int64_t Renderer::Context::getFrameCount() {
 Renderer::Buffer& Renderer::Context::getCurrentBuffer() {
 	return buffers[current_buffer];
 }
+
+void Renderer::Context::quitProcess() {
+	dev.finishLoop();
+}

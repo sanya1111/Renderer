@@ -1,5 +1,5 @@
 include ../../MakeConf/inc.mk
-result_ex=../../$(BIN_DIR)/test_snapshot
+result_ex=../../$(BIN_DIR)/test_phong
 all:../../$(BIN_DIR) $(result_ex)
 
 $(result_ex):main.cpp ../../$(LIB_DIR)/libRenderer.so

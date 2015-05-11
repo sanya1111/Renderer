@@ -18,6 +18,7 @@ public:
 		: main_view(&main_view), light(light){
 		transform_matrix = Geom::MatrixFactory::transform(position, rot, scale) * main_view.projection_matrix();
 	}
+	DefaultVertexStage() {}
 	result process(std::tuple<Geom::TriangleF4, Geom::TriangleF, Geom::V3f, Geom::V3f> &tu, bool &ret);
 };
 

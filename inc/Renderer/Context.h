@@ -38,6 +38,7 @@ public:
 	int64_t getTime();
 	int64_t getFrameCount();
 	Buffer& getCurrentBuffer();
+	void quitProcess();
 };
 
 }
