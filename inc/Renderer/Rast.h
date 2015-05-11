@@ -9,7 +9,7 @@ namespace Renderer{
 
 class DefaultRast{
 	float  width, height;
-	int start_x,
+	int32_t start_x,
 		finish_x,
 		x,
 		it_y,
@@ -30,7 +30,7 @@ public:
 	DefaultRast(int height,int width);
 	void process(std::tuple<Geom::TriangleF4, Geom::TriangleF> &inp, bool &ret);
 	bool have();
-	Geom::V2<int> next();
+	Geom::V2<int32_t> next();
 };
 
 }

@@ -9,6 +9,13 @@ namespace Renderer{
 
 class Context{
 private:
+	struct FpsCounter{
+		int64_t frames_total = 0,
+			   time_total = 0,
+			   last = 0;
+		FpsCounter() : frames_total(0), time_total(0) {}
+		void frame(int32_t delta);
+	}fps_counter;
 	std::vector<Buffer> buffers;
 	int32_t current_buffer;
 	size_t buffers_num;
@@ -27,6 +34,10 @@ public:
 	void addConnector(Connector & );
 	void startListenning();
 	void onPageFlipped(uint32_t frame, uint32_t sec, uint32_t usec);
+	float getFps();
+	int64_t getTime();
+	int64_t getFrameCount();
+	Buffer& getCurrentBuffer();
 };
 
 }

@@ -25,7 +25,7 @@ int8_t sign(T a) {
 
 
 
-template<class T, int N, int M>
+template<class T, int32_t N, int32_t M>
 class Matrix{
 protected:
 	std::array<T, N * M> ma;
@@ -37,7 +37,7 @@ public:
 				   row2 = _mm_loadu_ps(B[1]),
 				   row3 = _mm_loadu_ps(B[2]),
 				   row4 = _mm_loadu_ps(B[3]);
-			for(int i=0; i<4; i++) {
+			for(int32_t i=0; i<4; i++) {
 				__m128 brod1 = _mm_set1_ps(A[i][0]),
 					   brod2 = _mm_set1_ps(A[i][1]),
 					   brod3 = _mm_set1_ps(A[i][2]),
@@ -53,12 +53,12 @@ public:
 		}
 	};
 	struct standart_multipler{
-		template<int M2>
+		template<int32_t M2>
 		void mult(Matrix<T, N, M> &A, const Matrix<T, M, M2> &B, Matrix<T, N, M2> &C){
-			for(int i = 0; i < N; i++){
-				for(int j = 0; j < M2; j++){
+			for(int32_t i = 0; i < N; i++){
+				for(int32_t j = 0; j < M2; j++){
 					C[i][j] = 0;
-					for(int k = 0; k < M; k++){
+					for(int32_t k = 0; k < M; k++){
 						C[i][j] += A[i][k] * B[k][j];
 					}
 				}
@@ -71,14 +71,14 @@ public:
 		std::fill(ma.begin(), ma.end(), 0);
 	}
 	Matrix(std::initializer_list<T > Li) {
-		int pos = 0;
+		int32_t pos = 0;
 		for(auto it : Li){
 			ma[pos++] = it;
 		}
 	}
 	void print(){
-		for(int i = 0; i < N;i++){
-			for(int j = 0; j < M; j++){
+		for(int32_t i = 0; i < N;i++){
+			for(int32_t j = 0; j < M; j++){
 				DEB("%lf ", ma[i * M + j]);
 			}
 			DEB("\n");
@@ -93,13 +93,13 @@ public:
 
 	std::array<T, N> colomn(size_t j){
 		std::array<T, N> res;
-		for(int i = 0; i < N; i++){
+		for(int32_t i = 0; i < N; i++){
 			res[i] = ma[i * M + j];
 		}
 		return res;
 	}
 
-	template<int M2>
+	template<int32_t M2>
 	Matrix<T, N, M2> operator*(const Matrix<T, M, M2> &other){
 		Matrix<T, N, M2> ret;
 		(typename int_Selector_<M, M2, multipler_t, standart_multipler>::result ()).mult(*this, other, ret);
@@ -108,8 +108,8 @@ public:
 
 	Matrix<T, N, M> operator*(const T value){
 		Matrix ret;
-		for(int i = 0; i < N;i++){
-			for(int j = 0; j < M; j++){
+		for(int32_t i = 0; i < N;i++){
+			for(int32_t j = 0; j < M; j++){
 				ret[i][j] = ma[i * M + j] * value;
 			}
 		}
@@ -149,7 +149,7 @@ namespace MatrixFactory{
 template<class T>
 class V2{
 public:
-	static const int num = 2;
+	static const int32_t num = 2;
 	T x, y;
 	V2(const V2 &other) = default;
 	V2() : x(0), y(0){}
@@ -173,10 +173,11 @@ public:
 //		DEB("%f %f %f %f\n", x, y, z, w);
 	}
 };
+
 template<class T >
 class V3 {
 public:
-	static const int num = 3;
+	static const int32_t num = 3;
 	T x, y, z;
 	V3() : x(0), y(0), z(0) {}
 	V3(T x, T y, T z) : x(x), y(y), z(z) {}
@@ -254,7 +255,7 @@ public:
 			-y, x, 0
 		};
 	}
-	V3<T> vMul(V3<T> &other){
+	V3<T> vMul(V3<T> &other) const{
 		return V3<T>((skewSimMatrix() * other.colomnMatrix()).colomn(0));
 	}
 
@@ -321,7 +322,7 @@ using V3f = V3<float>;
 template<class T >
 class V4 {
 public:
-	static const int num = 4;
+	static const int32_t num = 4;
 	T x, y, z, w;
 	V4() : x(0), y(0), z(0), w(0) {}
 	V4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w){}
@@ -380,14 +381,14 @@ using V4i = V4<int32_t>;
 using V4d = V4<double>;
 using V4f = V4<float>;
 
-template<class T, int X>
+template<class T, int32_t X>
 class VX : public Matrix<T, X, 1>{
 public:
-	static const int num = X;
+	static const int32_t num = X;
 	using Matrix<T, X, 1>::ma;
 	VX(){
 		std::fill(ma.begin(), ma.end(), 0);
-//		for(int i = 0; i < X; i++){s
+//		for(int32_t i = 0; i < X; i++){s
 	}
 	VX(const VX<T, X>&) = default;
 
@@ -401,7 +402,7 @@ public:
 
 	VX<T, X> operator+(const VX<T, X> &other){
 		VX<T, X> res;
-		for(int i = 0; i < X; i++){
+		for(int32_t i = 0; i < X; i++){
 			res[i] = (*this)[i] + other[i];
 		}
 		return res;
@@ -417,9 +418,9 @@ public:
 	}
 };
 
-template<int X>
+template<int32_t X>
 using VXf = VX<float, X>;
-template<int X>
+template<int32_t X>
 using VXi = VX<int, X>;
 
 
@@ -455,96 +456,11 @@ using TriangleF = Triangle_<V3f>;
 using Triangle4 = Triangle_<V4i>;
 using TriangleF4 = Triangle_<V4f>;
 
-template<int X>
+template<int32_t X>
 using TriangleX = Triangle_<VXi<X>>;
-template<int X>
+template<int32_t X>
 using TriangleXF = Triangle_<VXf<X>>;
 
-Triangle4 makeTriangle4(const Triangle &a, const V3i &ot);
-
-TriangleX<6> makeTriangle6(const Triangle &a, const V3i &norm, const V3i &u, const V3i &v);
-
-TriangleXF<7> makeTriangle7(Triangle_<V4f> a, V3f norm, V3f u, V3f v );
-
-/*template<class ...T>
-struct Summator_{
-	static const int num = 0;
-};
-
-template<class W,class ...T>
-struct Summator_<W, T...>{
-	static const int num = W::num + Summator_<T...>::num;
-};
-
-template<class T, int last, class ... Other>
-struct makerTriangle_{
-	void operator()(T * ret, Other ... ot){
-
-	}
-};
-
-template<class T, int last, class W, class ... Other>
-struct makerTriangle_<T, last, W, Other...>{
-	void operator()(T * ret, W now, Other... ot){
-		makerTriangle_<T, last + W::num, Other ...>()(ret, ot...);
-		for(int i = last; i < last + W::num; i++){
-			ret[i] = now[i - last];
-		}
-	}
-};
-
-
-template<template<class> class W, class ...T>
-Triangle_<W<Summator<T...>::num> > makeTriangle(T ... classes){
-	const int sum =Summator<T...>::num;
-	W from[sum];
-	makerPi<W, 0, T...>()(from, classes...);
-	return Pi<W, sum>(from);
-}
-*/
-
-//template<class ... T> struct summator{
-//	static constexpr int sum = 0;
-//};
-//
-//template<class T, class ... tail> struct summator<T, tail...>{
-//	static constexpr int sum = T::num + summator<tail...>::sum;
-//};
-//
-//template<class X>
-//TriangleXF<X::num> makeTriangleTemp(X from){
-//
-//}
-//template<class X, class ... T>
-//TriangleXF<X> makeTriangleXF(std::tuple<X, T...> tp){
-//	TriangleXF<X> > res;
-//	FOR(i, 3){
-//		FOR(j, summator<T...>::sum){
-//			res[i][j] =
-//		}
-//	}
-//}
-
-//template<int X>
-//TriangleXF<summator<T...>::sum > makeTriangleXF(std::tuple<T...> tp){
-//
-//}
-
-
-template<int X>
-V3f barycentric(const TriangleXF<X>& a, const V3i &p){
-	V3f s[2];
-	FOR(i, 2){
-		s[i][0] = a.vs[2][i]-a.vs[0][i];
-		s[i][1] = a.vs[1][i]-a.vs[0][i];
-		s[i][2] = a.vs[0][i] - p[i];
-	}
-	V3f u = s[0].vMul(s[1]);
-	if (std::abs(u[2]) < 1) // dont forget that u[2] is integer. If it is zero then triangle ABC is degenerate
-		return V3f(-1,1,1);
-	return V3f(1.f-(u.x+u.y)/u.z, u.y/u.z, u.x/u.z);
-	; // in this case generate negative coordinates, it will be thrown away by the rasterizator
-}
 
 
 

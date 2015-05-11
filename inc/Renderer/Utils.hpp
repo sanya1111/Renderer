@@ -1,8 +1,7 @@
 #ifndef UTILS_HPP_
 #define UTILS_HPP_
 
-#define FOR(i, n) for(int i = 0; i < (n); i++)
-#define FORN(i, j, n) for(int i = (j); i < (n); i++)
+#define FOR(i, n) for(decltype(n) i = 0; i < (n); i++)
 
 template<class now, class comp, class T, class U>
 struct Selector_{
@@ -29,7 +28,6 @@ bool between(T b, T pt, T e){
 	return pt >= b && pt <= e;
 }
 
-const int INF = 1e9;
 
 float segmSolver(float x_s, float x_e, float at);
 

@@ -1,5 +1,5 @@
-#ifndef DEVICE2_H_
-#define DEVICE2_H_
+#ifndef DEVICE_H_
+#define DEVICE_H_
 
 #include "Renderer/Buffer.h"
 #include "Renderer/Connector.h"
@@ -22,19 +22,15 @@
 namespace Renderer{
 
 class Device{
-	//flags
 	bool loop_finit;
 	int8_t page_flip_pending;
-	//
 	drmModeRes * drm_mode_res;
 	int32_t fd;
 	std::unordered_set<uint32_t> used_connectors;
 	std::unordered_set<uint32_t> used_crts;
-	//enums
 	enum DriverVersion {
 			i915, radeon, nouveau, unknown
 	} driver_version;
-	//methods
 	void initModeRes();
 	void openDevice(const std::string &dev_path);
 	static void onPageFlipped(int32_t fd, uint32_t frame, uint32_t sec,

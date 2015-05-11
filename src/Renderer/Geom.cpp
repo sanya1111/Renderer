@@ -107,42 +107,6 @@ Renderer::Geom::Matrix44f Renderer::Geom::MatrixFactory::withRotation(const V3<f
 	};
 }
 
-Triangle4 Renderer::Geom::makeTriangle4(const Triangle &a, const V3i& ot) {
-	Triangle4 res;
-	for(int i = 0; i < 3; i++){
-		res.vs[i] = V4i(a.vs[i], ot[i]);
-	}
-	return res;
-}
-
-TriangleX<6> Renderer::Geom::makeTriangle6(const Triangle &a, const V3i &norm, const V3i &u, const V3i &v){
-	TriangleX<6> res;
-	for(int i = 0; i < 3; i++){
-		for(int j = 0; j < 3; j++){
-			res.vs[i][j] = a.vs[i][j];
-		}
-		res.vs[i][3] = norm[i];
-		res.vs[i][4] = u[i];
-		res.vs[i][5] = v[i];
-	}
-	return res;
-}
-
-TriangleXF<7> Renderer::Geom::makeTriangle7(Triangle_<V4f> a, V3f norm, V3f u, V3f v ){
-	TriangleXF<7> res;
-	FOR(i ,3){
-		FOR(j, 4){
-			res.vs[i][j] = a.vs[i][j];
-		}
-		res.vs[i][4] = norm[i];
-		res.vs[i][5] = u[i];
-		res.vs[i][6] = v[i];
-	}
-	return res;
-}
-
-
-
 Matrix44f Renderer::Geom::MatrixFactory::transform(const V3<float>& cen,
 		const V3<float>& rot, const V3<float> scale) {
 	return  (scale4(scale) * rotX4(rot.x) * rotY4(rot.y) * rotZ4(rot.z) ) * translation(cen) ;

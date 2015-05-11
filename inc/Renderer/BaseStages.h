@@ -11,13 +11,11 @@ class MeshModelStage{
 	size_t ptr;
 	std::vector<Geom::V3f> norm_v;
 public:
-	//pt n u v
 	typedef std::tuple<Geom::TriangleF4, Geom::TriangleF, Geom::V3f, Geom::V3f>  result;
 	bool have();
 	result process(bool &fin);
 	MeshModelStage(const MeshModel& model);
 	MeshModelStage(){}
-
 	void start();
 	void operator=(MeshModelStage &&mstage);
 };
@@ -32,10 +30,10 @@ public:
 	result process(bool &fin);
 	ModelStage(const Model& model);
 	ModelStage(){}
-
 	void start();
 	void operator=(ModelStage &&mstage);
 };
+
 }
 
 

@@ -22,7 +22,7 @@ void Renderer::Model::clean() {
 	vector<Material>().swap(mats);
 }
 
-void Renderer::Model::loadObj2(const string &filename) {
+void Renderer::Model::loadFile(const string &filename) {
 	clean();
 	Assimp::Importer imp;
 	const aiScene* sc = imp.ReadFile(filename,
@@ -89,7 +89,6 @@ void Renderer::Texture::writeBmp(const std::string& filename) {
 }
 
 void Renderer::Texture::writeHdr(const std::string& filename) {
-	//float * what the?????
 //	stbi_write_hdr(filename.c_str(), width, height, comp, data.get());
 }
 
@@ -99,4 +98,8 @@ void Renderer::Texture::writeTga(const std::string& filename) {
 
 Renderer::Texture::Texture(shared_ptr<uint8_t> data,
 		uint32_t width, uint32_t height, uint32_t comp) : comp(comp), width(width), height(height), data(data){
+}
+
+std::vector<Texture>& Renderer::Material::getTextureVec(size_t id) {
+	return col[id];
 }

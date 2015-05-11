@@ -17,6 +17,7 @@
 #include <exception>
 #include <libdrm/i915_drm.h>
 #include <drm_fourcc.h>
+
 #include "Renderer/Log.h"
 
 namespace Renderer {

@@ -9,38 +9,26 @@ bool Renderer::MeshModelStage::have() {
 }
 
 
-Renderer::MeshModelStage::result Renderer::MeshModelStage::process ( bool& fin ) {
-        result res;
-        FOR(j,3){
-                FOR(k,3){
-                        get<0>(res)[j][k] = norm_v[model->faces[ptr][j]][k];
-                }
-                get<0>(res)[j][3] = 1;
-                get<1>(res)[j] = model->normals[model->faces[ptr][j]];
-                get<2>(res)[j] = model->verts_tex[model->faces[ptr][j]][0]; //u
-                get<3>(res)[j] = model->verts_tex[model->faces[ptr][j]][1]; //v
-        }
-        ptr++;
-        return res;
+Renderer::MeshModelStage::result Renderer::MeshModelStage::process ( bool&  ) {
+	result res;
+	FOR(j,3)
+	{
+		FOR(k,3)
+		{
+			get<0>(res)[j][k] = norm_v[model->faces[ptr][j]][k];
+		}
+		get<0>(res)[j][3] = 1;
+		get<1>(res)[j] = model->normals[model->faces[ptr][j]];
+		get<2>(res)[j] = model->verts_tex[model->faces[ptr][j]][0]; //u
+		get<3>(res)[j] = model->verts_tex[model->faces[ptr][j]][1]; //v
+	}
+	ptr++;
+	return res;
 }
 
 
 
-Renderer::MeshModelStage::MeshModelStage(const MeshModel& model)  : model(&model), norm_v(model.verts), ptr(0){
-//        V3f m(0, 0, 0);
-//        for_each(model.verts.begin(), model.verts.end(), [&m](const V3f &v){
-//                FOR(i, 3){
-//                        m[i] = max(m[i], fabs(v[i]));
-//                }
-//        });
-////        DEB("here ");
-////        m.print();
-//        for_each(norm_v.begin(), norm_v.end(), [&m](V3f &v){
-//                FOR(i, 3){
-//                        v[i] /= m[i];
-//                }
-//        });
-}
+Renderer::MeshModelStage::MeshModelStage(const MeshModel& model)  : model(&model), norm_v(model.verts), ptr(0){}
 
 void Renderer::MeshModelStage::start() {
         ptr = 0;
@@ -80,7 +68,6 @@ Renderer::ModelStage::ModelStage(const Model& model) : mstage(model.meshs.size()
 	FOR(i, model.meshs.size()){
 		mstage[i] = move(MeshModelStage(model.meshs[i]));
 	}
-	DEB("OK");
 }
 
 void Renderer::ModelStage::start() {

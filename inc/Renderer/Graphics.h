@@ -26,40 +26,39 @@ namespace Renderer {
 		Buffer * buf;
 		std::vector<float> zbuffer;
 		void at(uint8_t * ptr,const Rgba & color);
-		//views
 	public:
 		void fill(const Rgba &color);
 		void fill2(const Rgba & color);
-		void drawPixel(int32_t screen_x,int32_t screen_y, float h, Rgba color);
+		void drawPixel(int32_t screen_x,int32_t screen_y, float h, const Rgba &color);
 		void drawBegin(Buffer * buf);
 		void drawEnd();
 		void cleanZ();
-		//newwww
-		template<class BaseStage, class VertexStage, class Rast, class PixelStage>
-		void drawModel_new(BaseStage &bstage, VertexStage &vstage, Rast &rast, PixelStage &pstage) {
-			bstage.start();
-			while(bstage.have()){
-				bool ret = true;
-				typename BaseStage::result res_base = bstage.process(ret);
-				if(!ret)
-					continue;
-				typename VertexStage::result res_vertex = vstage.process(res_base, ret);
-				if(!ret)
-					continue;
-				rast.process(res_vertex, ret);
-				if(!ret)
-					continue;
-				pstage.save(res_vertex);
-				while(rast.have()){
-					Geom::V2<int> pt = rast.next();
-					if(pstage.apply(pt)){
-						drawPixel(pt.x, pt.y, pstage.getZ(), pstage.getColor());
-					}
+		Texture saveSnapshot();
+		Drawer() {	}
+	};
+
+	template<class BaseStage, class VertexStage, class Rast, class PixelStage, class Painter>
+	void drawModel(BaseStage &bstage, VertexStage &vstage, Rast &rast, PixelStage &pstage, Painter &painter) {
+		bstage.start();
+		while(bstage.have()){
+			bool ret = true;
+			typename BaseStage::result res_base = bstage.process(ret);
+			if(!ret)
+				continue;
+			typename VertexStage::result res_vertex = vstage.process(res_base, ret);
+			if(!ret)
+				continue;
+			rast.process(res_vertex, ret);
+			if(!ret)
+				continue;
+			pstage.save(res_vertex);
+			while(rast.have()){
+				Geom::V2<int> pt = rast.next();
+				if(pstage.apply(pt)){
+					painter.drawPixel(pt.x, pt.y, pstage.getZ(), pstage.getColor());
 				}
 			}
 		}
-		Texture saveSnapshot();
-		Drawer() {	}
 	};
 }
 

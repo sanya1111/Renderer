@@ -25,11 +25,16 @@ public:
 };
 
 class Material{
+	std::vector<Texture> col[5];
 public:
-	//0 - DIFFUSE, 1 - SPECULAR, 2 - AMBIENT , 3 - EMMISIVE
-	std::vector<Texture> col[4];
+	enum{
+		DIFFUSE_TID = 1,
+		SPECULAR_TID = 2,
+		AMBIENT_TID = 3,
+		EMMISIVE_TID = 4,
+	};
 	void add(uint8_t type, const Texture & tex);
-	friend class Drawer;
+	std::vector<Texture>& getTextureVec(size_t id);
 };
 
 class MeshModel{
@@ -37,7 +42,7 @@ public:
 	std::vector<Geom::V3f> verts;
 	std::vector<Geom::V3f> verts_tex;
 	std::vector<Geom::V3f> normals;
-	std::vector<std::vector<int> > faces;
+	std::vector<std::vector<int32_t> > faces;
 };
 
 class Model{
@@ -46,7 +51,7 @@ public:
 	std::vector<MeshModel> meshs;
 	std::vector<size_t> mat_index;
 	std::vector<Material> mats;
-	void loadObj2(const std::string &);
+	void loadFile(const std::string &);
 };
 
 

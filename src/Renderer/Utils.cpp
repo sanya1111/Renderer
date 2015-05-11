@@ -1,8 +1,10 @@
 #include "Renderer/Utils.hpp"
+using namespace std;
+#include <algorithm>
 
 float segmSolver(float x_s, float x_e, float at) {
 	if(x_s == x_e)
-		return INF;
+		return numeric_limits<float>::max();
 	return ( (at - x_s) / (x_e - x_s));
 }
 

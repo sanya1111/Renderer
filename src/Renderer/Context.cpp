@@ -35,9 +35,33 @@ void Renderer::Context::changeBuffer() {
 	current_buffer = (current_buffer + 1) % buffers_num;
 }
 
-void Renderer::Context::onPageFlipped(uint32_t frame, uint32_t sec,
-		uint32_t usec) {
-	drawable->onDraw(frame, sec, usec, buffers[current_buffer]);
+void Renderer::Context::onPageFlipped(uint32_t, uint32_t sec, uint32_t usec) {
+	fps_counter.frame(sec * 1000 + usec / 1000);
+	drawable->onDraw(*this);
 	dev.pageFlip(saved_crtc, buffers[current_buffer], (void *)this);
 	changeBuffer();
+}
+
+void Renderer::Context::FpsCounter::frame(int32_t delta) {
+	frames_total++;
+	if(last){
+		time_total += delta - last;
+	}
+	last = delta;
+}
+
+float Renderer::Context::getFps() {
+	return float(fps_counter.frames_total) / (float(fps_counter.time_total) / 1000.0);
+}
+
+int64_t Renderer::Context::getTime() {
+	return fps_counter.time_total;
+}
+
+int64_t Renderer::Context::getFrameCount() {
+	return fps_counter.frames_total;
+}
+
+Renderer::Buffer& Renderer::Context::getCurrentBuffer() {
+	return buffers[current_buffer];
 }

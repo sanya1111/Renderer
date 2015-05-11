@@ -4,13 +4,12 @@
 #include "Renderer/Graphics.h"
 namespace Renderer {
 
+class Context;
 
 class Drawable {
 public:
-	bool flag_finit;
-	Drawable();
-	virtual void onDraw(uint32_t frame, uint32_t sec,
-			uint32_t usec, Buffer &) = 0;
+	Drawable() {}
+	virtual void onDraw(Context &) = 0;
 	virtual ~Drawable() = default;
 };
 

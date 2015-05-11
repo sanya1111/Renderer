@@ -15,10 +15,6 @@ DefaultVertexStage::result Renderer::DefaultVertexStage::process(
 		 tr[2].x, tr[2].y, tr[2].z, tr[2].w,
 		 0,       0,       0,       0
 	 } * transform_matrix;
-//	 FOR(i, 3){
-//		 DEB("%f ", pt[i][2] / pt[i][3]);
-//	 }
-//	 DEB("\n");
 	 ret = false;
 	 FOR(i, 3){
 		 if(main_view->inProjection(Geom::V4f(pt[i]))){
@@ -42,9 +38,7 @@ DefaultVertexStage::result Renderer::DefaultVertexStage::process(
 		 intensity[i] = light.getForce(Geom::V4f(pt_int[i]).norm().norm(), to_eye);
 		 intensity[i] = std::max(0.0f, intensity[i]);
 		 intensity[i] = std::min(1.0f, intensity[i]);
-//			 assert(intensity[i] <= 1.0f);
 	 }
-//		 intensity.print();
 	 Geom::TriangleF4 &f = std::get<0>(res);
 	 Geom::TriangleF &s = std::get<1>(res);
 	 FOR(i, 3){

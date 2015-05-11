@@ -3,7 +3,7 @@
 using namespace Renderer;
 using namespace Renderer::Geom;
 
-Renderer::CameraView::CameraView(Geom::V3f cen_, Geom::V3f up1_, Geom::V3f f_, float angle_, int32_t width_, int32_t height_, float near_, float far_) :
+Renderer::CameraView::CameraView(const Geom::V3f &cen_, const Geom::V3f &up1_, const Geom::V3f &f_, float angle_, int32_t width_, int32_t height_, float near_, float far_) :
 		cen(cen_) , f(f_), aw(angle_), near(near_), far(far_){
 
 	this->r = up1_.vMul(this->f);

@@ -3,6 +3,7 @@
 #include "Renderer/Geom.hpp"
 
 namespace Renderer{
+
 class CameraView{
 	Geom::V3f cen,
 		up,
@@ -15,7 +16,7 @@ class CameraView{
 public:
 	CameraView & operator=(const CameraView & other) = default;
 	CameraView() {}
-	CameraView(Geom::V3f cen, Geom::V3f up1, Geom::V3f f, float angle, int32_t width, int32_t height, float near, float far);
+	CameraView(const Geom::V3f &cen, const Geom::V3f &up1, const Geom::V3f &f, float angle, int32_t width, int32_t height, float near, float far);
 	Geom::V3f moveToCam(const Geom::V3f &v);
 	Geom::V3f projection(const Geom::V3f &v);
 	Geom::Matrix44f projection_matrix()const;

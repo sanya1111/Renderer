@@ -5,6 +5,7 @@ using namespace Geom;
 using namespace std;
 
 static const float eps = 1e-5;
+
 void Renderer::DefaultRast::convert(Geom::TriangleF4 &tr, bool &ret){
 	Geom::Matrix44f pt = Geom::Matrix44f{
 	 tr[0].x, tr[0].y, tr[0].z, tr[0].w,
@@ -19,7 +20,7 @@ void Renderer::DefaultRast::convert(Geom::TriangleF4 &tr, bool &ret){
 		FOR(j, 3)
 				tr[i][j] /= tr[i][3];
 	}
-	V2<int> cnt(0, 0);
+	V2<int32_t> cnt(0, 0);
 	FOR(i, 3){
 		V3f tpt = tr[i].norm();
 		if(between(0.0f, tpt.x, height))
@@ -70,7 +71,7 @@ void Renderer::DefaultRast::init(Geom::TriangleF4 tr, bool &ret){
     	ret = false;
     	return;
     }
-    start_x = max(0, (int)tr[0].x + ((tr[0].x - (int)tr[0].x) > eps ? 1 : 0));
+    start_x = max(0, (int32_t)tr[0].x + ((tr[0].x - (int32_t)tr[0].x) > eps ? 1 : 0));
 	finish_x = min(height - 1, tr[2].x);
 	mid = V2<float>(tr[1].x, tr[1].y);
     add1 = (tr[2].y - tr[0].y) / (tr[2].x - tr[0].x);
@@ -82,36 +83,8 @@ void Renderer::DefaultRast::init(Geom::TriangleF4 tr, bool &ret){
 	half = 0;
 	fix_y();
 	fix();
-    /*for(int i = max(start, 0); i <= min((int)height - 1, finish); i++){
-            V4f p2 = tr[0] + (tr[2] - tr[0]) * (float(i - tr[0].x) / (tr[2].x - tr[0].x));
-            V4f p1;
-            if (i >= tr[1].x){
-                    if(tr[2].x == tr[1].x){
-                            p1 = tr[1];
-                    } else {
-                            p1 = tr[1] + (tr[2] - tr[1]) * ((i - tr[1].x) / (tr[2].x - tr[1].x));
-                    }
-            } else {
-                    if(tr[0].x == tr[1].x) {
-                            p1 = tr[0];
-                    } else {
-                            p1 = tr[0] + (tr[1] - tr[0]) * (float(i - tr[0].x) / (tr[1].x - tr[0].x));
-                    }
-            }
-            if(p1.y > p2.y){
-                    swap(p1, p2);
-            }
-            int start_y = p1.y + (p1.y - (int)p1.y > eps ? 1 : 0);
-            int end_y = p2.y;
-            for(int j = max(start_y, 0); j <= min(end_y, (int) width - 1); j++){
-                    V2<int> pt(i, j);
-                    if(pstage.apply(pt)){
-                            drawPixel(pt.x, pt.y, pstage.getZ(), pstage.getColor());
-                    }
-            }
-    }
-    */
 }
+
 void Renderer::DefaultRast::process(
 		std::tuple<Geom::TriangleF4, Geom::TriangleF>& inp, bool& ret) {
 	convert(get<0>(inp), ret);
@@ -122,13 +95,13 @@ bool Renderer::DefaultRast::have() {
 	return x <= finish_x;
 }
 
-Geom::V2<int> Renderer::DefaultRast::next() {
-	V2<int> ret(x, it_y++);
+Geom::V2<int32_t> Renderer::DefaultRast::next() {
+	V2<int32_t> ret(x, it_y++);
 	fix();
 	return ret;
 }
 
-Renderer::DefaultRast::DefaultRast(int height, int width) : width(width), height(height) {
+Renderer::DefaultRast::DefaultRast(int32_t height, int32_t width) : width(width), height(height) {
 	screen_ma = {
 				height / 2.0f, 0, 0, 0,
 				0, width / 2.0f, 0, 0,

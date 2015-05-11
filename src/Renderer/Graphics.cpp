@@ -11,7 +11,6 @@
 using namespace Renderer;
 using namespace Geom;
 using namespace std;
-//Helpers
 
 static inline void * mem(void *s, int32_t c, size_t count){
 	 asm volatile("rep\n\t"
@@ -35,7 +34,7 @@ inline void Renderer::Drawer::at(uint8_t* ptr, const Rgba& color) {
 }
 
 
-void Renderer::Drawer::drawPixel(int32_t screen_x, int32_t screen_y, float h, Rgba color) {
+void Renderer::Drawer::drawPixel(int32_t screen_x, int32_t screen_y, float h, const Rgba &color) {
 	int32_t pos = screen_x * buf->width + screen_y;
 	if(zbuffer[pos] > h ){
 		zbuffer[pos] = h;
@@ -70,17 +69,12 @@ void Renderer::Drawer::drawBegin(Buffer * buf) {
 void Renderer::Drawer::drawEnd() {
 }
 
-
-
-
-
-
 Rgba Renderer::Rgba::operator *(const float& intensity) const{
 	return Rgba((float)r * intensity, (float)g * intensity, (float)b * intensity, a);
 }
 
 void Renderer::Drawer::cleanZ() {
-	zbuffer.assign(buf->size, INF);
+	zbuffer.assign(buf->size, numeric_limits<float>::max());
 }
 
 Texture Renderer::Drawer::saveSnapshot() {
