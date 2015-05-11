@@ -3,7 +3,7 @@
 
 #include "Renderer/Geom.hpp"
 #include "Renderer/Model.h"
-
+#include "Renderer/Light.h"
 namespace Renderer{
 
 class Rgba;

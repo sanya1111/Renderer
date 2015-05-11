@@ -20,7 +20,7 @@ Renderer::CameraView::CameraView(Geom::V3f cen_, Geom::V3f up1_, Geom::V3f f_, f
 	float left = -right;
 	float top = std::tan(ah) * projection_plane_z;
 	float bottom = -top;
-	move_ma = MatrixFactory::translation(cen) * MatrixFactory::withRotation(r, up, f);
+	move_ma = MatrixFactory::translation(-cen) * MatrixFactory::withRotation(r, up, f);
 	projection_ma = move_ma * MatrixFactory::projection(left, right, top, bottom, near, far);
 }
 
@@ -43,4 +43,8 @@ Geom::V4f Renderer::CameraView::projection2(const Geom::V3f& v) {
 bool Renderer::CameraView::inProjection(const Geom::V4f& pt) {
 	V3f good = pt.norm();
 	return between(-1.0f, good.x, 1.0f) && between(-1.0f, good.y, 1.0f) && between(near, good.z, far);
+}
+
+Geom::V3f Renderer::CameraView::get_center() {
+	return cen;
 }

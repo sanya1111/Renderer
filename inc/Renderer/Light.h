@@ -8,39 +8,43 @@ namespace Renderer{
 class AmbientLight{
 	float force;
 public:
-	AmbientLight(float mat_kof, float force) : force(mat_kof * force) {}
-	float getForce();
+	AmbientLight(float force) : force(force) {}
+	float getForce()const;
 };
+
 class DiffuseLight{
 	Geom::V3f direction;
 	float force;
 public:
-	DiffuseLight(Geom::V3f direction, float force) : direction(direction.norm()), force(force) {}
-	float getForce(Geom::V3f vec, float mat_kof);
+	DiffuseLight(const DiffuseLight&)=default;
+	DiffuseLight(Geom::V3f source, float force) : direction(source), force(force) {}
+	float getForce(Geom::V3f vec)const;
 };
 
 
 class SpecularLight{
 	float force;
+	float alpha;
 	Geom::V3f direction;
 public:
-	SpecularLight(Geom::V3f direction, float force) : direction(direction.norm()), force(force) {}
+	SpecularLight(Geom::V3f direction, float force, float alpha) : direction(direction.norm()), force(force), alpha(alpha){}
 	Geom::V3f nextBeam();
-	float getForce(Geom::V3f normal, Geom::V3f to_eye, float alpha, float mat_kof);
+	float getForce(Geom::V3f normal, Geom::V3f to_eye) const;
 };
 
 class Phong{
-	AmbientLight &a;
-	DiffuseLight &b;
-	SpecularLight &c;
+	AmbientLight a;
+	DiffuseLight b;
+	SpecularLight c;
 	float a_kof, b_kof, c_kof;
 public:
-	Phong(AmbientLight &a, DiffuseLight &b, SpecularLight &c, float a_kof, float b_kof, float c_kof) :
+	Phong(const AmbientLight &a, const DiffuseLight &b, const SpecularLight &c, float a_kof, float b_kof, float c_kof) :
 		a(a), b(b), c(c),
 		a_kof(a_kof),
 		b_kof(b_kof),
 		c_kof(c_kof){}
-	float getForce(Geom::V3f normal, Geom::V3f to_eye, float dif_kof, float alpha, float spec_kof);
+	Phong(const Phong&) = default;
+	float getForce(Geom::V3f normal, Geom::V3f to_eye);
 };
 
 }

@@ -7,6 +7,7 @@
 #include "Renderer/VertexStages.h"
 #include "Renderer/PixelStages.h"
 #include "Renderer/Rast.h"
+#include "Renderer/Light.h"
 
 using namespace Renderer;
 using namespace std;
@@ -26,9 +27,11 @@ public:
 	static const int nummer = 1;
 	MeshModelStage model_stage[nummer];
 	float count = 0;
+	bool now = 0;
+	float count2 = 0;
 	MyDraw() {
 //		model.loadObj2("../test/test_snapshot/obj/floor/floor.obj");
-		model.loadObj2("../test/test_snapshot/obj/output2.obj");
+		model.loadObj2("../test/test_snapshot/obj/output.obj");
 //		model.loadObj2("../test/test_obj_load/obj/reconstructed_head.obj");
 //		model.loadObj2("../test/test_obj_load/obj/pone/telefone.obj");
 //		model.loadObj2("../test/test_snapshot/obj/eye/eyeball_obj.obj");
@@ -53,13 +56,19 @@ public:
 //			saved.writePng("saved.png");
 //			saved.writeTga("saved.tga");
 		}
-		count += 0.025;
-		CameraView cam(V3f(0, 0, -0.75 ), V3f(0, 1, 0), V3f(0, 0, 1),
+		count += !now ? 0.025 : -0.025;
+		count2 += 0.25;
+		if(count > 0.8f)
+			now = 1;
+		if(count < -0.2f)
+			now = 0;
+		CameraView cam(V3f(0, 0, 0.75 ), V3f(0, 1, 0), V3f(0, 0, 1),
 					(60.0)/180.0 * 3.14, buf.width, buf.height, 0.000001f, 100); //phone
 		drawer.drawBegin(&buf);
 		drawer.fill2(black);
-		V3f light_dir(0, 0, 1);
-		DefaultVertexStage vstage1(cam, V3f(0, 0, 2.2), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0 , 3.14  + 3.14/3 + count, 3.14/2 ), light_dir);
+		V3f light_dir(0, count, 1/3.0);
+		Phong light(AmbientLight(1.0), 	DiffuseLight (light_dir, 1.0), SpecularLight(light_dir, 1.5, 4.0), 5 / 12.0, 1/12.0, 9/12.0);
+		DefaultVertexStage vstage1(cam, V3f(0, 0, 1.87), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0, 3.14   , 3.14/2 ), light);
 //		DefaultVertexStage vstage1(cam, V3f(0, 0, 2.8), V3f(1/1036.623291 , 1/381.681671  , 1/290.129395), V3f(3.14 / 2 , 3.14/2  + count, 0 ), light_dir);
 //		DefaultVertexStage vstage2(cam, V3f(0, 0, 3), V3f(1/1740.142212  , 1/381.681671   , 1/290.129395), V3f(3.14 / 2 , 3.14/2 + count , 0 ), light_dir);
 //		DefaultVertexStage vstage3(cam, V3f(0, 0, 3), V3f(1/(211.544144 * 2.0) , 1/(211.544144  *2.0)  , 1.0/(4 * 49.822578 )), V3f(3.14 / 2 , 3.14/2 + count , 0 ), light_dir);

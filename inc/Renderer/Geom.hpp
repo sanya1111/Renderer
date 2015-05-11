@@ -283,6 +283,9 @@ public:
 		return *this = cen + this->rotate(rot).scale(scale) ;
 	}
 
+	V3 operator-(){
+		return V3(-x, -y, -z);
+	}
 	V3 scale(const V3 &v)const{
 		return rowMatrix() * MatrixFactory::scale(v)[0];
 	}
@@ -296,7 +299,7 @@ public:
 		return cen + this->rotate(rot).scale(scale) ;
 	}
 
-	void print(){
+	void print()const{
 		DEB("%f %f %f\n", x, y, z);
 //		DEB("%d %d %d\n", x, y, z);
 	}

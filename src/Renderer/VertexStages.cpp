@@ -38,8 +38,10 @@ DefaultVertexStage::result Renderer::DefaultVertexStage::process(
 	 } * transform_matrix;
 
 	 FOR(i, 3) {
-		 intensity[i] = (Geom::V4f(pt_int[i]).norm().norm()).scMul(light_dir.norm());
+		 V3f to_eye = main_view->get_center() - (V4f(tr[i]).norm());
+		 intensity[i] = light.getForce(Geom::V4f(pt_int[i]).norm().norm(), to_eye);
 		 intensity[i] = std::max(0.0f, intensity[i]);
+		 intensity[i] = std::min(1.0f, intensity[i]);
 //			 assert(intensity[i] <= 1.0f);
 	 }
 //		 intensity.print();
