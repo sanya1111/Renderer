@@ -62,25 +62,30 @@ class Buffer {
 										  (1ULL<<32) - (1U<<24)}
 	};
 	uint8_t format_desc_entry;
-	friend class Drawer;
 	uint32_t handle;
-	uint8_t *map;
+	uint8_t *map, *saved_map = NULL;
 	uint32_t fb;
 	uint32_t pixel_format;
 	uint32_t stride;
-	uint32_t size;
 	uint32_t bpp;
 	uint32_t depth;
+	uint32_t width;
+	uint32_t height;
+	uint32_t size;
+	friend class Drawer;
+	friend class DrawerSimulator;
 	friend class Device;
 	Buffer(int32_t fd, uint32_t width, uint32_t height, uint32_t format,  MappingInfo mapping_info);
 public:
-	uint32_t width;
-	uint32_t height;
+	uint32_t getWidth();
+	uint32_t getHeight();
+
 	class BufferException: public std::runtime_error {
 	public:
 		using std::runtime_error::runtime_error;
 	};
-
+	void substitution_on(uint8_t * sub_buffer);
+	void substitution_off();
 	Buffer() = default;
 
 	~Buffer();

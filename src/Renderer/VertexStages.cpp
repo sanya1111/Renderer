@@ -53,3 +53,8 @@ DefaultVertexStage::result Renderer::DefaultVertexStage::process(
 	 }
 	 return res;
 }
+
+
+Geom::Matrix44f Renderer::DefaultVertexStage::getMatrix(){
+	return to_world * to_cam;
+}

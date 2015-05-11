@@ -31,6 +31,7 @@ public:
 	void process(std::tuple<Geom::TriangleF4, Geom::TriangleF> &inp, bool &ret);
 	bool have();
 	Geom::V2<int32_t> next();
+	Geom::Matrix44f getMatrix();
 };
 
 }

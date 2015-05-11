@@ -22,6 +22,7 @@ public:
 	}
 	DefaultVertexStage() {}
 	result process(std::tuple<Geom::TriangleF4, Geom::TriangleF, Geom::V3f, Geom::V3f> &tu, bool &ret);
+	Geom::Matrix44f getMatrix();
 };
 
 }

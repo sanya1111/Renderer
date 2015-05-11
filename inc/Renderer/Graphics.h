@@ -11,6 +11,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 namespace Renderer {
 
 	class Rgba{
@@ -23,6 +24,7 @@ namespace Renderer {
 
 
 	class Drawer{
+	protected:
 		Buffer * buf;
 		std::vector<float> zbuffer;
 		void at(uint8_t * ptr,const Rgba & color);
@@ -35,6 +37,14 @@ namespace Renderer {
 		void cleanZ();
 		Texture saveSnapshot();
 		Drawer() {	}
+	};
+
+	class DrawerSimulator : public Drawer{
+		std::shared_ptr<uint8_t> temp_buf;
+	public:
+		void drawBegin(Buffer *buf);
+		void drawEnd();
+		std::vector<float> &getZbuffer();
 	};
 
 	template<class BaseStage, class VertexStage, class Rast, class PixelStage, class Painter>

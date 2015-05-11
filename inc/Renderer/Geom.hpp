@@ -25,60 +25,58 @@ int8_t sign(T a) {
 
 
 
-template<class T, int32_t N, int32_t M>
+template<class T, int N, int M>
+class Matrix;
+
+template<size_t DIM,typename T> struct dt {
+    static T det(const Matrix<T, DIM,DIM>& src) {
+        T ret=0;
+        for (size_t i=DIM; i--; ret += src[0][i]*src.cofactor(0,i));
+        return ret;
+    }
+};
+
+template<typename T> struct dt<1,T> {
+    static T det(const Matrix<T, 1,1>& src) {
+        return src[0][0];
+    }
+};
+
+template<class T>
+class V3;
+
+template<class T, int N, int M>
 class Matrix{
 protected:
 	std::array<T, N * M> ma;
 public:
-	struct quick_multipler{
-		typedef Matrix<float ,4, 4> with;
-		void mult(with &A, const with &B, with &C){
-			__m128 row1 = _mm_loadu_ps(B[0]),
-				   row2 = _mm_loadu_ps(B[1]),
-				   row3 = _mm_loadu_ps(B[2]),
-				   row4 = _mm_loadu_ps(B[3]);
-			for(int32_t i=0; i<4; i++) {
-				__m128 brod1 = _mm_set1_ps(A[i][0]),
-					   brod2 = _mm_set1_ps(A[i][1]),
-					   brod3 = _mm_set1_ps(A[i][2]),
-					   brod4 = _mm_set1_ps(A[i][3]);
-				_mm_store_ps(C[i], _mm_add_ps(
-						_mm_add_ps(
-							_mm_mul_ps(brod1, row1),
-							_mm_mul_ps(brod2, row2)),
-						_mm_add_ps(
-							_mm_mul_ps(brod3, row3),
-							_mm_mul_ps(brod4, row4))));
-			}
-		}
-	};
 	struct standart_multipler{
-		template<int32_t M2>
-		void mult(Matrix<T, N, M> &A, const Matrix<T, M, M2> &B, Matrix<T, N, M2> &C){
-			for(int32_t i = 0; i < N; i++){
-				for(int32_t j = 0; j < M2; j++){
+		template<int M2>
+		static void mult(Matrix<T, N, M> &A, const Matrix<T, M, M2> &B, Matrix<T, N, M2> &C){
+			for(int i = 0; i < N; i++){
+				for(int j = 0; j < M2; j++){
 					C[i][j] = 0;
-					for(int32_t k = 0; k < M; k++){
+					for(int k = 0; k < M; k++){
 						C[i][j] += A[i][k] * B[k][j];
 					}
 				}
 			}
 		}
 	};
-	typedef typename Selector_<Matrix<T, N, M>, Matrix<float, 4, 4>, quick_multipler, standart_multipler>::result multipler_t;
+	typedef standart_multipler multipler_t;
 
 	Matrix() {
 		std::fill(ma.begin(), ma.end(), 0);
 	}
 	Matrix(std::initializer_list<T > Li) {
-		int32_t pos = 0;
+		int pos = 0;
 		for(auto it : Li){
 			ma[pos++] = it;
 		}
 	}
 	void print(){
-		for(int32_t i = 0; i < N;i++){
-			for(int32_t j = 0; j < M; j++){
+		for(int i = 0; i < N;i++){
+			for(int j = 0; j < M; j++){
 				DEB("%lf ", ma[i * M + j]);
 			}
 			DEB("\n");
@@ -93,28 +91,79 @@ public:
 
 	std::array<T, N> colomn(size_t j){
 		std::array<T, N> res;
-		for(int32_t i = 0; i < N; i++){
+		for(int i = 0; i < N; i++){
 			res[i] = ma[i * M + j];
 		}
 		return res;
 	}
 
-	template<int32_t M2>
+	template<int M2>
 	Matrix<T, N, M2> operator*(const Matrix<T, M, M2> &other){
 		Matrix<T, N, M2> ret;
-		(typename int_Selector_<M, M2, multipler_t, standart_multipler>::result ()).mult(*this, other, ret);
+		standart_multipler::mult(*this, other, ret);
 		return ret;
 	}
 
 	Matrix<T, N, M> operator*(const T value){
 		Matrix ret;
-		for(int32_t i = 0; i < N;i++){
-			for(int32_t j = 0; j < M; j++){
+		for(int i = 0; i < N;i++){
+			for(int j = 0; j < M; j++){
 				ret[i][j] = ma[i * M + j] * value;
 			}
 		}
 		return ret;
 	}
+	 T det() const {
+		return dt<M,T>::det(*this);
+	}
+
+	Matrix<T, N-1, M-1> get_minor(size_t row, size_t col) const {
+		Matrix<T, N-1,M-1> ret;
+		for (size_t i=N-1; i--; )
+			for (size_t j=M-1;j--; ret[i][j]=(*this)[i<row?i:i+1][j<col?j:j+1]);
+		return ret;
+	}
+
+	T cofactor(size_t row, size_t col) const {
+		return get_minor(row,col).det()*((row+col)%2 ? -1 : 1);
+	}
+
+	Matrix<T, N,M> adjugate() const {
+		Matrix<T, N,M> ret;
+		for (size_t i=N; i--; )
+			for (size_t j=M; j--; ret[i][j]=cofactor(i,j));
+		return ret;
+	}
+
+	Matrix<T, N, M> operator/(const T other){
+		Matrix<T, N, M> res;
+		FOR(i, N) FOR(j, M){
+			res[i][j] = (*this)[i][j] /other;
+		}
+		return res;
+	}
+
+	Matrix<T, N,M> invert_transpose() {
+		Matrix<T, N,M> ret = adjugate();
+		T tmp = V3<T>(ret[0]).scMul(V3<T>((*this)[0]));
+		return ret/tmp;
+	}
+
+	Matrix<T,M,N> invert() {
+		return invert_transpose().transpose();
+	}
+
+	Matrix<T, M,N> transpose() {
+			Matrix<T, M, N> ret;
+			for (size_t i=M; i--; ){
+				std::array<T, N> c= colomn(i);
+				FOR(j, N){
+					ret[i][j] = c[j];
+				}
+			}
+			return ret;
+	}
+
 };
 
 template<class T>

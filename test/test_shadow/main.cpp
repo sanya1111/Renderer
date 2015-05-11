@@ -18,6 +18,14 @@ using namespace Renderer::Geom;
 #include <fstream>
 #include <memory>
 
+//class MyVertexStage : public DefaultVertexStage{
+//	DefaultPixelStage def;
+//	Matrix44f trans;
+//public:
+//	typedef std::tuple<Geom::TriangleF4, Geom::TriangleF, Geom::V3f> result;
+//	MyVertexStage(const DefaultVertexStage&def, Matrix44f trans) : def(def), trans(trans) {}
+//};
+
 class MyDraw : public Drawable{
 public:
 	Rgba white, black;
@@ -49,21 +57,21 @@ public:
 			now = 1;
 		if(count < -0.2f)
 			now = 0;
-//		CameraView cam(V3f(-2, 0, 1.87), V3f(0, 1, 0), V3f(1, 0, 0),
-//					(60.0)/180.0 * 3.14, buf.width, buf.height, 0.000001f, 100);
-		CameraView cam(V3f(0, 0, 0.75 ), V3f(0, 1, 0), V3f(0, 0, 1),
-					(60.0)/180.0 * 3.14, buf.width, buf.height, 0.000001f, 100000);
+		CameraView cam(V3f(-2, 0, 1.87), V3f(0, 1, 0), V3f(1, 0, 0),
+					(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100);
+//		CameraView cam(V3f(0, 0, 0.75 ), V3f(0, 1, 0), V3f(0, 0, 1),
+//					(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
 		drawer.drawBegin(&buf);
 		{
 			drawer.fill2(black);
 //			V3f light_dir(0, count, 1/3.0);
-			V3f light_dir(-2 + count2, 0, 1.87);
-			Phong light(AmbientLight(1.0), 	DiffuseLight (light_dir, 1.0), SpecularLight(light_dir, 1.5, 4.0), 0, 1, 0);
-			Phong light2(AmbientLight(1.0), 	DiffuseLight (light_dir, 4.0), SpecularLight(light_dir, 1.5, 4.0),  1, 0, 0);
+			V3f light_dir(-2, 0, 1.87);
+			Phong light(AmbientLight(1.0), 	DiffuseLight (light_dir, 1.0), SpecularLight(light_dir, 1.5, 4.0), 5 / 12.0, 1/12.0, 9/12.0);
+			Phong light2(AmbientLight(1.0), 	DiffuseLight (light_dir, 4.0), SpecularLight(light_dir, 1.5, 4.0),  0, 1, 0);
 			DefaultVertexStage vstage[2];
 			vstage[0]= DefaultVertexStage(cam, V3f(-0.3 , 0, 1.87), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0, 3.14   , 3.14/2 ), light);
 			vstage[1]= DefaultVertexStage(cam, V3f(0.5, 0, 1.87), V3f(2 , 2   , 2 ), V3f(0, 3.14   , 3.14/2 ), light2);
-			DefaultRast rast(buf.height, buf.width);
+			DefaultRast rast(buf.getHeight(), buf.getWidth());
 			FOR(i, 2){
 				DefaultPixelStage pstage(model[i].mats[model[i].mat_index[0]].getTextureVec(Material::DIFFUSE_TID)[0]);
 				drawModel(model_stage[i], vstage[i], rast, pstage, drawer);

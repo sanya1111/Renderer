@@ -109,3 +109,7 @@ Renderer::DefaultRast::DefaultRast(int32_t height, int32_t width) : width(width)
 				height / 2.0f, width / 2.0f, 0, 1
 	};
 }
+
+Geom::Matrix44f DefaultRast::getMatrix(){
+	return screen_ma;
+}

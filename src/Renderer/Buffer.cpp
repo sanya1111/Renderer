@@ -165,6 +165,23 @@ void Renderer::Buffer::destroy(int32_t fd) {
 	}
 }
 
+void Renderer::Buffer::substitution_on(uint8_t* sub_buffer) {
+	saved_map = map;
+	map = sub_buffer;
+}
+
+void Renderer::Buffer::substitution_off() {
+	map = saved_map;
+}
+
+uint32_t Renderer::Buffer::getWidth() {
+	return width;
+}
+
+uint32_t Renderer::Buffer::getHeight() {
+	return height;
+}
+
 Renderer::Buffer::~Buffer() {
 }
 

@@ -89,3 +89,18 @@ Texture Renderer::Drawer::saveSnapshot() {
 		return Texture(new_buf, buf->width, buf->height, 3);
 	}
 }
+
+void Renderer::DrawerSimulator::drawBegin(Buffer* buf) {
+	temp_buf = shared_ptr<uint8_t>(new uint8_t[buf->size]);
+	buf->substitution_on(temp_buf.get());
+	Drawer::drawBegin(buf);
+}
+
+void Renderer::DrawerSimulator::drawEnd() {
+	Drawer::drawEnd();
+	buf->substitution_off();
+}
+
+std::vector<float>& Renderer::DrawerSimulator::getZbuffer() {
+	return zbuffer;
+}
