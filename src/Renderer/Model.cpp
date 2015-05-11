@@ -32,7 +32,7 @@ void Renderer::Model::loadObj2(const string &filename) {
 		    aiProcess_OptimizeMeshes);
 	meshs.resize(sc->mNumMeshes);
 	mat_index.resize(sc->mNumMeshes);
-	for(unsigned i = 0; i < 3; i++){
+	for(unsigned i = 0; i < sc->mNumMeshes; i++){
 		aiMesh * mesh = sc->mMeshes[i];
 		mat_index[i] = mesh->mMaterialIndex;
 		for(unsigned j = 0 ;j < mesh->mNumVertices; j++){

@@ -37,7 +37,7 @@ inline void Renderer::Drawer::at(uint8_t* ptr, const Rgba& color) {
 
 void Renderer::Drawer::drawPixel(int32_t screen_x, int32_t screen_y, float h, Rgba color) {
 	int32_t pos = screen_x * buf->width + screen_y;
-	if(zbuffer[pos] > h){
+	if(zbuffer[pos] > h ){
 		zbuffer[pos] = h;
 		uint8_t * ptr = buf->map + screen_x * buf->stride + screen_y * buf->bpp / 8;
 		at(ptr, color);
