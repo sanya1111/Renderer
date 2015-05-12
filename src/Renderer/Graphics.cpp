@@ -88,6 +88,7 @@ Texture Renderer::Drawer::saveSnapshot() {
 		}
 		return Texture(new_buf, buf->width, buf->height, 3);
 	}
+	return Texture();
 }
 
 void Renderer::DrawerSimulator::drawBegin(Buffer* buf) {

@@ -2,7 +2,7 @@ include ../MakeConf/inc.mk
 
 #test_subdirs=$(shell ls | sed -e "s/Makefile//")
 
-test_subdirs=test_shadow
+test_subdirs=test_shadow test_phong
 
 all:subdirs
 	

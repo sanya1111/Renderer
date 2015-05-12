@@ -34,12 +34,6 @@ public:
 		if(ret){
 			V2<float> inner = DefaultPixelStage::getXY();
 			V4f need = V4f((V4f(inner.x, inner.y, DefaultPixelStage::getZ(), DefaultPixelStage::getW()).rowMatrix() * trans)[0]);
-//			Matrix44f need = {
-//				inner.x, inner.y, in_z, 1,
-//				tr->vs[0].x, tr->vs[0].y, tr->vs[0].z, tr->vs[0].w,
-//				tr->vs[1].x, tr->vs[1].y, tr->vs[1].z, tr->vs[1].w,
-//				tr->vs[2].x, tr->vs[2].y, tr->vs[2].z, tr->vs[2].w,
-//			} * trans;
 			int sx = need.x / need.w, sy = need.y/need.w;
 			flag = false;
 			if(sx >= 0 && sy >= 0 && sx < height && sy < width){
@@ -62,9 +56,6 @@ public:
 	Model model[2];
 	static const int nummer = 2;
 	MeshModelStage model_stage[nummer];
-	float count = 0;
-	bool now = 0;
-	float count2 = 0;
 	MyDraw() {
 		model[0].loadFile("../test/test_shadow/obj/output2.obj");
 		model[1].loadFile("../test/test_shadow/obj/floor/floor.obj");
@@ -73,32 +64,21 @@ public:
 		}
 		white = Rgba(255, 255, 255, 0);
 		black = Rgba(0, 0, 0, 0);
-		count = 0;
 	}
 	virtual void onDraw(Context & context){
 		Buffer &buf = context.getCurrentBuffer();
 		if(context.getFrameCount() > 10000){
 			context.quitProcess();
 		}
-		count += !now ? 0.025 : -0.025;
-		count2 += 0.025;
-		if(count > 0.8f)
-			now = 1;
-		if(count < -0.2f)
-			now = 0;
-//		CameraView cam(V3f(-2, 0, 1.87), V3f(0, 1, 0), V3f(1, 0, 0),
-//					(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100);
 		vector<float> zbuf;
 
 		V3f light_dir(-2, 0, 1.87);
 		Phong light(AmbientLight(1.0), 	DiffuseLight (light_dir, 1.0), SpecularLight(light_dir, 1.5, 4.0), 5 / 12.0, 1/12.0, 9/12.0);
 		Phong light2(AmbientLight(1.0), 	DiffuseLight (light_dir, 4.0), SpecularLight(light_dir, 1.5, 4.0),  0, 1, 0);
-
 		Matrix44f trans[2];
 		{
 			drawer_sim.drawBegin(&buf);
 			drawer_sim.fill2(black);
-//			V3f light_dir(0, count, 1/3.0);
 			DefaultVertexStage vstage[2];
 			CameraView cam(light_dir, V3f(0, 1, 0), V3f(1, 0, 0),
 											(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
@@ -118,15 +98,8 @@ public:
 			FOR(i, 2)
 				trans[i] = (vstage[i].getMatrix() * rast.getMatrix());
 		}
-		DEB("ONE\n");
-		FOR(i, 2){
-			trans[i].print();
-		}
-		DEB("end\n");
 		{
 			drawer.drawBegin(&buf);
-//			CameraView cam(V3f(0, 0, -0.75), V3f(0, 1, 0), V3f(0, 0, 1),
-//										(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
 			CameraView cam(light_dir, V3f(0, 1, 0), V3f(1, 0, 0),
 														(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
 			DefaultVertexStage vstage[2];
@@ -142,11 +115,6 @@ public:
 				drawModel(model_stage[i], vstage[i], rast, pstage, drawer);
 			}
 			drawer.drawEnd();
-			DEB("TWO\n");
-			FOR(i, 2){
-				((vstage[i].getMatrix() * rast.getMatrix()) * trans[i].invert()).print();
-			}
-			DEB("end\n");
 		}
 
 	}

@@ -42,14 +42,14 @@ void Renderer::MeshModelStage::operator=(MeshModelStage &&mstage) {
 
 //==================================================
 bool Renderer::ModelStage::have() {
-	return ptr < mstage.size();
+	return (size_t)ptr < mstage.size();
 }
 
 void Renderer::ModelStage::next(){
 	ptr++;
-	if(ptr < mstage.size())
+	if((size_t)ptr < mstage.size())
 		mstage[ptr].start();
-	while(ptr < mstage.size() && !mstage[ptr].have()){
+	while((size_t)ptr < mstage.size() && !mstage[ptr].have()){
 		ptr++;
 	}
 }

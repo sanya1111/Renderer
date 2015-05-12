@@ -49,14 +49,14 @@ public:
 		if(count < -0.2f)
 			now = 0;
 		CameraView cam(V3f(0, 0, 0.75 ), V3f(0, 1, 0), V3f(0, 0, 1),
-					(60.0)/180.0 * 3.14, buf.width, buf.height, 0.000001f, 100);
+					(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100);
 		drawer.drawBegin(&buf);
 		{
 			drawer.fill2(black);
 			V3f light_dir(0, count, 1/3.0);
 			Phong light(AmbientLight(1.0), 	DiffuseLight (light_dir, 1.0), SpecularLight(light_dir, 1.5, 4.0), 5 / 12.0, 1/12.0, 9/12.0);
 			DefaultVertexStage vstage1(cam, V3f(0, 0, 1.87), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0, 3.14   , 3.14/2 ), light);
-			DefaultRast rast(buf.height, buf.width);
+			DefaultRast rast(buf.getHeight(), buf.getWidth());
 			DefaultPixelStage pstage(model.mats[model.mat_index[0]].getTextureVec(Material::DIFFUSE_TID)[0]);
 			drawModel(model_stage[0], vstage1, rast, pstage, drawer);
 		}

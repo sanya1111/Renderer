@@ -14,12 +14,12 @@ class Texture{
 	uint32_t comp;
 public:
 	uint32_t width, height;
+	Texture() {}
 	Texture(const std::string &filename);
 	Texture(std::shared_ptr<uint8_t> data_, uint32_t width, uint32_t height,uint32_t comp );
 	Rgba at(const uint32_t &x, const uint32_t &y)const;
 	void writePng(const std::string &filename);
 	void writeBmp(const std::string &filename);
-	void writeHdr(const std::string &filename);
 	void writeTga(const std::string &filename);
 	friend class Drawer;
 };

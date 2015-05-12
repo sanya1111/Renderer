@@ -88,9 +88,6 @@ void Renderer::Texture::writeBmp(const std::string& filename) {
 	stbi_write_bmp(filename.c_str(), width, height, comp, data.get());
 }
 
-void Renderer::Texture::writeHdr(const std::string& filename) {
-//	stbi_write_hdr(filename.c_str(), width, height, comp, data.get());
-}
 
 void Renderer::Texture::writeTga(const std::string& filename) {
 	stbi_write_tga(filename.c_str(), width, height, comp, data.get());

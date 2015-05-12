@@ -1,9 +1,5 @@
-libdrm installing 
-from archive 
-1. cd /tmp && wget http://dri.freedesktop.org/libdrm/libdrm-[verison].tar.bz2
-3. tar -xvjf libdrm-[verison].tar.bz2
-2. cd libdrm-[version] &&  sed -e "/pthread-stubs/d" -i configure.ac && autoreconf -fiv && ./configure --prefix=/usr --enable-udev && make
-3. make install (as root)
+<h2>Requirements</h2>
+Libdrm, Libkms, Libassimp
 
-include directories :
-/usr/include/libkms  and /usr/include/libdrm
+
+
