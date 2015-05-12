@@ -18,18 +18,47 @@ using namespace Renderer::Geom;
 #include <fstream>
 #include <memory>
 
-//class MyVertexStage : public DefaultVertexStage{
-//	DefaultPixelStage def;
-//	Matrix44f trans;
-//public:
-//	typedef std::tuple<Geom::TriangleF4, Geom::TriangleF, Geom::V3f> result;
-//	MyVertexStage(const DefaultVertexStage&def, Matrix44f trans) : def(def), trans(trans) {}
-//};
+class MyPixelStage : public DefaultPixelStage{
+	Matrix44f trans;
+	int height, width;
+	vector<float> z;
+	bool flag = false;
+public:
+	MyPixelStage(Texture &with, const Matrix44f &trans, vector<float>&z, int height, int width )
+		: DefaultPixelStage(with), trans(trans),
+		  z(z), height(height), width(width){
+	}
+	bool apply(Geom::V2<int> &pt){
+		bool ret = DefaultPixelStage::apply(pt);
+		flag = true;
+		if(ret){
+			V2<float> inner = DefaultPixelStage::getXY();
+			V4f need = V4f((V4f(inner.x, inner.y, DefaultPixelStage::getZ(), DefaultPixelStage::getW()).rowMatrix() * trans)[0]);
+//			Matrix44f need = {
+//				inner.x, inner.y, in_z, 1,
+//				tr->vs[0].x, tr->vs[0].y, tr->vs[0].z, tr->vs[0].w,
+//				tr->vs[1].x, tr->vs[1].y, tr->vs[1].z, tr->vs[1].w,
+//				tr->vs[2].x, tr->vs[2].y, tr->vs[2].z, tr->vs[2].w,
+//			} * trans;
+			int sx = need.x / need.w, sy = need.y/need.w;
+			flag = false;
+			if(sx >= 0 && sy >= 0 && sx < height && sy < width){
+				flag = (z[sx * width + sy] - need.z >=0);
+			}
+		}
+		return ret;
+	}
+	Rgba getColor(){
+		float kof = (!flag ? 0 : 1);
+		return DefaultPixelStage::getColor() * kof;
+	}
+};
 
 class MyDraw : public Drawable{
 public:
 	Rgba white, black;
 	Drawer drawer;
+	DrawerSimulator drawer_sim;
 	Model model[2];
 	static const int nummer = 2;
 	MeshModelStage model_stage[nummer];
@@ -57,27 +86,69 @@ public:
 			now = 1;
 		if(count < -0.2f)
 			now = 0;
-		CameraView cam(V3f(-2, 0, 1.87), V3f(0, 1, 0), V3f(1, 0, 0),
-					(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100);
-//		CameraView cam(V3f(0, 0, 0.75 ), V3f(0, 1, 0), V3f(0, 0, 1),
-//					(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
-		drawer.drawBegin(&buf);
+//		CameraView cam(V3f(-2, 0, 1.87), V3f(0, 1, 0), V3f(1, 0, 0),
+//					(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100);
+		vector<float> zbuf;
+
+		V3f light_dir(-2, 0, 1.87);
+		Phong light(AmbientLight(1.0), 	DiffuseLight (light_dir, 1.0), SpecularLight(light_dir, 1.5, 4.0), 5 / 12.0, 1/12.0, 9/12.0);
+		Phong light2(AmbientLight(1.0), 	DiffuseLight (light_dir, 4.0), SpecularLight(light_dir, 1.5, 4.0),  0, 1, 0);
+
+		Matrix44f trans[2];
 		{
-			drawer.fill2(black);
+			drawer_sim.drawBegin(&buf);
+			drawer_sim.fill2(black);
 //			V3f light_dir(0, count, 1/3.0);
-			V3f light_dir(-2, 0, 1.87);
-			Phong light(AmbientLight(1.0), 	DiffuseLight (light_dir, 1.0), SpecularLight(light_dir, 1.5, 4.0), 5 / 12.0, 1/12.0, 9/12.0);
-			Phong light2(AmbientLight(1.0), 	DiffuseLight (light_dir, 4.0), SpecularLight(light_dir, 1.5, 4.0),  0, 1, 0);
 			DefaultVertexStage vstage[2];
+			CameraView cam(light_dir, V3f(0, 1, 0), V3f(1, 0, 0),
+											(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
 			vstage[0]= DefaultVertexStage(cam, V3f(-0.3 , 0, 1.87), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0, 3.14   , 3.14/2 ), light);
 			vstage[1]= DefaultVertexStage(cam, V3f(0.5, 0, 1.87), V3f(2 , 2   , 2 ), V3f(0, 3.14   , 3.14/2 ), light2);
 			DefaultRast rast(buf.getHeight(), buf.getWidth());
 			FOR(i, 2){
 				DefaultPixelStage pstage(model[i].mats[model[i].mat_index[0]].getTextureVec(Material::DIFFUSE_TID)[0]);
+				drawModel(model_stage[i], vstage[i], rast, pstage, drawer_sim);
+			}
+			if(context.getFrameCount() == 1){
+				Texture tex= drawer_sim.saveSnapshot();
+				tex.writePng("okey.png");
+			}
+			drawer_sim.drawEnd();
+			zbuf = drawer_sim.getZbuffer();
+			FOR(i, 2)
+				trans[i] = (vstage[i].getMatrix() * rast.getMatrix());
+		}
+		DEB("ONE\n");
+		FOR(i, 2){
+			trans[i].print();
+		}
+		DEB("end\n");
+		{
+			drawer.drawBegin(&buf);
+//			CameraView cam(V3f(0, 0, -0.75), V3f(0, 1, 0), V3f(0, 0, 1),
+//										(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
+			CameraView cam(light_dir, V3f(0, 1, 0), V3f(1, 0, 0),
+														(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
+			DefaultVertexStage vstage[2];
+			vstage[0]= DefaultVertexStage(cam, V3f(-0.3 , 0, 1.87), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0, 3.14   , 3.14/2 ), light);
+			vstage[1]= DefaultVertexStage(cam, V3f(0.5, 0, 1.87), V3f(2 , 2   , 2 ), V3f(0, 3.14   , 3.14/2 ), light2);
+			DefaultRast rast(buf.getHeight(), buf.getWidth());
+			FOR(i, 2){
+				MyPixelStage pstage(model[i].mats[model[i].mat_index[0]].getTextureVec(Material::DIFFUSE_TID)[0],
+						(vstage[i].getMatrix() * rast.getMatrix()).invert() * trans[i],
+						zbuf,
+						buf.getHeight(),
+						buf.getWidth());
 				drawModel(model_stage[i], vstage[i], rast, pstage, drawer);
 			}
+			drawer.drawEnd();
+			DEB("TWO\n");
+			FOR(i, 2){
+				((vstage[i].getMatrix() * rast.getMatrix()) * trans[i].invert()).print();
+			}
+			DEB("end\n");
 		}
-		drawer.drawEnd();
+
 	}
 };
 

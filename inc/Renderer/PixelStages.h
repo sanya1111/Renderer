@@ -9,6 +9,7 @@ namespace Renderer{
 class Rgba;
 
 class DefaultPixelStage{
+protected:
 	Geom::TriangleF4 * tr;
 	Geom::TriangleF * other;
 	Geom::V3f bc_clip;
@@ -20,7 +21,11 @@ public:
 	void save(std::tuple<Geom::TriangleF4, Geom::TriangleF> &result);
 	bool apply(Geom::V2<int> &pt);
 	float getZ();
+	float getzz();
+	Geom::V2<float> getxy();
+	Geom::V2<float> getXY();
 	Rgba getColor();
+	float getW();
 };
 
 }

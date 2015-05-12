@@ -38,9 +38,33 @@ float Renderer::DefaultPixelStage::getZ(){
 	return  (V3f(tr->vs[0][2] * tr->vs[0][3], tr->vs[1][2] * tr->vs[1][3], tr->vs[2][2] * tr->vs[2][3]).scMul(bc_clip));
 }
 
+float Renderer::DefaultPixelStage::getW(){
+	return  (V3f(tr->vs[0][3], tr->vs[1][3], tr->vs[2][3]).scMul(bc_clip));
+}
+
 Rgba Renderer::DefaultPixelStage::getColor(){
 	float inten = V3f(other->vs[0][0], other->vs[1][0], other->vs[2][0]).scMul(bc_clip);
 	int c1 = (V3f(other->vs[0][1], other->vs[1][1], other->vs[2][1]).scMul(bc_clip)) * tex->width;
 	int c2 = tex->height - 1 - (V3f(other->vs[0][2], other->vs[1][2], other->vs[2][2]).scMul(bc_clip)) * tex->height;
 	return tex->at(c2, c1) * inten;
 }
+
+Geom::V2<float> DefaultPixelStage::getXY(){
+	V2<float> res;
+	FOR(i, 2){
+		res[i] = V3f(tr->vs[0][i] * tr->vs[0][3] , tr->vs[1][i] * tr->vs[1][3], tr->vs[2][i] * tr->vs[2][3]).scMul(bc_clip);
+	}
+	return res;
+}
+Geom::V2<float> DefaultPixelStage::getxy(){
+	V2<float> res;
+	FOR(i, 2){
+		res[i] = V3f(tr->vs[0][i]  , tr->vs[1][i] , tr->vs[2][i] ).scMul(bc_clip);
+	}
+	return res;
+}
+
+float Renderer::DefaultPixelStage::getzz(){
+	return  (V3f(tr->vs[0][2] , tr->vs[1][2] , tr->vs[2][2] ).scMul(bc_clip));
+}
+

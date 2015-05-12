@@ -74,7 +74,7 @@ public:
 			ma[pos++] = it;
 		}
 	}
-	void print(){
+	void print()const{
 		for(int i = 0; i < N;i++){
 			for(int j = 0; j < M; j++){
 				DEB("%lf ", ma[i * M + j]);
