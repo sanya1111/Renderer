@@ -1,0 +1,10 @@
+newmtl material_1
+d 1
+Ns 1
+Ni 0
+Ka 0 0 0
+Kd 0 0 0
+Ks 1 1 1
+Km 0
+map_Kd /diablo3_pose_diffuse.tga
+
