@@ -19,6 +19,5 @@ float Renderer::SpecularLight::getForce(const Geom::V3f &normal_i,const Geom::V3
 }
 
 float Renderer::Phong::getForce(const Geom::V3f &normal, const Geom::V3f &to_eye, const Geom::V3f &pt) {
-//	DEB("%f \n", b.getForce(normal, pt));
 	return a_kof * a.getForce() + b_kof * b.getForce(normal, pt) + c_kof * c.getForce(normal, to_eye, pt);
 }

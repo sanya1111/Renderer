@@ -19,12 +19,12 @@ using namespace Renderer::Geom;
 #include <memory>
 
 class MyPixelStage : public DefaultPixelStage{
-	Matrix44f trans;
+	Matrix44<double> trans;
 	int height, width;
 	vector<float> z;
 	bool flag = false;
 public:
-	MyPixelStage(Texture &with, const Matrix44f &trans, vector<float>&z, int height, int width )
+	MyPixelStage(Texture &with, const Matrix44<double> &trans, vector<float>&z, int height, int width )
 		: DefaultPixelStage(with), trans(trans),
 		  z(z), height(height), width(width){
 	}
@@ -33,7 +33,7 @@ public:
 		flag = true;
 		if(ret){
 			V2<float> inner = DefaultPixelStage::getXY();
-			V4f need = V4f((V4f(inner.x, inner.y, DefaultPixelStage::getZ(), DefaultPixelStage::getW()).rowMatrix() * trans)[0]);
+			V4<double> need = V4<double>((V4<double>(inner.x, inner.y, DefaultPixelStage::getZ(), DefaultPixelStage::getW()).rowMatrix() * trans)[0]);
 			int sx = need.x / need.w, sy = need.y/need.w;
 			flag = false;
 			if(sx >= 0 && sy >= 0 && sx < height && sy < width){
@@ -43,8 +43,10 @@ public:
 		return ret;
 	}
 	Rgba getColor(){
-		float kof = (!flag ? 0 : 1);
-		return DefaultPixelStage::getColor() * kof;
+		if(!flag)
+			return Rgba(0, 0, 0, 0);
+		Rgba ret = DefaultPixelStage::getColor() ;
+		return ret;
 	}
 };
 
@@ -75,7 +77,7 @@ public:
 		V3f light_dir(-2, 0, 1.87);
 		Phong light(AmbientLight(1.0), 	DiffuseLight (light_dir, 1.0), SpecularLight(light_dir, 1.5, 4.0), 5 / 12.0, 1/12.0, 9/12.0);
 		Phong light2(AmbientLight(1.0), 	DiffuseLight (light_dir, 4.0), SpecularLight(light_dir, 1.5, 4.0),  0, 1, 0);
-		Matrix44f trans[2];
+		Matrix44<double> trans[2];
 		{
 			drawer_sim.drawBegin(&buf);
 			drawer_sim.fill2(black);
@@ -90,25 +92,28 @@ public:
 				drawModel(model_stage[i], vstage[i], rast, pstage, drawer_sim);
 			}
 			if(context.getFrameCount() == 1){
-				Texture tex= drawer_sim.saveSnapshot();
-				tex.writePng("okey.png");
+//				Texture tex= drawer_sim.saveSnapshot();
+//				tex.writePng("okey.png");
 			}
 			drawer_sim.drawEnd();
 			zbuf = drawer_sim.getZbuffer();
 			FOR(i, 2)
-				trans[i] = (vstage[i].getMatrix() * rast.getMatrix());
+				trans[i] = (Matrix44<double>(vstage[i].getMatrix()) * Matrix44<double>(rast.getMatrix()));
 		}
+
 		{
 			drawer.drawBegin(&buf);
 			CameraView cam(light_dir, V3f(0, 1, 0), V3f(1, 0, 0),
 														(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
+//			CameraView cam(V3f(-1, 0, -0.4), V3f(0, 1, 0), V3f(0, 0, 1),
+//														(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
 			DefaultVertexStage vstage[2];
 			vstage[0]= DefaultVertexStage(cam, V3f(-0.3 , 0, 1.87), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0, 3.14   , 3.14/2 ), light);
-			vstage[1]= DefaultVertexStage(cam, V3f(0.5, 0, 1.87), V3f(2 , 2   , 2 ), V3f(0, 3.14   , 3.14/2 ), light2);
+			vstage[1]= DefaultVertexStage(cam, V3f(0.5, 0, 1.87), V3f(1 , 1   , 1 ), V3f(0, 3.14   , 3.14/2 ), light2);
 			DefaultRast rast(buf.getHeight(), buf.getWidth());
 			FOR(i, 2){
 				MyPixelStage pstage(model[i].mats[model[i].mat_index[0]].getTextureVec(Material::DIFFUSE_TID)[0],
-						(vstage[i].getMatrix() * rast.getMatrix()).invert() * trans[i],
+						Matrix44<double>(Matrix44<double>(vstage[i].getMatrix()) * Matrix44<double>(rast.getMatrix())).invert() * Matrix44<double>(trans[i]),
 						zbuf,
 						buf.getHeight(),
 						buf.getWidth());

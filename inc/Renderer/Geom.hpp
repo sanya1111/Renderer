@@ -164,6 +164,13 @@ public:
 			return ret;
 	}
 
+	operator Matrix<double, N, M> () const{
+		Matrix<double, N, M> ret;
+		FOR(i, N) FOR(j, M){
+			ret[i][j] = (*this)[i][j];
+		}
+		return ret;
+	}
 };
 
 template<class T>

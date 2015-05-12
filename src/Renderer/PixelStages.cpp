@@ -44,8 +44,8 @@ float Renderer::DefaultPixelStage::getW(){
 
 Rgba Renderer::DefaultPixelStage::getColor(){
 	float inten = V3f(other->vs[0][0], other->vs[1][0], other->vs[2][0]).scMul(bc_clip);
-	int c1 = (V3f(other->vs[0][1], other->vs[1][1], other->vs[2][1]).scMul(bc_clip)) * tex->width;
-	int c2 = tex->height - 1 - (V3f(other->vs[0][2], other->vs[1][2], other->vs[2][2]).scMul(bc_clip)) * tex->height;
+	int c1 = (V3f(other->vs[0][1], other->vs[1][1], other->vs[2][1]).scMul(bc_clip)) * (tex->width - 1);
+	int c2 = tex->height - 1 - (V3f(other->vs[0][2], other->vs[1][2], other->vs[2][2]).scMul(bc_clip)) * (tex->height - 1);
 	return tex->at(c2, c1) * inten;
 }
 
