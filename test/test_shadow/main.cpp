@@ -44,7 +44,7 @@ public:
 	}
 	Rgba getColor(){
 		if(!flag)
-			return Rgba(0, 0, 0, 0);
+			return DefaultPixelStage::getColor() * (1/1.5f);
 		Rgba ret = DefaultPixelStage::getColor() ;
 		return ret;
 	}
@@ -54,6 +54,7 @@ class MyDraw : public Drawable{
 public:
 	Rgba white, black;
 	Drawer drawer;
+	float count2 = 0;
 	DrawerSimulator drawer_sim;
 	Model model[2];
 	static const int nummer = 2;
@@ -73,10 +74,10 @@ public:
 			context.quitProcess();
 		}
 		vector<float> zbuf;
-
-		V3f light_dir(-2, 0, 1.87);
+//		count2 += 0.05;
+		V3f light_dir(-2.2, 0, 1.87);
 		Phong light(AmbientLight(1.0), 	DiffuseLight (light_dir, 1.0), SpecularLight(light_dir, 1.5, 4.0), 5 / 12.0, 1/12.0, 9/12.0);
-		Phong light2(AmbientLight(1.0), 	DiffuseLight (light_dir, 4.0), SpecularLight(light_dir, 1.5, 4.0),  0, 1, 0);
+		Phong light2(AmbientLight(1.0), 	DiffuseLight (light_dir, 4.0), SpecularLight(light_dir, 1.5, 4.0),  1, 0, 0);
 		Matrix44<double> trans[2];
 		{
 			drawer_sim.drawBegin(&buf);
@@ -85,15 +86,15 @@ public:
 			CameraView cam(light_dir, V3f(0, 1, 0), V3f(1, 0, 0),
 											(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
 			vstage[0]= DefaultVertexStage(cam, V3f(-0.3 , 0, 1.87), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0, 3.14   , 3.14/2 ), light);
-			vstage[1]= DefaultVertexStage(cam, V3f(0.5, 0, 1.87), V3f(2 , 2   , 2 ), V3f(0, 3.14   , 3.14/2 ), light2);
+			vstage[1]= DefaultVertexStage(cam, V3f(0.4, 0, 1.87), V3f(1 , 1   , 1 ), V3f(0, 3.14   , 3.14/2 ), light2);
 			DefaultRast rast(buf.getHeight(), buf.getWidth());
 			FOR(i, 2){
 				DefaultPixelStage pstage(model[i].mats[model[i].mat_index[0]].getTextureVec(Material::DIFFUSE_TID)[0]);
 				drawModel(model_stage[i], vstage[i], rast, pstage, drawer_sim);
 			}
 			if(context.getFrameCount() == 1){
-//				Texture tex= drawer_sim.saveSnapshot();
-//				tex.writePng("okey.png");
+				Texture tex= drawer_sim.saveSnapshot();
+				tex.writePng("okey.png");
 			}
 			drawer_sim.drawEnd();
 			zbuf = drawer_sim.getZbuffer();
@@ -103,13 +104,14 @@ public:
 
 		{
 			drawer.drawBegin(&buf);
-			CameraView cam(light_dir, V3f(0, 1, 0), V3f(1, 0, 0),
-														(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
-//			CameraView cam(V3f(-1, 0, -0.4), V3f(0, 1, 0), V3f(0, 0, 1),
+			drawer_sim.fill2(black);
+//			CameraView cam(light_dir, V3f(0, 1, 0), V3f(1, 0, 0),
 //														(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
+			CameraView cam(V3f(-1.4 + count2, 0, -0.1), V3f(0, 1, 0), V3f(0, 0, 1),
+														(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
 			DefaultVertexStage vstage[2];
 			vstage[0]= DefaultVertexStage(cam, V3f(-0.3 , 0, 1.87), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0, 3.14   , 3.14/2 ), light);
-			vstage[1]= DefaultVertexStage(cam, V3f(0.5, 0, 1.87), V3f(1 , 1   , 1 ), V3f(0, 3.14   , 3.14/2 ), light2);
+			vstage[1]= DefaultVertexStage(cam, V3f(0.4, 0, 1.87), V3f(1 , 1   , 1 ), V3f(0, 3.14   , 3.14/2 ), light2);
 			DefaultRast rast(buf.getHeight(), buf.getWidth());
 			FOR(i, 2){
 				MyPixelStage pstage(model[i].mats[model[i].mat_index[0]].getTextureVec(Material::DIFFUSE_TID)[0],
