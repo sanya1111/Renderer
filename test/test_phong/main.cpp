@@ -23,16 +23,12 @@ public:
 	Rgba white, black;
 	Drawer drawer;
 	Model model;
-	static const int nummer = 1;
-	MeshModelStage model_stage[nummer];
+	MeshModelStage model_stage;
 	float count = 0;
 	bool now = 0;
-	float count2 = 0;
 	MyDraw() {
 		model.loadFile("../test/test_phong/obj/output.obj");
-		for(int i = 0; i < nummer; i++){
-			model_stage[i] = move(MeshModelStage(model.meshs[i]));
-		}
+		model_stage = move(MeshModelStage(model.meshs[0]));
 		white = Rgba(255, 255, 255, 0);
 		black = Rgba(0, 0, 0, 0);
 		count = 0;
@@ -43,7 +39,6 @@ public:
 			context.quitProcess();
 		}
 		count += !now ? 0.025 : -0.025;
-		count2 += 0.25;
 		if(count > 0.8f)
 			now = 1;
 		if(count < -0.2f)

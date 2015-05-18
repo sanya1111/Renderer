@@ -105,8 +105,6 @@ public:
 		{
 			drawer.drawBegin(&buf);
 			drawer_sim.fill2(black);
-//			CameraView cam(light_dir, V3f(0, 1, 0), V3f(1, 0, 0),
-//														(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
 			CameraView cam(V3f(-1.4 + count2, 0, -0.1), V3f(0, 1, 0), V3f(0, 0, 1),
 														(60.0)/180.0 * 3.14, buf.getWidth(), buf.getHeight(), 0.000001f, 100000);
 			DefaultVertexStage vstage[2];
