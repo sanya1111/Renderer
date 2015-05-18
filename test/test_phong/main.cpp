@@ -53,7 +53,7 @@ public:
 			DefaultVertexStage vstage1(cam, V3f(0, 0, 1.87), V3f(1 /2.0 , 1   , 1 /2.0 ), V3f(0, 3.14   , 3.14/2 ), light);
 			DefaultRast rast(buf.getHeight(), buf.getWidth());
 			DefaultPixelStage pstage(model.mats[model.mat_index[0]].getTextureVec(Material::DIFFUSE_TID)[0]);
-			drawModel(model_stage[0], vstage1, rast, pstage, drawer);
+			drawModel(model_stage, vstage1, rast, pstage, drawer);
 		}
 		drawer.drawEnd();
 	}
@@ -63,10 +63,9 @@ public:
 
 int main(){
 	Device dev("/dev/dri/card0");
-	Connector connector;
-	Crtc crtc;
-	std::tie(connector, crtc) = dev.getPossiblePair();
-	Context context(2, connector, crtc, unique_ptr<Drawable>(new MyDraw()), dev);
+	vector<Connector> conn_v= dev.getConnectorVec();
+	vector<Crtc> crtc_v = dev.getCrtcVec();
+	Context context(2, conn_v[0], crtc_v[0], unique_ptr<Drawable>(new MyDraw()), dev);
 	context.startListenning();
 	dev.startLoop();
 	DEB("FPS : %f\n", context.getFps());
