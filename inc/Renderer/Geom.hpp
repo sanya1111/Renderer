@@ -50,9 +50,31 @@ class Matrix{
 protected:
 	std::array<T, N * M> ma;
 public:
+	struct quick_multipler{
+		typedef Matrix<float ,4, 4> with;
+		void mult(with &A, const with &B, with &C){
+			__m128 row1 = _mm_loadu_ps(B[0]),
+				   row2 = _mm_loadu_ps(B[1]),
+				   row3 = _mm_loadu_ps(B[2]),
+				   row4 = _mm_loadu_ps(B[3]);
+			for(int i=0; i<4; i++) {
+				__m128 brod1 = _mm_set1_ps(A[i][0]),
+					   brod2 = _mm_set1_ps(A[i][1]),
+					   brod3 = _mm_set1_ps(A[i][2]),
+					   brod4 = _mm_set1_ps(A[i][3]);
+				_mm_store_ps(C[i], _mm_add_ps(
+						_mm_add_ps(
+							_mm_mul_ps(brod1, row1),
+							_mm_mul_ps(brod2, row2)),
+						_mm_add_ps(
+							_mm_mul_ps(brod3, row3),
+							_mm_mul_ps(brod4, row4))));
+			}
+		}
+	};
 	struct standart_multipler{
 		template<int M2>
-		static void mult(Matrix<T, N, M> &A, const Matrix<T, M, M2> &B, Matrix<T, N, M2> &C){
+		void mult(Matrix<T, N, M> &A, const Matrix<T, M, M2> &B, Matrix<T, N, M2> &C){
 			for(int i = 0; i < N; i++){
 				for(int j = 0; j < M2; j++){
 					C[i][j] = 0;
@@ -63,7 +85,8 @@ public:
 			}
 		}
 	};
-	typedef standart_multipler multipler_t;
+	typedef typename Selector_<Matrix<T, N, M>, Matrix<float, 4, 4>, quick_multipler, standart_multipler>::result multipler_t;
+
 
 	Matrix() {
 		std::fill(ma.begin(), ma.end(), 0);
@@ -100,7 +123,7 @@ public:
 	template<int M2>
 	Matrix<T, N, M2> operator*(const Matrix<T, M, M2> &other){
 		Matrix<T, N, M2> ret;
-		standart_multipler::mult(*this, other, ret);
+		(typename int_Selector_<M, M2, multipler_t, standart_multipler>::result ()).mult(*this, other, ret);
 		return ret;
 	}
 
